@@ -1,0 +1,115 @@
+/* =========================================
+   1. 全域變數與基礎字體設定 (三份 HTML 共用)
+   ========================================= */
+:root {
+  --primary: #3c49ba;
+  --secondary: #ffb415;
+  --danger: #E1251B;
+  --bg-color: #ffffff;
+  --border-color: #e2e8f0;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+}
+
+body {
+  margin: 0; 
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, 'Microsoft JhengHei', sans-serif;
+  background-color: #f8fafc; 
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+/* =========================================
+   2. 首頁專屬排版 (index.html 專用)
+   ========================================= */
+.dashboard-body {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;
+}
+.container { width: 100%; max-width: 900px; padding: 40px 20px; }
+.dashboard-header { text-align: center; margin-bottom: 60px; }
+.dashboard-header h1 { font-size: 32px; font-weight: 700; color: var(--primary); margin-bottom: 12px; letter-spacing: -0.5px; }
+.dashboard-header p { font-size: 16px; color: var(--text-muted); }
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+.tool-card { background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 40px 32px; text-decoration: none; color: inherit; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; align-items: flex-start; }
+.tool-card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 12px 24px rgba(60, 73, 186, 0.15); }
+.icon-wrapper { width: 48px; height: 48px; background-color: rgba(60, 73, 186, 0.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; color: var(--primary); }
+.tool-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.tool-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; flex-grow: 1; }
+.action-link { font-size: 14px; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 4px; }
+.action-link svg { transition: transform 0.2s ease; }
+.tool-card:hover .action-link svg { transform: translateX(4px); }
+
+/* =========================================
+   3. 工具頁面共用排版 (Banner & EDM 專用)
+   ========================================= */
+.tool-layout {
+  display: flex; 
+  height: 100vh; 
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 440px; 
+  background-color: var(--bg-color);
+  border-right: 1px solid var(--border-color);
+  padding: 24px; 
+  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.02); 
+  z-index: 10;
+}
+
+.header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+.header h1 { margin: 0; font-size: 20px; color: var(--text-main); }
+.header p { margin: 8px 0 0 0; font-size: 13px; color: var(--text-muted); line-height: 1.5;}
+
+.preview-container {
+  flex: 1; display: flex; flex-direction: column;
+}
+
+/* =========================================
+   4. 表單與輸入框共用組件
+   ========================================= */
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 8px; color: var(--text-main); }
+
+.input-field {
+  width: 100%; padding: 10px; border: 1px solid var(--border-color);
+  border-radius: 6px; font-size: 14px; box-sizing: border-box;
+  transition: border-color 0.2s; margin-bottom: 8px;
+}
+.input-field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(60, 73, 186, 0.1); }
+
+/* =========================================
+   5. 卡片與工具列共用組件
+   ========================================= */
+.section-card {
+  background-color: #f8fafc; border: 1px solid var(--border-color);
+  border-radius: 8px; padding: 16px; margin-bottom: 24px;
+}
+.section-card-header {
+  display: flex; align-items: center; gap: 10px; font-size: 15px;
+  font-weight: bold; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); cursor: pointer;
+}
+
+.toolbar { display: flex; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; width: fit-content; margin-bottom: 8px; }
+.toolbar-btn {
+  cursor: pointer; background: #fff; border: none; border-right: 1px solid var(--border-color);
+  padding: 6px 12px; font-size: 13px; transition: background 0.1s;
+}
+.toolbar-btn:last-child { border-right: none; }
+.toolbar-btn:hover { background: #f1f5f9; }
+
+/* =========================================
+   6. 下載按鈕共用樣式
+   ========================================= */
+.btn-download {
+  display: flex; justify-content: center; align-items: center; gap: 8px;
+  width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), #2563eb);
+  color: white; text-align: center; border: none; border-radius: 8px; 
+  font-size: 16px; font-weight: bold; letter-spacing: 1px;
+  cursor: pointer; box-shadow: 0 4px 6px -1px rgba(60, 73, 186, 0.4);
+  transition: all 0.2s ease; margin-top: 30px; margin-bottom: 20px;
+}
+.btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 12px -2px rgba(60, 73, 186, 0.5); }
+.btn-download:active { transform: translateY(0); box-shadow: 0 2px 4px -1px rgba(60, 73, 186, 0.4); }
