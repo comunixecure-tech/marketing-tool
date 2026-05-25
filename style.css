@@ -109,7 +109,7 @@ body {
   color: white; text-align: center; border: none; border-radius: 8px; 
   font-size: 16px; font-weight: bold; letter-spacing: 1px;
   cursor: pointer; box-shadow: 0 4px 6px -1px rgba(60, 73, 186, 0.4);
-  transition: all 0.2s ease; margin-top: 30px; margin-bottom: 20px;
+  transition: all 0.2s ease; margin-top: 30px; margin-bottom: 80px;
 }
 .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 12px -2px rgba(60, 73, 186, 0.5); }
 .btn-download:active { transform: translateY(0); box-shadow: 0 2px 4px -1px rgba(60, 73, 186, 0.4); }

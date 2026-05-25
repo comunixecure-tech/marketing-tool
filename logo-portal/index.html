@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Logo 自助服務站｜uniXecure</title>
+    <link rel="icon" href="https://www.unixecure.com/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../style.css">
+<style>
+  /* --- Logo 工具專屬樣式 --- */
+  .sidebar { width: 480px; overflow-y: auto; height: 100vh; padding-bottom: 40px; }
+  
+  .radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .radio-pill { position: relative; }
+  .radio-pill input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .radio-pill label {
+    display: inline-block; padding: 8px 16px; background: #f1f5f9; border: 1px solid var(--border-color);
+    border-radius: 20px; font-size: 13px; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    user-select: none;
+  }
+  .radio-pill label:hover { background: #e2e8f0; }
+  .radio-pill input[type="radio"]:checked + label {
+    background: var(--primary); color: #fff; border-color: var(--primary); font-weight: bold;
+    box-shadow: 0 2px 4px rgba(60, 73, 186, 0.2);
+  }
+  .radio-pill input[type="radio"]:disabled + label {
+    opacity: 0.5; cursor: not-allowed; background: #f8fafc; color: #cbd5e1; border-color: #f1f5f9;
+  }
+
+  .dynamic-section { 
+    display: none; padding-left: 16px; border-left: 3px solid #cbd5e1; margin-top: 12px;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  .dynamic-section.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+  .size-inputs { display: flex; gap: 12px; align-items: center; }
+  .size-inputs span { color: var(--text-muted); font-size: 14px; }
+  
+  .padding-wrapper { display: flex; gap: 8px; align-items: center; }
+  .btn-reset { 
+    padding: 8px 12px; font-size: 12px; background: #fff; border: 1px solid var(--border-color); 
+    border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: 0.2s; white-space: nowrap;
+  }
+  .btn-reset:hover { background: #f1f5f9; color: var(--text-main); }
+
+  .preview-container { background-color: #f8fafc; height: 100vh; display: flex; flex-direction: column; }
+  .preview-header { padding: 12px 24px; background-color: #fff; border-bottom: 1px solid var(--border-color); font-size: 13px; font-weight: bold; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+  
+  .canvas-wrapper {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    background-image: repeating-linear-gradient(45deg, #f1f5f9 25%, transparent 25%, transparent 75%, #f1f5f9 75%, #f1f5f9), repeating-linear-gradient(45deg, #f1f5f9 25%, #ffffff 25%, #ffffff 75%, #f1f5f9 75%, #f1f5f9);
+    background-position: 0 0, 15px 15px; background-size: 30px 30px;
+    background-color: #ffffff; overflow: auto; padding: 40px;
+  }
+  
+  canvas { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+
+  .color-picker-wrapper { display: none; margin-top: 8px; align-items: center; gap: 8px; }
+  .color-picker-wrapper.active { display: flex; }
+</style>
+</head>
+<body class="tool-layout">
+
+  <div class="sidebar">
+    <a href="../index.html" class="back-to-home">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        返回主頁
+    </a>
+    <div class="header" style="margin-bottom: 15px;">
+      <h1>Logo 自助服務站</h1>
+    </div>
+
+    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px; padding-left: 4px;">
+      需要 .ai 原始檔？<a href="https://systexgroup-my.sharepoint.com/:f:/g/personal/2200615_systex_com_tw/IgCqcp6hsQvbTZ6d3OI9n9RkATM2c9Q43c7C5SGHhwNVcXI?e=7FTNlS" target="_blank" style="color: var(--text-muted); text-decoration: underline; font-weight: bold;">前往 Logo 原檔雲端資料夾下載 (限精誠集團帳號)</a>
+    </div>
+
+    <div class="form-group">
+      <label>1. 選擇品牌 / 產品</label>
+      <div class="radio-group" id="brand-group">
+        <div class="radio-pill"><input type="radio" name="brand" id="b-uni" value="unixecure"><label for="b-uni">uniXecure</label></div>
+        <div class="radio-pill"><input type="radio" name="brand" id="b-raven" value="raven"><label for="b-raven">RAVEN</label></div>
+        <div class="radio-pill"><input type="radio" name="brand" id="b-heis" value="heis"><label for="b-heis">HEIS</label></div>
+        <div class="radio-pill"><input type="radio" name="brand" id="b-lucas" value="lucas"><label for="b-lucas">LUCAS</label></div>
+        <div class="radio-pill"><input type="radio" name="brand" id="b-srmas" value="srmas"><label for="b-srmas">SRMAS</label></div>
+        
+        <div id="agent-brands-container" style="display:contents;"></div>
+
+        <div class="radio-pill"><input type="radio" name="brand" id="b-upload" value="upload"><label for="b-upload">📁 自訂上傳...</label></div>
+      </div>
+      <div id="upload-area" style="display: none; margin-top: 12px;">
+        <input type="file" id="f-upload" accept="image/png, image/jpeg, image/svg+xml" class="input-field" onchange="handleFileUpload(event)">
+      </div>
+    </div>
+
+    <div class="form-group dynamic-section" id="layout-section">
+      <label>2. 選擇排版形式</label>
+      <div class="radio-group" id="layout-group"></div>
+    </div>
+
+    <div class="form-group dynamic-section" id="color-section">
+      <label>3. 選擇色彩版本</label>
+      <div class="radio-group" id="color-group"></div>
+    </div>
+
+    <hr style="border:0; border-top:1px solid #e2e8f0; margin: 24px 0;">
+
+    <div class="form-group">
+      <label>4. 目標畫布尺寸 (px)</label>
+      <div class="size-inputs">
+        <input type="number" id="f-width" class="input-field" value="500" min="50" oninput="drawCanvas()" placeholder="寬度">
+        <span>×</span>
+        <input type="number" id="f-height" class="input-field" value="500" min="50" oninput="drawCanvas()" placeholder="高度">
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">💡 系統會自動將 Logo 等比例縮放並完美置中於此畫布範圍內。</p>
+    </div>
+
+    <div class="form-group">
+      <label>5. 邊界留白 Padding (px)</label>
+      <div class="padding-wrapper">
+        <input type="number" id="f-padding" class="input-field" value="40" min="0" oninput="drawCanvas()" style="flex:1;">
+        <button type="button" class="btn-reset" onclick="resetPadding()">↻ 恢復預設 (40px)</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>6. 匯出格式</label>
+      <div class="radio-group">
+        <div class="radio-pill"><input type="radio" name="format" id="fmt-png" value="png" checked onchange="handleFormatChange()"><label for="fmt-png">PNG (支援透明)</label></div>
+        <div class="radio-pill"><input type="radio" name="format" id="fmt-jpg" value="jpg" onchange="handleFormatChange()"><label for="fmt-jpg">JPG (檔案較小)</label></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>7. 畫布背景設定</label>
+      <div class="radio-group">
+        <div class="radio-pill"><input type="radio" name="bg" id="bg-trans" value="transparent" checked onchange="drawCanvas()"><label for="bg-trans">透明背景</label></div>
+        <div class="radio-pill"><input type="radio" name="bg" id="bg-white" value="#ffffff" onchange="drawCanvas()"><label for="bg-white">純白背景</label></div>
+        <div class="radio-pill"><input type="radio" name="bg" id="bg-custom" value="custom" onchange="drawCanvas()"><label for="bg-custom">自訂顏色</label></div>
+      </div>
+      <div class="color-picker-wrapper" id="custom-bg-picker">
+        <input type="color" id="f-bg-color" value="#f8fafc" oninput="drawCanvas()" style="width:40px; height:30px; padding:0; border:1px solid #ccc;">
+        <span style="font-size: 13px;">選擇顏色</span>
+      </div>
+    </div>
+
+    <button class="btn-download" onclick="downloadImage()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      下載處理後的圖檔
+    </button>
+  </div>
+
+  <div class="preview-container">
+    <div class="preview-header">
+      <span>即時預覽</span>
+      <span id="output-info" style="font-weight:bold; text-align: right; word-break: break-all;">畫布初始化中...</span>
+    </div>
+    <div class="canvas-wrapper">
+      <canvas id="preview-canvas"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // 【4. 代理產品自動擴充區】
+    // 未來有新的代理產品，只需在這裡加入陣列 (例如: 'cisco')
+    // 系統會自動產生 Radio 按鈕，並嘗試去 ../assets/logos/agents/cisco/ 讀圖
+    // =========================================================
+    const agentList = [
+      // 'cisco', 'fortinet' // 解除註解即可測試
+    ];
+
+    // =========================================================
+    // 1. 品牌產品識別資料庫 (所有純文字 wordmark 皆已移除 full 標準色)
+    // =========================================================
+    const logoDB = {
+      'unixecure': {
+        name: 'uniXecure',
+        layouts: {
+          'standard': {
+            name: '標準 Logo',
+            colors: {
+              'full': '../assets/logos/unixecure/full.svg',
+              'white': '../assets/logos/unixecure/white.svg',
+              'dark': '../assets/logos/unixecure/dark.svg',
+              'allwhite': '../assets/logos/unixecure/allwhite.svg'
+            }
+          }
+        }
+      },
+      'raven': {
+        name: 'RAVEN',
+        layouts: {
+          'horizontal': {
+            name: '橫式 Horizontal',
+            colors: {
+              'full': '../assets/logos/raven/horizontal-full.svg',
+              'black': '../assets/logos/raven/horizontal-black.svg',
+              'white': '../assets/logos/raven/horizontal-white.svg'
+            }
+          },
+          'vertical': {
+            name: '直式 Vertical',
+            colors: {
+              'full': '../assets/logos/raven/vertical-full.svg',
+              'black': '../assets/logos/raven/vertical-black.svg',
+              'white': '../assets/logos/raven/vertical-white.svg'
+            }
+          },
+          'mark': {
+            name: '純圖形 Logomark',
+            colors: {
+              'full': '../assets/logos/raven/mark-full.svg',
+              'black': '../assets/logos/raven/mark-black.svg',
+              'white': '../assets/logos/raven/mark-white.svg'
+            }
+          },
+          'wordmark': {
+            name: '純文字 Wordmark',
+            colors: {
+              'black': '../assets/logos/raven/wordmark-black.svg',
+              'white': '../assets/logos/raven/wordmark-white.svg'
+            }
+          }
+        }
+      },
+      'heis': {
+        name: 'HEIS',
+        layouts: {
+          'horizontal': {
+            name: '橫式 Horizontal',
+            colors: {
+              'full': '../assets/logos/heis/horizontal-full.svg',
+              'black': '../assets/logos/heis/horizontal-black.svg',
+              'white': '../assets/logos/heis/horizontal-white.svg'
+            }
+          },
+          'vertical': {
+            name: '直式 Vertical',
+            colors: {
+              'full': '../assets/logos/heis/vertical-full.svg',
+              'black': '../assets/logos/heis/vertical-black.svg',
+              'white': '../assets/logos/heis/vertical-white.svg'
+            }
+          },
+          'mark': {
+            name: '純圖形 Logomark',
+            colors: {
+              'full': '../assets/logos/heis/mark-full.svg',
+              'black': '../assets/logos/heis/mark-black.svg',
+              'white': '../assets/logos/heis/mark-white.svg'
+            }
+          },
+          'wordmark': {
+            name: '純文字 Wordmark',
+            colors: {
+              'black': '../assets/logos/heis/wordmark-black.svg',
+              'white': '../assets/logos/heis/wordmark-white.svg'
+            }
+          }
+        }
+      },
+      'lucas': {
+        name: 'LUCAS',
+        layouts: {
+          'horizontal': {
+            name: '橫式 Horizontal',
+            colors: {
+              'full': '../assets/logos/lucas/horizontal-full.svg',
+              'black': '../assets/logos/lucas/horizontal-black.svg',
+              'white': '../assets/logos/lucas/horizontal-white.svg'
+            }
+          },
+          'vertical': {
+            name: '直式 Vertical',
+            colors: {
+              'full': '../assets/logos/lucas/vertical-full.svg',
+              'black': '../assets/logos/lucas/vertical-black.svg',
+              'white': '../assets/logos/lucas/vertical-white.svg'
+            }
+          },
+          'mark': {
+            name: '純圖形 Logomark',
+            colors: {
+              'full': '../assets/logos/lucas/mark-full.svg',
+              'black': '../assets/logos/lucas/mark-black.svg',
+              'white': '../assets/logos/lucas/mark-white.svg'
+            }
+          },
+          'wordmark': {
+            name: '純文字 Wordmark',
+            colors: {
+              'black': '../assets/logos/lucas/wordmark-black.svg',
+              'white': '../assets/logos/lucas/wordmark-white.svg'
+            }
+          }
+        }
+      },
+      'srmas': {
+        name: 'SRMAS',
+        layouts: {
+          'horizontal': {
+            name: '橫式 Horizontal',
+            colors: {
+              'full': '../assets/logos/srmas/horizontal-full.svg',
+              'black': '../assets/logos/srmas/horizontal-black.svg',
+              'white': '../assets/logos/srmas/horizontal-white.svg'
+            }
+          },
+          'vertical': {
+            name: '直式 Vertical',
+            colors: {
+              'full': '../assets/logos/srmas/vertical-full.svg',
+              'black': '../assets/logos/srmas/vertical-black.svg',
+              'white': '../assets/logos/srmas/vertical-white.svg'
+            }
+          },
+          'mark': {
+            name: '純圖形 Logomark',
+            colors: {
+              'full': '../assets/logos/srmas/mark-full.svg',
+              'black': '../assets/logos/srmas/mark-black.svg',
+              'white': '../assets/logos/srmas/mark-white.svg'
+            }
+          },
+          'wordmark': {
+            name: '純文字 Wordmark',
+            colors: {
+              'black': '../assets/logos/srmas/wordmark-black.svg',
+              'white': '../assets/logos/srmas/wordmark-white.svg'
+            }
+          }
+        }
+      }
+    };
+
+    // 自動為代理產品注入 HTML 與資料庫設定
+    const agentContainer = document.getElementById('agent-brands-container');
+    agentList.forEach(agent => {
+      // 1. 自動擴充 logoDB
+      logoDB[agent] = {
+        name: agent.toUpperCase(),
+        layouts: {
+          'standard': {
+            name: '標準 Logo',
+            colors: {
+              'full': `../assets/logos/agents/${agent}/full.svg`,
+              'white': `../assets/logos/agents/${agent}/white.svg`
+            }
+          }
+        }
+      };
+      // 2. 自動產生 HTML 按鈕
+      const radioHTML = `
+        <div class="radio-pill">
+          <input type="radio" name="brand" id="b-${agent}" value="${agent}">
+          <label for="b-${agent}">${agent.toUpperCase()}</label>
+        </div>`;
+      agentContainer.insertAdjacentHTML('beforeend', radioHTML);
+    });
+
+    // ---------------------------------------------------------
+    // 2. 控制核心與狀態管理
+    // ---------------------------------------------------------
+    let currentImage = new Image();
+    let isImageLoaded = false;
+    let selectedBrand = '';
+    let selectedLayout = '';
+    let selectedColor = '';
+    let customFilename = 'logo_export';
+
+    // 綁定所有產品切換監聽 (包含剛剛動態產生的代理產品)
+    document.querySelectorAll('input[name="brand"]').forEach(radio => {
+      radio.addEventListener('change', handleBrandChange);
+    });
+
+    function handleBrandChange() {
+      const brandVal = document.querySelector('input[name="brand"]:checked').value;
+      const uploadArea = document.getElementById('upload-area');
+      const layoutSec = document.getElementById('layout-section');
+      const colorSec = document.getElementById('color-section');
+      
+      if (brandVal === 'upload') {
+        uploadArea.style.display = 'block';
+        layoutSec.classList.remove('active');
+        colorSec.classList.remove('active');
+        isImageLoaded = false;
+        customFilename = 'uploaded_logo';
+        drawCanvas();
+        return;
+      }
+
+      uploadArea.style.display = 'none';
+      selectedBrand = brandVal;
+      customFilename = brandVal;
+      
+      if (logoDB[brandVal]) {
+        const layouts = logoDB[brandVal].layouts;
+        const layoutGroup = document.getElementById('layout-group');
+        layoutGroup.innerHTML = '';
+        
+        let firstLayout = true;
+        for (const key in layouts) {
+          const id = `l-${key}`;
+          const isChecked = firstLayout ? 'checked' : '';
+          layoutGroup.innerHTML += `
+            <div class="radio-pill">
+              <input type="radio" name="layout" id="${id}" value="${key}" ${isChecked}>
+              <label for="${id}">${layouts[key].name}</label>
+            </div>`;
+          firstLayout = false;
+        }
+        
+        document.querySelectorAll('input[name="layout"]').forEach(r => r.addEventListener('change', handleLayoutChange));
+        layoutSec.classList.add('active');
+        handleLayoutChange();
+      }
+    }
+
+    function handleLayoutChange() {
+      selectedLayout = document.querySelector('input[name="layout"]:checked').value;
+      const colors = logoDB[selectedBrand].layouts[selectedLayout].colors;
+      const colorGroup = document.getElementById('color-group');
+      const colorSec = document.getElementById('color-section');
+      
+      colorGroup.innerHTML = '';
+      
+      const colorNames = { 
+        'full': '標準色 Full Color', 
+        'black': '單色黑 Black Mono', 
+        'white': '反白色 White Reverse',
+        'dark': '深色版 Dark',
+        'allwhite': '全白版 All White'
+      };
+      
+      let firstColor = true;
+      for (const key in colors) {
+        const id = `c-${key}`;
+        const isChecked = firstColor ? 'checked' : '';
+        colorGroup.innerHTML += `
+          <div class="radio-pill">
+            <input type="radio" name="color" id="${id}" value="${key}" ${isChecked}>
+            <label for="${id}">${colorNames[key] || key}</label>
+          </div>`;
+        firstColor = false;
+      }
+      
+      document.querySelectorAll('input[name="color"]').forEach(r => r.addEventListener('change', loadFileBySelection));
+      colorSec.classList.add('active');
+      loadFileBySelection();
+    }
+
+    function loadFileBySelection() {
+      selectedColor = document.querySelector('input[name="color"]:checked').value;
+      const filePath = logoDB[selectedBrand].layouts[selectedLayout].colors[selectedColor];
+      loadImage(filePath);
+    }
+
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      customFilename = file.name.split('.')[0];
+      const reader = new FileReader();
+      reader.onload = (e) => loadImage(e.target.result);
+      reader.readAsDataURL(file);
+    }
+
+    function loadImage(src) {
+      isImageLoaded = false;
+      
+      const infoTag = document.getElementById('output-info');
+      infoTag.textContent = "正在讀取圖檔資產...";
+      infoTag.style.color = "var(--text-muted)";
+      
+      drawCanvas();
+
+      currentImage = new Image();
+      currentImage.onload = () => {
+        isImageLoaded = true;
+        infoTag.style.color = "var(--primary)";
+        drawCanvas();
+      };
+      currentImage.onerror = () => {
+        isImageLoaded = false;
+        infoTag.textContent = `❌ 讀取失敗，找不到此檔案： ${src}`;
+        infoTag.style.color = "var(--danger)";
+        drawCanvas();
+      };
+      currentImage.src = src;
+    }
+
+    function handleFormatChange() {
+      const format = document.querySelector('input[name="format"]:checked').value;
+      const transRadio = document.getElementById('bg-trans');
+      
+      if (format === 'jpg') {
+        transRadio.disabled = true;
+        if (transRadio.checked) document.getElementById('bg-white').checked = true;
+      } else {
+        transRadio.disabled = false;
+      }
+      drawCanvas();
+    }
+
+    function resetPadding() {
+      document.getElementById('f-padding').value = 40;
+      drawCanvas();
+    }
+
+    // ---------------------------------------------------------
+    // 3. 核心完美置中與縮放演算
+    // ---------------------------------------------------------
+    function drawCanvas() {
+      const canvas = document.getElementById('preview-canvas');
+      const ctx = canvas.getContext('2d');
+      const infoTag = document.getElementById('output-info');
+
+      const canvasW = parseInt(document.getElementById('f-width').value) || 500;
+      const canvasH = parseInt(document.getElementById('f-height').value) || 500;
+      const padding = parseInt(document.getElementById('f-padding').value) || 0;
+      const bgSetting = document.querySelector('input[name="bg"]:checked').value;
+      
+      const customPicker = document.getElementById('custom-bg-picker');
+      customPicker.classList.toggle('active', bgSetting === 'custom');
+
+      canvas.width = canvasW;
+      canvas.height = canvasH;
+      ctx.clearRect(0, 0, canvasW, canvasH);
+
+      if (bgSetting !== 'transparent') {
+        ctx.fillStyle = bgSetting === 'custom' ? document.getElementById('f-bg-color').value : bgSetting;
+        ctx.fillRect(0, 0, canvasW, canvasH);
+      }
+
+      if (!isImageLoaded) {
+        if (!infoTag.textContent.includes("❌")) {
+          infoTag.textContent = `畫布已就緒: ${canvasW} x ${canvasH} px (未選取圖檔)`;
+        }
+        return;
+      }
+
+      const availableW = Math.max(0, canvasW - padding * 2);
+      const availableH = Math.max(0, canvasH - padding * 2);
+      
+      const imgW = currentImage.naturalWidth || currentImage.width;
+      const imgH = currentImage.naturalHeight || currentImage.height;
+      
+      const imgRatio = imgW / imgH;
+      const boxRatio = availableW / availableH;
+
+      let drawW, drawH;
+
+      if (imgRatio > boxRatio) {
+        drawW = availableW;
+        drawH = availableW / imgRatio;
+      } else {
+        drawH = availableH;
+        drawW = availableH * imgRatio;
+      }
+
+      const drawX = padding + (availableW - drawW) / 2;
+      const drawY = padding + (availableH - drawH) / 2;
+
+      ctx.drawImage(currentImage, drawX, drawY, drawW, drawH);
+      infoTag.textContent = `最終輸出規格: ${canvasW} x ${canvasH} px`;
+    }
+
+    // ---------------------------------------------------------
+    // 4. 導出下載
+    // ---------------------------------------------------------
+    function downloadImage() {
+      if (!isImageLoaded) { alert("請確認當前已成功顯示 Logo 圖檔再行下載"); return; }
+      const canvas = document.getElementById('preview-canvas');
+      const format = document.querySelector('input[name="format"]:checked').value;
+      const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+      const filename = `${customFilename}_${canvas.width}x${canvas.height}.${format}`;
+
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, mimeType, 1.0);
+    }
+
+    window.onload = () => {
+      const defaultRadio = document.getElementById('b-uni');
+      if (defaultRadio) {
+        defaultRadio.checked = true;
+        handleBrandChange();
+      }
+    };
+  </script>
+</body>
+</html>
