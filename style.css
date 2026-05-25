@@ -49,14 +49,21 @@ body {
   overflow: hidden;
 }
 
+/* =========================================
+   全站工具側邊欄 (Sidebar) 統一主架構
+   ========================================= */
 .sidebar {
-  width: 440px; 
+  width: 480px;          /* 統一採用寬敞舒適的標準寬度 */
+  height: 100vh;         /* 強制固定與螢幕等高 */
+  overflow-y: auto;      /* 當內容過長時，允許側邊欄獨立內部滾動 */
+  box-sizing: border-box;/* 確保 padding 不會撐破寬度 */
+  
+  /* 以下為原本共用的視覺基礎（可根據您原有的樣式調整或保留） */
+  padding: 30px 24px;
   background-color: var(--bg-color);
   border-right: 1px solid var(--border-color);
-  padding: 24px; 
-  overflow-y: auto;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.02); 
-  z-index: 10;
+  display: flex;
+  flex-direction: column;
 }
 
 .header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }

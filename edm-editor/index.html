@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="../style.css">
 <style>
   /* --- EDM 專屬工具樣式 --- */
-  .sidebar { width: 480px; } /* EDM 面板較寬，覆寫共用的 440px */
   .btn-download { margin-bottom: 10px; } /* 微調間距 */
   
   .thumb-preview { width: 30px; height: 30px; border-radius: 4px; border: 1px solid var(--border-color); object-fit: contain; background: #fff; flex-shrink: 0; }
@@ -167,7 +166,7 @@
       if (!hasSaved) {
         setDefaultDate();
         addAgendaItem({time: "14:00 - 14:10", topic: "開場致詞", speaker: "王小明", title: "產品經理", img: ""});
-        addLogoItem("https://www.unixecure.com/images/logo.png");
+        addLogoItem("../assets/logos/unixecure/full.svg");
       }
       
       isInit = false;
