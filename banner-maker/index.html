@@ -185,25 +185,7 @@
     }
 
     // 載入網址 Logo (防 CORS 崩潰機制)
-    function loadLogoUrl() {
-      const url = document.getElementById('f-logo-url').value.trim();
-      if (!url) {
-        images.logo = null;
-        drawCanvas();
-        return;
-      }
-      const img = new Image();
-      img.crossOrigin = "Anonymous";
-      img.onload = () => { images.logo = img; drawCanvas(); };
-      img.onerror = () => { 
-        // 跨域失敗的話，用無跨域模式重試一次，這樣至少能預覽
-        const fallbackImg = new Image();
-        fallbackImg.onload = () => { images.logo = fallbackImg; drawCanvas(); };
-        fallbackImg.onerror = () => { images.logo = null; drawCanvas(); };
-        fallbackImg.src = url;
-      };
-      img.src = url;
-    }
+   
 
     function handleImageUpload(event, type) {
       const file = event.target.files[0];
@@ -506,17 +488,61 @@
       }
     }
 
-    function downloadBanner() {
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-      
-      const link = document.createElement('a');
-      link.download = `${yyyy}${mm}${dd}_banner.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+    // 載入網址 Logo (防 CORS 崩潰機制升級版)
+function loadLogoUrl() {
+  const url = document.getElementById('f-logo-url').value.trim();
+  if (!url) {
+    images.logo = null;
+    drawCanvas();
+    return;
+  }
+  
+  const img = new Image();
+  img.crossOrigin = "Anonymous"; // 第一次嘗試：標準跨域請求
+  img.onload = () => { images.logo = img; drawCanvas(); };
+  img.onerror = () => { 
+    // 第一次失敗時，使用 CORS Proxy 代理服務繞過限制
+    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+    const proxyImg = new Image();
+    proxyImg.crossOrigin = "Anonymous";
+    
+    proxyImg.onload = () => { images.logo = proxyImg; drawCanvas(); };
+    proxyImg.onerror = () => { 
+      // 如果代理也失敗，清空圖片並提示使用者
+      alert("無法載入該網址的圖片。伺服器阻擋了存取，請改用「上傳本地圖片」功能。");
+      images.logo = null; 
+      drawCanvas(); 
+    };
+    
+    proxyImg.src = proxyUrl;
+  };
+  
+  img.src = url;
+}
+
+// 執行下載並捕捉錯誤
+function downloadBanner() {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  
+  try {
+    // 嘗試輸出圖片
+    const dataUrl = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `${yyyy}${mm}${dd}_banner.png`;
+    link.href = dataUrl;
+    link.click();
+  } catch (error) {
+    // 捕捉 Canvas 污染造成的安全性錯誤
+    if (error.name === "SecurityError") {
+      alert("下載失敗：因為載入了外部網址的圖片，基於瀏覽器安全性 (CORS) 阻擋了下載功能。\n\n解決方法：請將該 Logo 下載到電腦中，改用「上傳檔案」的方式加入，即可正常下載。");
+    } else {
+      alert("下載時發生未知的錯誤：" + error.message);
     }
+  }
+}
 
     window.onload = () => {
       loadLogoUrl();
