@@ -49,21 +49,14 @@ body {
   overflow: hidden;
 }
 
-/* =========================================
-   全站工具側邊欄 (Sidebar) 統一主架構
-   ========================================= */
 .sidebar {
-  width: 480px;          /* 統一採用寬敞舒適的標準寬度 */
-  height: 100vh;         /* 強制固定與螢幕等高 */
-  overflow-y: auto;      /* 當內容過長時，允許側邊欄獨立內部滾動 */
-  box-sizing: border-box;/* 確保 padding 不會撐破寬度 */
-  
-  /* 以下為原本共用的視覺基礎（可根據您原有的樣式調整或保留） */
-  padding: 30px 24px;
+  width: 440px; 
   background-color: var(--bg-color);
   border-right: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
+  padding: 24px; 
+  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.02); 
+  z-index: 10;
 }
 
 .header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
@@ -146,3 +139,104 @@ body {
   background-color: #f8fafc;
   transform: translateY(-1px);
 }
+
+/* =========================================
+   8. 共用預覽區與畫布 (Banner, EDM, Logo 統一規格)
+   ========================================= */
+.preview-container {
+  background-color: #f1f5f9; /* 統一淺灰底色 */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.preview-header {
+  padding: 12px 24px;
+  background-color: #fff;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.canvas-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 統一使用透明棋盤格背景，幫助辨識透明圖層 */
+  background-image: repeating-linear-gradient(45deg, #f1f5f9 25%, transparent 25%, transparent 75%, #f1f5f9 75%, #f1f5f9), repeating-linear-gradient(45deg, #f1f5f9 25%, #ffffff 25%, #ffffff 75%, #f1f5f9 75%, #f1f5f9);
+  background-position: 0 0, 15px 15px;
+  background-size: 30px 30px;
+  background-color: #ffffff;
+  overflow: auto;
+  padding: 40px;
+}
+
+.canvas-wrapper canvas {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+  /* background-color 將由 JS 動態控制，預設維持透明以顯示棋盤格 */
+}
+
+/* =========================================
+   9. 共用表單與操作元件庫
+   ========================================= */
+/* 上傳按鈕 */
+.file-upload-wrapper { display: flex; align-items: center; gap: 10px; width: 100%; }
+.file-upload-btn { background: #f1f5f9; border: 1px solid var(--border-color); padding: 9px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; color: var(--text-main); white-space: nowrap; }
+.file-upload-btn:hover { background: #e2e8f0; }
+input[type="file"] { display: none; }
+
+/* Radio 藥丸按鈕 */
+.radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.radio-pill { position: relative; }
+.radio-pill input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.radio-pill label { display: inline-block; padding: 8px 16px; background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 20px; font-size: 13px; color: var(--text-muted); cursor: pointer; transition: all 0.2s; user-select: none; }
+.radio-pill label:hover { background: #e2e8f0; }
+.radio-pill input[type="radio"]:checked + label { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: bold; box-shadow: 0 2px 4px rgba(60, 73, 186, 0.2); }
+.radio-pill input[type="radio"]:disabled + label { opacity: 0.5; cursor: not-allowed; background: #f8fafc; color: #cbd5e1; border-color: #f1f5f9; }
+
+/* 通用操作按鈕 (解決 btn-reset 命名衝突) */
+.btn-sm-outline { padding: 8px 12px; font-size: 12px; background: #fff; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: 0.2s; white-space: nowrap; }
+.btn-sm-outline:hover { background: #f1f5f9; color: var(--text-main); }
+
+.btn-text-link { display: block; width: 100%; text-align: center; background: none; border: none; color: var(--text-muted); font-size: 13px; cursor: pointer; padding: 10px; text-decoration: underline; margin-bottom: 20px; transition: color 0.2s ease; }
+.btn-text-link:hover { color: var(--danger); }
+
+/* 色碼選擇器 */
+.color-picker-group { display: flex; gap: 15px; margin-bottom: 18px; padding: 10px; background: #f8fafc; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: wrap; }
+.color-item { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: bold; width: 100%; }
+.color-item input[type="color"], .color-picker-wrapper input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; padding: 0; border: 1px solid #ccc; border-radius: 4px; }
+.color-picker-wrapper { display: none; margin-top: 8px; align-items: center; gap: 8px; }
+.color-picker-wrapper.active { display: flex; }
+
+/* =========================================
+   10. 特定工具專屬細節 (拖曳、動態區塊)
+   ========================================= */
+/* 動態區塊 (Logo) */
+.dynamic-section { display: none; padding-left: 16px; border-left: 3px solid #cbd5e1; margin-top: 12px; animation: fadeIn 0.3s ease-in-out; }
+.dynamic-section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+.size-inputs { display: flex; gap: 12px; align-items: center; }
+.size-inputs span { color: var(--text-muted); font-size: 14px; }
+.padding-wrapper { display: flex; gap: 8px; align-items: center; }
+
+/* 拖曳列表 (EDM) */
+.thumb-preview { width: 30px; height: 30px; border-radius: 4px; border: 1px solid var(--border-color); object-fit: contain; background: #fff; flex-shrink: 0; }
+.btn-delete { font-size: 13px; color: var(--danger); background: #fff; border: 1px solid #fca5a5; border-radius: 6px; padding: 8px 12px; cursor: pointer; transition: all 0.2s; }
+.btn-delete:hover { background: #fef2f2; border-color: var(--danger); }
+.drag-handle { cursor: grab; color: #cbd5e1; font-size: 18px; user-select: none; padding-right: 5px; }
+.drag-handle:active { cursor: grabbing; }
+.sortable-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.sortable-content { flex-grow: 1; }
+
+/* EDM iframe 特殊處理 */
+iframe { width: 100%; height: 100%; flex-grow: 1; border: none; background-color: #fff; }
