@@ -130,8 +130,25 @@ function handleLayoutChange() {
 
 function loadFileBySelection() {
   selectedColor = document.querySelector('input[name="color"]:checked').value;
-  const filePath = logoDB[selectedBrand].layouts[selectedLayout].colors[selectedColor];
-  loadImage(filePath);
+  
+  // 從資料庫取得資料 (可能是 <svg> 原始碼，也可能是路徑)
+  const svgData = logoDB[selectedBrand].layouts[selectedLayout].colors[selectedColor];
+  
+  // 判斷：這是一段純 SVG 原始碼，還是外部路徑？
+  if (svgData.trim().startsWith('<svg')) {
+    try {
+      // 這是最穩定的 Canvas SVG 轉碼法：先處理中文 (圖層_1)，再轉成 Base64
+      const base64Svg = btoa(unescape(encodeURIComponent(svgData)));
+      const dataUri = `data:image/svg+xml;base64,${base64Svg}`;
+      loadImage(dataUri);
+    } catch (e) {
+      console.error("SVG 轉碼失敗:", e);
+      document.getElementById('output-info').textContent = "❌ SVG 轉碼失敗";
+    }
+  } else {
+    // 如果未來 RAVEN 等產品放的是 '../assets/...' 路徑，依然完美相容
+    loadImage(svgData);
+  }
 }
 
 function handleFileUpload(event) {
