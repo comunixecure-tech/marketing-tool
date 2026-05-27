@@ -35,15 +35,18 @@
       </select>
     </div>
 
-    <div class="form-group">
-      <label>主辦單位 Logo</label>
-      <div class="file-upload-wrapper">
-        <select id="f-logo-select" class="input-field" onchange="loadLogoUrl()" style="margin-bottom: 0;"></select>
-        <label class="file-upload-btn">
-          自訂上傳
-          <input type="file" id="f-logo" accept="image/png, image/jpeg, image/svg+xml" onchange="handleImageUpload(event, 'logo')">
-        </label>
+    <div class="section-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <label style="margin: 0; font-size: 15px;">主辦單位 Logo</label>
+        <div class="toolbar" style="margin: 0;">
+          <button type="button" class="toolbar-btn" onclick="toggleAllLogoColors('full')">全標準色</button>
+          <button type="button" class="toolbar-btn" onclick="toggleAllLogoColors('white')">全反白色</button>
+        </div>
       </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-top:-8px; margin-bottom:12px;">拖曳 ::: 可調整排序</p>
+      
+      <div id="banner-logo-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      <button type="button" class="btn-sm-outline" style="width: 100%; margin-top: 12px;" onclick="addBannerLogo()">+ 新增主辦單位</button>
     </div>
 
     <div class="form-group">

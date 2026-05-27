@@ -1,7 +1,7 @@
 let isInit = true;
 let isEventNameManuallyEdited = false;
 
-// 將純 SVG 原始碼轉為安全的 Data URI (加上 Base64 防護)
+// 🟢 新增：將純 SVG 原始碼轉為安全的 Data URI (加上 Base64 防護)
 function encodeSvg(svgString) {
   if (!svgString) return '';
   return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgString)))}`;
@@ -10,17 +10,23 @@ function encodeSvg(svgString) {
 // 1. 啟動與資料載入
 function init() {
   const hasSaved = loadData();
+  
+  // 如果沒有暫存資料 (第一次打開，或按了清除記憶)
   if (!hasSaved) {
+    // 確保預設寫入 Banner 網址
+    document.getElementById('f-banner').value = "https://www.unixecure.com/images/index-banner-image.png";
+    
     setDefaultDate();
     addAgendaItem({time: "14:00 - 14:10", topic: "開場致詞", speaker: "王小明", title: "產品經理", img: ""});
     
-    // 🟢 預設抓取 logoDB 裡面的 uniXecure SVG
+    // 🟢 預設主辦單位：從共用資料庫 (common.js) 拉取 uniXecure 的 SVG 並自動轉碼
     let uniSvgDataUri = "";
     if (typeof logoDB !== 'undefined' && logoDB['unixecure']) {
       const rawSvg = logoDB['unixecure'].layouts.standard.colors.full;
       uniSvgDataUri = encodeSvg(rawSvg);
     }
-    addLogoItem(uniSvgDataUri); // 預設放進列表中
+    // 將轉換好的 SVG 丟入主辦單位列表
+    addLogoItem(uniSvgDataUri);
   }
   
   isInit = false;
@@ -28,6 +34,7 @@ function init() {
   updateListThumbs();
   updatePreview();
   
+  // 監聽所有輸入框變動以即時更新預覽
   document.addEventListener('input', (e) => {
     if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
       updatePreview();
@@ -37,6 +44,7 @@ function init() {
   initSortable(document.getElementById('agenda-list'));
   initSortable(document.getElementById('logo-list'));
 
+  // 監聽活動名稱同步邏輯
   document.getElementById('f-title').addEventListener('input', function() {
     if (!isEventNameManuallyEdited) {
       document.getElementById('f-event-name').value = this.value;
