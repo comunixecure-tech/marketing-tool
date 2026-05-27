@@ -245,6 +245,11 @@ function drawColoredText(ctx, tokens, x, y, maxWidth, lineHeight) {
   ctx.textBaseline = 'top';
   let cx = x;
   let cy = y;
+  
+  // 🟢 修正：計算字體與行高的落差，強制垂直置中，完美平衡單行標題的上下間距
+  const fontSize = 58; 
+  const yOffset = (lineHeight - fontSize) / 2; 
+
   for (let i = 0; i < tokens.length; i++) {
     let token = tokens[i];
     if (token.text === '\n') { cx = x; cy += lineHeight; continue; }
@@ -255,7 +260,8 @@ function drawColoredText(ctx, tokens, x, y, maxWidth, lineHeight) {
     if (cx + w > x + maxWidth && cx !== x && token.text.trim() !== '') {
       cx = x; cy += lineHeight;
     }
-    ctx.fillText(token.text, cx, cy);
+    // 加上 yOffset 補償值
+    ctx.fillText(token.text, cx, cy + yOffset);
     cx += w;
   }
   ctx.textBaseline = 'alphabetic';
@@ -338,7 +344,7 @@ async function _doDrawCanvas() {
   const tagText = document.getElementById('f-tag').value || "";
   const dateText = document.getElementById('f-date').value || "";
 
-  const elementGap = 26;
+  const elementGap = 32;
   
   // 🟢 修正：尺寸與間距全面調整
   const productLogoH = 50;  // 將產品 Logo 稍微縮小
@@ -356,7 +362,9 @@ async function _doDrawCanvas() {
   const titleTokens = getTokensFromNode(titleEl, '#1e293b');
   const maxTitleW = showSpeaker ? 700 : 1050;
   const titleLineH = 75;
-  const row2H = measureColoredText(ctx, titleTokens, maxTitleW, titleLineH);
+  const actualTitleH = measureColoredText(ctx, titleTokens, maxTitleW, titleLineH);
+  // 🟢 修正：強制保留「至少」兩行的高度 (150px)，但超過兩行時畫布會自動跟著長高
+  const row2H = Math.max(actualTitleH, titleLineH * 2);
 
   const row3H = dateText ? 32 : 0;
   const ctaReservedH = 60; 
@@ -381,9 +389,18 @@ async function _doDrawCanvas() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // 🟢 修正：如果是純白俐落風格，給予「極淺灰」底色，與純白 EDM 做出區隔
+  if (bgStyle === 'solid') {
+    ctx.fillStyle = '#f8f9fa'; 
+  } else {
+    ctx.fillStyle = '#ffffff';
+  }
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
   // 繪製背景風格
   if (bgStyle === 'solid') {
-    ctx.fillStyle = '#f1f5f9'; 
+    // 配合極淺灰底色，三角形改用稍微深一點點的質感灰
+    ctx.fillStyle = '#e9ecef'; 
     ctx.beginPath();
     ctx.moveTo(canvas.width, canvas.height - 350);
     ctx.lineTo(canvas.width, canvas.height);
@@ -398,10 +415,21 @@ async function _doDrawCanvas() {
       }
     }
   } else if (bgStyle === 'gradient') {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#ffffff');
-    gradient.addColorStop(1, hexToRgba(primaryColor, 0.15));
-    ctx.fillStyle = gradient;
+    // 💎 修正：極致輕透乾淨的微光漸層 (告別髒汙感)
+    
+    // 1. 底層大面積柔和對角線漸層 (透明度極度降低，保留絕對的乾淨白底)
+    const grad1 = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grad1.addColorStop(0, '#ffffff');
+    grad1.addColorStop(0.5, hexToRgba(primaryColor, 0.015)); // 中段只有 1.5% 的極淡色彩
+    grad1.addColorStop(1, hexToRgba(primaryColor, 0.06));    // 底部稍微加重到 6% 做收尾
+    ctx.fillStyle = grad1;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 2. 右上角高亮光暈 (將發光中心點移到畫布邊緣，讓光暈更自然擴散)
+    const grad2 = ctx.createRadialGradient(canvas.width, 0, 0, canvas.width, 0, 800);
+    grad2.addColorStop(0, hexToRgba(primaryColor, 0.05)); // 光暈起點也降到 5%
+    grad2.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad2;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
@@ -450,7 +478,9 @@ async function _doDrawCanvas() {
 
   // 4. 繪製主標題
   ctx.font = 'bold 58px "Microsoft JhengHei", sans-serif';
-  drawColoredText(ctx, titleTokens, 60, currentY, maxTitleW, titleLineH);
+  // 🟢 計算垂直置中補償值，讓「單行標題」也能完美置中於這 150px 的保留空間內
+  const titleYOffset = (row2H - actualTitleH) / 2;
+  drawColoredText(ctx, titleTokens, 60, currentY + titleYOffset, maxTitleW, titleLineH);
   currentY += row2H + elementGap;
 
   // 5. 繪製日期
