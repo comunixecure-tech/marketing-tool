@@ -1,6 +1,12 @@
 let isInit = true;
 let isEventNameManuallyEdited = false;
 
+// 將純 SVG 原始碼轉為安全的 Data URI (加上 Base64 防護)
+function encodeSvg(svgString) {
+  if (!svgString) return '';
+  return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgString)))}`;
+}
+
 // 1. 啟動與資料載入
 function init() {
   const hasSaved = loadData();
@@ -8,14 +14,13 @@ function init() {
     setDefaultDate();
     addAgendaItem({time: "14:00 - 14:10", topic: "開場致詞", speaker: "王小明", title: "產品經理", img: ""});
     
-    // 取得 uniXecure full 的 SVG 並轉為 Data URI
+    // 🟢 預設抓取 logoDB 裡面的 uniXecure SVG
     let uniSvgDataUri = "";
     if (typeof logoDB !== 'undefined' && logoDB['unixecure']) {
       const rawSvg = logoDB['unixecure'].layouts.standard.colors.full;
-      uniSvgDataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(rawSvg)}`;
+      uniSvgDataUri = encodeSvg(rawSvg);
     }
-    // 將轉換好的 SVG 丟入主辦單位預設欄位
-    addLogoItem(uniSvgDataUri);
+    addLogoItem(uniSvgDataUri); // 預設放進列表中
   }
   
   isInit = false;
@@ -268,7 +273,7 @@ function generateEDM() {
     let logos = '';
     document.querySelectorAll('.l-url').forEach(input => {
       if (input.value.trim()) {
-        logos += `<img src="${input.value.trim()}" height="40" style="display: inline-block; height: 40px; max-width: 180px; width: auto; margin-right: 25px; margin-bottom: 15px; vertical-align: middle;">`;
+        logos += `<img src="${input.value.trim()}" height="60" style="display: inline-block; height: 60px; max-width: 250px; width: auto; margin-right: 25px; margin-bottom: 15px; vertical-align: middle;">`;
       }
     });
     if (logos) organizerHTML = `<div style="font-size: 18px; font-weight: bold; color: #333; margin: 40px 0 15px;">主辦單位</div><div style="text-align: left;">${logos}</div>`;

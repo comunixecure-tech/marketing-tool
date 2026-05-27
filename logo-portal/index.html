@@ -29,65 +29,69 @@
         <div class="radio-pill"><input type="radio" name="brand" id="b-srmas" value="srmas"><label for="b-srmas">SRMAS</label></div>
         
         <div id="agent-brands-container" style="display:contents;"></div>
-        <div class="radio-pill"><input type="radio" name="brand" id="b-upload" value="upload"><label for="b-upload">📁 自訂上傳...</label></div>
-      </div>
+      <div class="radio-pill"><input type="radio" name="brand" id="b-upload" value="upload"><label for="b-upload">📁 自訂上傳...</label></div>
+    </div>
       
       <div id="upload-area" style="display: none; margin-top: 12px;">
-        <input type="file" id="f-upload" accept="image/png, image/jpeg, image/svg+xml" class="input-field" onchange="handleFileUpload(event)">
+      <div class="file-upload-wrapper">
+        <label class="file-upload-btn" style="width: 100%; text-align: center;">
+          點擊選擇本地檔案...
+          <input type="file" id="f-upload" accept="image/png, image/jpeg, image/svg+xml" onchange="handleFileUpload(event)">
+        </label>
       </div>
     </div>
+  </div>
 
-    <div class="form-group dynamic-section" id="layout-section">
-      <label>2. 選擇排版形式</label>
-      <div class="radio-group" id="layout-group"></div>
+  <div class="form-group dynamic-section" id="layout-section">
+    <label>2. 選擇排版形式</label>
+    <div class="radio-group" id="layout-group"></div>
+  </div>
+
+  <div class="form-group dynamic-section" id="color-section">
+    <label>3. 選擇色彩版本</label>
+    <div class="radio-group" id="color-group"></div>
+  </div>
+
+  <hr style="border:0; border-top:1px solid #e2e8f0; margin: 24px 0;">
+
+  <div class="form-group">
+    <label>4. 目標畫布尺寸 (px)</label>
+    <div class="size-inputs">
+      <input type="number" id="f-width" class="input-field" value="500" min="50" oninput="drawCanvas()" placeholder="寬度">
+      <span>×</span>
+      <input type="number" id="f-height" class="input-field" value="500" min="50" oninput="drawCanvas()" placeholder="高度">
     </div>
+    <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">💡 系統會自動將 Logo 等比例縮放並完美置中於此畫布範圍內。</p>
+  </div>
 
-    <div class="form-group dynamic-section" id="color-section">
-      <label>3. 選擇色彩版本</label>
-      <div class="radio-group" id="color-group"></div>
+  <div class="form-group">
+    <label>5. 邊界留白 Padding (px)</label>
+    <div class="padding-wrapper">
+      <input type="number" id="f-padding" class="input-field" value="40" min="0" oninput="drawCanvas()" style="flex:1;">
+      <button type="button" class="btn-sm-outline" onclick="resetPadding()">↻ 恢復預設 (40px)</button>
     </div>
+  </div>
 
-    <hr style="border:0; border-top:1px solid #e2e8f0; margin: 24px 0;">
-
-    <div class="form-group">
-      <label>4. 目標畫布尺寸 (px)</label>
-      <div class="size-inputs">
-        <input type="number" id="f-width" class="input-field" value="500" min="50" oninput="drawCanvas()" placeholder="寬度">
-        <span>×</span>
-        <input type="number" id="f-height" class="input-field" value="500" min="50" oninput="drawCanvas()" placeholder="高度">
-      </div>
-      <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">💡 系統會自動將 Logo 等比例縮放並完美置中於此畫布範圍內。</p>
+  <div class="form-group">
+    <label>6. 匯出格式</label>
+    <div class="radio-group">
+      <div class="radio-pill"><input type="radio" name="format" id="fmt-png" value="png" checked onchange="handleFormatChange()"><label for="fmt-png">PNG (支援透明)</label></div>
+      <div class="radio-pill"><input type="radio" name="format" id="fmt-jpg" value="jpg" onchange="handleFormatChange()"><label for="fmt-jpg">JPG (檔案較小)</label></div>
     </div>
+  </div>
 
-    <div class="form-group">
-      <label>5. 邊界留白 Padding (px)</label>
-      <div class="padding-wrapper">
-        <button type="button" class="btn-sm-outline" onclick="resetPadding()">↻ 恢復預設 (40px)</button>
-        
-        <input type="color" id="f-bg-color" value="#f8fafc" oninput="drawCanvas()">
-      </div>
+  <div class="form-group">
+    <label>7. 畫布背景設定</label>
+    <div class="radio-group">
+      <div class="radio-pill"><input type="radio" name="bg" id="bg-trans" value="transparent" checked onchange="drawCanvas()"><label for="bg-trans">透明背景</label></div>
+      <div class="radio-pill"><input type="radio" name="bg" id="bg-white" value="#ffffff" onchange="drawCanvas()"><label for="bg-white">純白背景</label></div>
+      <div class="radio-pill"><input type="radio" name="bg" id="bg-custom" value="custom" onchange="drawCanvas()"><label for="bg-custom">自訂顏色</label></div>
     </div>
-
-    <div class="form-group">
-      <label>6. 匯出格式</label>
-      <div class="radio-group">
-        <div class="radio-pill"><input type="radio" name="format" id="fmt-png" value="png" checked onchange="handleFormatChange()"><label for="fmt-png">PNG (支援透明)</label></div>
-        <div class="radio-pill"><input type="radio" name="format" id="fmt-jpg" value="jpg" onchange="handleFormatChange()"><label for="fmt-jpg">JPG (檔案較小)</label></div>
-      </div>
+    <div class="color-picker-wrapper" id="custom-bg-picker">
+      <input type="color" id="f-bg-color" value="#f8fafc" oninput="drawCanvas()">
+      <span style="font-size: 13px;">選擇顏色</span>
     </div>
-
-    <div class="form-group">
-      <label>7. 畫布背景設定</label>
-      <div class="radio-group">
-        <div class="radio-pill"><input type="radio" name="bg" id="bg-trans" value="transparent" checked onchange="drawCanvas()"><label for="bg-trans">透明背景</label></div>
-        <div class="radio-pill"><input type="radio" name="bg" id="bg-white" value="#ffffff" onchange="drawCanvas()"><label for="bg-white">純白背景</label></div>
-        <div class="radio-pill"><input type="radio" name="bg" id="bg-custom" value="custom" onchange="drawCanvas()"><label for="bg-custom">自訂顏色</label></div>
-      </div>
-      <div class="color-picker-wrapper" id="custom-bg-picker">
-        <input type="color" id="f-bg-color" value="#f8fafc" oninput="drawCanvas()" style="width:40px; height:30px; padding:0; border:1px solid #ccc;">
-        <span style="font-size: 13px;">選擇顏色</span>
-      </div>
-    </div>
+  </div>
 
     <button class="btn-download" onclick="downloadImage()">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

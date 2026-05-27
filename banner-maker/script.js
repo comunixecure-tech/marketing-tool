@@ -337,10 +337,10 @@ function drawCanvas() {
   }
 }
 
-// 將純 SVG 原始碼轉為安全的 Data URI
+// 將純 SVG 原始碼轉為安全的 Data URI (加上 Base64 防護)
 function encodeSvg(svgString) {
   if (!svgString) return '';
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
+  return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgString)))}`;
 }
 
 // 根據 logoDB 初始化下拉選單
@@ -348,9 +348,13 @@ function initLogoSelect() {
   const select = document.getElementById('f-logo-select');
   if (!select || typeof logoDB === 'undefined') return;
 
-  // 1. 加入 uniXecure 標準版
-  let uniSvg = logoDB['unixecure'].layouts.standard.colors.full;
-  select.add(new Option('uniXecure (標準)', encodeSvg(uniSvg)));
+  // 🟢 1. 加入 uniXecure 標準版 (Full) 與反白版 (White)
+  if (logoDB['unixecure'] && logoDB['unixecure'].layouts.standard) {
+    let uniFull = logoDB['unixecure'].layouts.standard.colors.full;
+    let uniWhite = logoDB['unixecure'].layouts.standard.colors.white;
+    select.add(new Option('uniXecure (標準色)', encodeSvg(uniFull)));
+    select.add(new Option('uniXecure (反白色)', encodeSvg(uniWhite)));
+  }
 
   // 2. 加入四產品的橫式 (Full & White)
   const products = ['raven', 'heis', 'lucas', 'srmas'];
