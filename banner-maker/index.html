@@ -36,11 +36,11 @@
     </div>
 
     <div class="form-group">
-      <label>主辦單位 Logo URL (支援網址或本機上傳)</label>
+      <label>主辦單位 Logo</label>
       <div class="file-upload-wrapper">
-        <input type="text" id="f-logo-url" class="input-field" value="../assets/logos/unixecure/full.svg" oninput="loadLogoUrl()" style="margin-bottom: 0;">
+        <select id="f-logo-select" class="input-field" onchange="loadLogoUrl()" style="margin-bottom: 0;"></select>
         <label class="file-upload-btn">
-          上傳檔案
+          自訂上傳
           <input type="file" id="f-logo" accept="image/png, image/jpeg, image/svg+xml" onchange="handleImageUpload(event, 'logo')">
         </label>
       </div>
@@ -121,6 +121,13 @@
       <canvas id="bannerCanvas"></canvas>
     </div>
   </div>
+
+  
+
+  <script src="../js/common.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>
 
   <script src="script.js" defer></script>
 </body>

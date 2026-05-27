@@ -7,7 +7,15 @@ function init() {
   if (!hasSaved) {
     setDefaultDate();
     addAgendaItem({time: "14:00 - 14:10", topic: "開場致詞", speaker: "王小明", title: "產品經理", img: ""});
-    addLogoItem("../assets/logos/unixecure/full.svg");
+    
+    // 取得 uniXecure full 的 SVG 並轉為 Data URI
+    let uniSvgDataUri = "";
+    if (typeof logoDB !== 'undefined' && logoDB['unixecure']) {
+      const rawSvg = logoDB['unixecure'].layouts.standard.colors.full;
+      uniSvgDataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(rawSvg)}`;
+    }
+    // 將轉換好的 SVG 丟入主辦單位預設欄位
+    addLogoItem(uniSvgDataUri);
   }
   
   isInit = false;
@@ -24,7 +32,6 @@ function init() {
   initSortable(document.getElementById('agenda-list'));
   initSortable(document.getElementById('logo-list'));
 
-  // 監聽活動名稱同步邏輯
   document.getElementById('f-title').addEventListener('input', function() {
     if (!isEventNameManuallyEdited) {
       document.getElementById('f-event-name').value = this.value;

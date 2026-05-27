@@ -337,9 +337,39 @@ function drawCanvas() {
   }
 }
 
+// 將純 SVG 原始碼轉為安全的 Data URI
+function encodeSvg(svgString) {
+  if (!svgString) return '';
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
+}
+
+// 根據 logoDB 初始化下拉選單
+function initLogoSelect() {
+  const select = document.getElementById('f-logo-select');
+  if (!select || typeof logoDB === 'undefined') return;
+
+  // 1. 加入 uniXecure 標準版
+  let uniSvg = logoDB['unixecure'].layouts.standard.colors.full;
+  select.add(new Option('uniXecure (標準)', encodeSvg(uniSvg)));
+
+  // 2. 加入四產品的橫式 (Full & White)
+  const products = ['raven', 'heis', 'lucas', 'srmas'];
+  products.forEach(p => {
+    if (logoDB[p] && logoDB[p].layouts.horizontal) {
+      let fullSvg = logoDB[p].layouts.horizontal.colors.full;
+      let whiteSvg = logoDB[p].layouts.horizontal.colors.white;
+      select.add(new Option(`${logoDB[p].name} (橫式 - 標準色)`, encodeSvg(fullSvg)));
+      select.add(new Option(`${logoDB[p].name} (橫式 - 反白色)`, encodeSvg(whiteSvg)));
+    }
+  });
+
+  // 3. 允許不顯示 Logo
+  select.add(new Option('不使用 Logo', 'none'));
+}
+
 function loadLogoUrl() {
-  const url = document.getElementById('f-logo-url').value.trim();
-  if (!url) {
+  const val = document.getElementById('f-logo-select').value;
+  if (val === 'none' || !val) {
     images.logo = null;
     drawCanvas();
     return;
@@ -348,22 +378,11 @@ function loadLogoUrl() {
   const img = new Image();
   img.crossOrigin = "Anonymous";
   img.onload = () => { images.logo = img; drawCanvas(); };
-  img.onerror = () => { 
-    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-    const proxyImg = new Image();
-    proxyImg.crossOrigin = "Anonymous";
-    
-    proxyImg.onload = () => { images.logo = proxyImg; drawCanvas(); };
-    proxyImg.onerror = () => { 
-      alert("無法載入該網址的圖片。伺服器阻擋了存取，請改用「上傳本地圖片」功能。");
-      images.logo = null; 
-      drawCanvas(); 
-    };
-    proxyImg.src = proxyUrl;
-  };
-  
-  img.src = url;
+  img.onerror = () => { images.logo = null; drawCanvas(); };
+  img.src = val; // 下拉選單的值已經是轉碼後的 Data URI 了
 }
+
+
 
 function downloadBanner() {
   const today = new Date();
@@ -387,6 +406,7 @@ function downloadBanner() {
 }
 
 window.onload = () => {
+  initLogoSelect(); // 啟動時先建立選單
   loadLogoUrl();
   drawCanvas();
 };
