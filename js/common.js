@@ -172,5 +172,25 @@ const logoDB = {
     }
   }
 };
+/* =========================================
+   自動產生全站 Emoji Favicon
+   ========================================= */
+(function setFavicon() {
+  // 🟢 你可以在這裡自由替換喜歡的 Emoji
+  // 推薦選項：🛠️ (工具), 🎨 (調色盤), 🚀 (火箭), 🖼️ (畫框), 🦄 (獨角獸)
+  const emoji = "🛠️"; 
+  
+  // 利用 SVG 將 Emoji 轉成合法的圖片網址
+  const faviconUrl = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${emoji}</text></svg>`;
+  
+  // 尋找網頁中是否已經有 favicon 標籤，沒有就自動建立一個
+  let link = document.querySelector("link[rel~='icon']");
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    document.head.appendChild(link);
+  }
+  link.href = faviconUrl;
+})();
 
 // 如果未來有其他跨工具共用的函式 (如格式化日期、HEX 轉換)，也可以統一放在這裡
