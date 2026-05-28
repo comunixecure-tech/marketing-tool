@@ -1,7 +1,7 @@
 let isInit = true;
 let isEventNameManuallyEdited = false;
 
-// 🟢 新增：將純 SVG 原始碼轉為安全的 Data URI (加上 Base64 防護)
+// 將純 SVG 原始碼轉為安全的 Data URI (加上 Base64 防護)
 function encodeSvg(svgString) {
   if (!svgString) return '';
   return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgString)))}`;
@@ -11,22 +11,30 @@ function encodeSvg(svgString) {
 function init() {
   const hasSaved = loadData();
   
-  // 如果沒有暫存資料 (第一次打開，或按了清除記憶)
   if (!hasSaved) {
-    // 確保預設寫入 Banner 網址
+    // 預設 Banner
     document.getElementById('f-banner').value = "https://www.unixecure.com/images/index-banner-image.png";
     
     setDefaultDate();
     addAgendaItem({time: "14:00 - 14:10", topic: "開場致詞", speaker: "王小明", title: "產品經理", img: ""});
     
-    // 🟢 預設主辦單位：從共用資料庫 (common.js) 拉取 uniXecure 的 SVG 並自動轉碼
-    let uniSvgDataUri = "";
-    if (typeof logoDB !== 'undefined' && logoDB['unixecure']) {
-      const rawSvg = logoDB['unixecure'].layouts.standard.colors.full;
-      uniSvgDataUri = encodeSvg(rawSvg);
-    }
-    // 將轉換好的 SVG 丟入主辦單位列表
-    addLogoItem(uniSvgDataUri);
+    // EDM 絕對不能用 Base64 SVG！請在這裡填入貴公司伺服器上真實的 PNG 網址
+    const uniXecureLogoUrl = "https://www.unixecure.com/images/logo.png"; 
+    
+    addLogoItem(uniXecureLogoUrl);
+    
+
+    // 🟢 新增：預設報名網址
+    document.getElementById('f-link').value = "https://tw.systexcloud.com/activity/now";
+    // 🟢 新增：將退訂聲明預設加入注意事項中
+    const defaultNotice = `注意事項
+1. 主辦單位確認您的報名資料後，將於活動前寄發提醒函，屆時請留意報名填寫之 email 信箱。
+2. 主辦單位保留報名資格審核權，請勿偽造他人身分資料以免觸犯法律。
+3. 主辦單位保留變更活動內容、日期、地點等修改權利。
+4. 以上活動若適逢天災等不可抗拒之因素，依照行政院人事行政總處或臺北市政府公佈之規定，決定延期與否，不再另行通知，敬請見諒。
+5. 主辦單位將有權利進行個人資料之蒐集處理及利用。
+6. 名額有限，盡速報名，主辦單位保有名單調整之權利。`;
+    document.getElementById('f-notice').value = defaultNotice;
   }
   
   isInit = false;
@@ -34,7 +42,6 @@ function init() {
   updateListThumbs();
   updatePreview();
   
-  // 監聽所有輸入框變動以即時更新預覽
   document.addEventListener('input', (e) => {
     if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
       updatePreview();
@@ -44,7 +51,6 @@ function init() {
   initSortable(document.getElementById('agenda-list'));
   initSortable(document.getElementById('logo-list'));
 
-  // 監聽活動名稱同步邏輯
   document.getElementById('f-title').addEventListener('input', function() {
     if (!isEventNameManuallyEdited) {
       document.getElementById('f-event-name').value = this.value;
@@ -299,11 +305,23 @@ function generateEDM() {
     </td></tr>`;
   }
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+  // 🟢 修正：加入三層版權防護機制的 HTML 結構
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="uniXecure">
+<meta name="copyright" content="智慧資安科技股份有限公司 uniXecure">
+<style>
+/* * uniXecure EDM Core Style
+ * Copyright (c) 2026 uniXecure. All rights reserved.
+ */
 body { margin: 0; padding: 0; background-color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .container { width: 100%; max-width: 650px; margin: 0 auto; background-color: #ffffff; }
 .btn { display: inline-block; padding: 14px 45px; background-color: ${sColor}; color: #21234a; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 6px; }
-</style></head><body>
+</style>
+</head>
+<body>
 <table width="100%" bgcolor="#ffffff" cellpadding="0" cellspacing="0" border="0"><tr><td align="center"><img src="${banner}" style="width: 100%; max-width: 900px; display: block; margin: 0 auto;"></td></tr></table>
 <table width="100%" bgcolor="#ffffff" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
 <table class="container" cellpadding="0" cellspacing="0" border="0">
@@ -326,7 +344,9 @@ body { margin: 0; padding: 0; background-color: #ffffff; font-family: 'Helvetica
   </td></tr>
   ${noticeHTML}
 </table>
-</td></tr></table></body></html>`;
+</td></tr></table>
+</body>
+</html>`;
 }
 
 function updatePreview() {

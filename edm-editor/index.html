@@ -99,7 +99,7 @@
 
     <div class="form-group">
       <label>報名網址 (URL)</label>
-      <input type="text" id="f-link" class="input-field" value="https://tw.systex.com/">
+      <input type="text" id="f-link" class="input-field" value="https://tw.systexcloud.com/activity/now">
     </div>
     
     <div class="form-group">
@@ -127,10 +127,35 @@
       下載 EDM HTML 檔
     </button>
     
-    <button class="btn-text-link" onclick="resetData()">🔄 清除記憶，恢復預設值</button>
-  </div>
+    <div class="section-card">
+      <div class="form-group">
+        <label>如何將 EDM 內容正確貼入信件？</label>
+        <p style="margin:0; font-size:13px; color:var(--danger); font-weight:bold;">
+          注意：請勿直接拖曳或複製檔案本身，這會變成信件附件。
+        </p>
+      </div>
 
-  <div class="preview-container">
+      <div class="form-group">
+        <label>使用一般信箱 (Outlook / Gmail)</label>
+        <ol style="margin:0; padding-left:20px; font-size:13px; color:var(--text-muted); line-height:1.6;">
+          <li>對剛下載的 .html 檔案點擊兩下，使用網頁瀏覽器 (如 Chrome 或 Edge) 開啟。</li>
+          <li>在瀏覽器畫面中按 Ctrl + A 全選，確認圖片與文字皆反白後，按 Ctrl + C 複製。</li>
+          <li>回到您的寫信畫面，點擊內文空白處按 Ctrl + V 貼上，顏色與排版即會完整呈現。</li>
+        </ol>
+      </div>
+
+      <div class="form-group" style="margin-bottom:0;">
+        <label>使用專業發信系統 (如 Mailchimp 等)</label>
+        <ul style="margin:0; padding-left:20px; font-size:13px; color:var(--text-muted); line-height:1.6;">
+          <li>若系統支援上傳：請直接於後台使用「匯入 HTML」功能。</li>
+          <li>若系統需填寫原始碼：對 .html 檔案點擊右鍵，選擇「以記事本開啟」，按 Ctrl + A 全選並複製所有文字，再貼入系統中。</li>
+        </ul>
+      </div>
+    </div>
+    
+    <button class="btn-text-link" onclick="resetData()">🔄 清除記憶，恢復預設值</button>
+
+  </div> <div class="preview-container">
     <div class="preview-header">
       <span>即時預覽 (模擬桌面版信箱)</span>
       <span style="font-weight:normal; color:#94a3b8;" id="save-status">已自動存檔</span>
