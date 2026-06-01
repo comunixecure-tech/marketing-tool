@@ -7,7 +7,8 @@ let selectedBrand = '';
 let selectedLayout = '';
 let selectedColor = '';
 let customFilename = 'logo_export';
-let currentObjectUrl = null; // 用於追蹤與釋放記憶體
+let currentObjectUrl = null; 
+let currentAssetData = null; // 新增：用於記錄當前選取的 SVG 原始路徑或字串
 
 function initAgents() {
   try {
@@ -61,6 +62,7 @@ function handleBrandChange() {
       if (layoutSec) layoutSec.classList.remove('active');
       if (colorSec) colorSec.classList.remove('active');
       isImageLoaded = false;
+      currentAssetData = null;
       customFilename = 'uploaded_logo';
       drawCanvas();
       return;
@@ -101,6 +103,7 @@ function handleBrandChange() {
         infoTag.style.color = "var(--danger)";
       }
       isImageLoaded = false;
+      currentAssetData = null;
       drawCanvas();
     }
   } catch (err) {
@@ -158,30 +161,20 @@ function loadFileBySelection() {
     const svgData = logoDB[selectedBrand].layouts[selectedLayout].colors[selectedColor];
     
     if (!svgData) return;
+    currentAssetData = svgData; // 紀錄原始資產，供 SVG 匯出使用
 
-    // 🔬 核心改進：判斷如果是純 <svg> 原始碼，直接用 Blob 封裝
     if (svgData.trim().startsWith('<svg')) {
-      // 釋放上一次的記憶體路徑，避免瀏覽器記憶體洩漏
-      if (currentObjectUrl) {
-        URL.revokeObjectURL(currentObjectUrl);
-      }
-      
-      // 使用 Blob，這能完美包容 SVG 內部的任何中文、雙引號或特殊字元，絕不報錯
+      if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
       const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
       currentObjectUrl = URL.createObjectURL(blob);
       loadImage(currentObjectUrl);
     } else {
-      // 相容傳統圖片路徑
       loadImage(svgData);
     }
   } catch (err) {
     console.error("讀取選取檔案失敗:", err);
     isImageLoaded = false;
-    const infoTag = document.getElementById('output-info');
-    if (infoTag) {
-      infoTag.textContent = "❌ 圖檔加載失敗";
-      infoTag.style.color = "var(--danger)";
-    }
+    currentAssetData = null;
     drawCanvas();
   }
 }
@@ -191,6 +184,7 @@ function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
     customFilename = file.name.split('.')[0];
+    currentAssetData = null; // 自訂上傳不支援 SVG 原生導出
     const reader = new FileReader();
     reader.onload = (e) => loadImage(e.target.result);
     reader.readAsDataURL(file);
@@ -201,48 +195,66 @@ function handleFileUpload(event) {
 
 function loadImage(src) {
   isImageLoaded = false;
-  const infoTag = document.getElementById('output-info');
-  if (infoTag) {
-    infoTag.textContent = "正在讀取圖檔資產...";
-    infoTag.style.color = "var(--text-muted)";
-  }
   drawCanvas();
 
   currentImage = new Image();
-  // 設置匿名跨域，防止 Canvas 導出時因為安全策略被污染 (Tainted Canvas)
   currentImage.crossOrigin = "anonymous"; 
   
   currentImage.onload = () => {
     isImageLoaded = true;
-    if (infoTag) infoTag.style.color = "var(--primary)";
     drawCanvas();
   };
   currentImage.onerror = () => {
     isImageLoaded = false;
-    if (infoTag) {
-      infoTag.textContent = `❌ 圖檔解析失敗，請確認 SVG 格式`;
-      infoTag.style.color = "var(--danger)";
-    }
     drawCanvas();
   };
   currentImage.src = src;
 }
 
+// 根據選擇的格式動態調整 UI 狀態
 function handleFormatChange() {
   try {
     const checkedFormat = document.querySelector('input[name="format"]:checked');
     if (!checkedFormat) return;
-    
     const format = checkedFormat.value;
-    const transRadio = document.getElementById('bg-trans');
     
+    const transRadio = document.getElementById('bg-trans');
+    const whiteRadio = document.getElementById('bg-white');
+    const customRadio = document.getElementById('bg-custom');
+    const wInput = document.getElementById('f-width');
+    const hInput = document.getElementById('f-height');
+    const pInput = document.getElementById('f-padding');
+    const hint = document.getElementById('format-hint');
+    const btnSpan = document.querySelector('#main-download-btn span');
+
+    // 恢復所有輸入框預設為可用
+    [transRadio, whiteRadio, customRadio, wInput, hInput, pInput].forEach(el => { if(el) el.disabled = false; });
+    if (hint) hint.style.display = 'none';
+
     if (format === 'jpg') {
       if (transRadio) transRadio.disabled = true;
-      const whiteRadio = document.getElementById('bg-white');
       if (transRadio && transRadio.checked && whiteRadio) whiteRadio.checked = true;
-    } else {
-      if (transRadio) transRadio.disabled = false;
+      if (btnSpan) btnSpan.textContent = "下載 JPG 圖檔";
+    } else if (format === 'png') {
+      if (btnSpan) btnSpan.textContent = "下載 PNG 圖檔";
+    } else if (format === 'svg') {
+      // SVG 為下載原始檔，故禁用畫布操作
+      [wInput, hInput, pInput, transRadio, whiteRadio, customRadio].forEach(el => { if(el) el.disabled = true; });
+      if (hint) {
+        hint.textContent = "💡 選擇 SVG 時，將直接匯出無損原始向量檔，忽略畫布尺寸與背景設定。";
+        hint.style.display = 'block';
+      }
+      if (btnSpan) btnSpan.textContent = "下載 SVG 向量檔";
+    } else if (format === 'ai') {
+      // AI 檔純提供雲端連結
+      [wInput, hInput, pInput, transRadio, whiteRadio, customRadio].forEach(el => { if(el) el.disabled = true; });
+      if (hint) {
+        hint.textContent = "💡 將直接引導您前往精誠企業雲端資料夾下載原始 AI 檔。";
+        hint.style.display = 'block';
+      }
+      if (btnSpan) btnSpan.textContent = "前往雲端下載 AI 原檔";
     }
+    
     drawCanvas();
   } catch (err) {
     console.error("格式切換失敗:", err);
@@ -256,7 +268,7 @@ function resetPadding() {
 }
 
 // =========================================================
-// 3. 核心完美置中與安全渲染演算 (Try-Catch 全面保護)
+// 3. 核心完美置中與安全渲染演算
 // =========================================================
 function drawCanvas() {
   try {
@@ -282,21 +294,18 @@ function drawCanvas() {
       customPicker.classList.toggle('active', bgSetting === 'custom');
     }
 
-    // 🟢 重新設定畫布尺寸並清空
     canvas.width = canvasW;
     canvas.height = canvasH;
     ctx.clearRect(0, 0, canvasW, canvasH);
 
-    // 🟢 繪製背景色 (不論圖片有沒有載入成功，這段都必須且一定能正常執行！)
     if (bgSetting !== 'transparent') {
       ctx.fillStyle = bgSetting === 'custom' ? (bgColorInput ? bgColorInput.value : '#f8fafc') : bgSetting;
       ctx.fillRect(0, 0, canvasW, canvasH);
     }
 
-    // 🟢 如果圖片還沒準備好，就停在這裡，確保背景色能單獨顯示
     if (!isImageLoaded) {
       if (infoTag && !infoTag.textContent.includes("❌") && !infoTag.textContent.includes("⚠️")) {
-        infoTag.textContent = `畫布已就緒: ${canvasW} x ${canvasH} px (未選取圖檔)`;
+        infoTag.textContent = `畫布已就緒: ${canvasW} x ${canvasH} px`;
         infoTag.style.color = "var(--text-muted)";
       }
       return;
@@ -305,7 +314,6 @@ function drawCanvas() {
     const availableW = Math.max(0, canvasW - padding * 2);
     const availableH = Math.max(0, canvasH - padding * 2);
     
-    // 安全防禦：如果 SVG 檔案缺乏實體尺寸，給予安全預設值，避免除以 0 造成瀏覽器崩潰
     let imgW = currentImage.naturalWidth || currentImage.width || 300;
     let imgH = currentImage.naturalHeight || currentImage.height || 100;
     if (imgW === 0 || imgH === 0) { imgW = 300; imgH = 100; }
@@ -326,11 +334,10 @@ function drawCanvas() {
     const drawX = padding + (availableW - drawW) / 2;
     const drawY = padding + (availableH - drawH) / 2;
 
-    // 🟢 繪製 Logo 圖片
     ctx.drawImage(currentImage, drawX, drawY, drawW, drawH);
     
     if (infoTag) {
-      infoTag.textContent = `最終輸出規格: ${canvasW} x ${canvasH} px`;
+      infoTag.textContent = `預覽規格: ${canvasW} x ${canvasH} px`;
       infoTag.style.color = "var(--text-main)";
     }
   } catch (err) {
@@ -339,16 +346,54 @@ function drawCanvas() {
 }
 
 // =========================================================
-// 4. 導出下載
+// 4. 導出下載 (整合 AI 與 SVG 原檔抓取)
 // =========================================================
-function downloadImage() {
+async function downloadImage() {
   try {
+    const checkedFormat = document.querySelector('input[name="format"]:checked');
+    const format = checkedFormat ? checkedFormat.value : 'png';
+
+    // [1] AI 檔處理：跳轉至雲端資料夾
+    if (format === 'ai') {
+      window.open('https://systexgroup-my.sharepoint.com/:f:/g/personal/2200615_systex_com_tw/IgCqcp6hsQvbTZ6d3OI9n9RkATM2c9Q43c7C5SGHhwNVcXI?e=7FTNlS', '_blank');
+      return;
+    }
+
+    // [2] SVG 檔處理：擷取原始文字後轉換 Blob 下載
+    if (format === 'svg') {
+      if (selectedBrand === 'upload') {
+        alert("自訂上傳模式不支援 SVG 匯出，請切換至 PNG 或 JPG。");
+        return;
+      }
+      if (!currentAssetData) {
+        alert("找不到可用的 SVG 來源檔");
+        return;
+      }
+
+      let svgContent = '';
+      if (currentAssetData.trim().startsWith('<svg')) {
+        svgContent = currentAssetData;
+      } else {
+        // 利用 Fetch API 讀取本地 SVG 內容 (GitHub Pages 完全支援)
+        const response = await fetch(currentAssetData);
+        svgContent = await response.text();
+      }
+      
+      const blob = new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${customFilename}_vector.svg`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    // [3] PNG & JPG 處理：依賴畫布匯出
     if (!isImageLoaded) { alert("請確認當前已成功顯示 Logo 圖檔再行下載"); return; }
     const canvas = document.getElementById('preview-canvas');
     if (!canvas) return;
     
-    const checkedFormat = document.querySelector('input[name="format"]:checked');
-    const format = checkedFormat ? checkedFormat.value : 'png';
     const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
     const filename = `${customFilename}_${canvas.width}x${canvas.height}.${format}`;
 
@@ -361,8 +406,9 @@ function downloadImage() {
       a.click();
       URL.revokeObjectURL(url);
     }, mimeType, 1.0);
+
   } catch (err) {
-    alert("匯出下載失敗，可能是瀏覽器安全策略阻擋。建議點擊「恢復預設背景」後重試。");
+    alert("匯出下載失敗。");
     console.error("下載失敗:", err);
   }
 }
