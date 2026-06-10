@@ -374,7 +374,9 @@ function downloadHTML() {
   a.click();
 }
 
+// ==========================================
 // 🟢 截圖模式開關與事件監聽
+// ==========================================
 function toggleScreenshotMode() {
   document.body.classList.add('screenshot-mode');
 }
