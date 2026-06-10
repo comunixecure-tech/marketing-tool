@@ -127,6 +127,10 @@
       下載 EDM HTML 檔
     </button>
     
+    <button type="button" onclick="toggleScreenshotMode()" style="width: 100%; padding: 12px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; font-weight: bold; color: var(--text-main); cursor: pointer; transition: background 0.2s; margin-bottom: 20px;">
+      📸 進入全螢幕截圖模式
+    </button>
+    
     <div class="section-card">
       <div class="form-group">
         <label>如何將 EDM 內容正確貼入信件？</label>
@@ -154,6 +158,11 @@
     </div>
     
     <button class="btn-text-link" onclick="resetData()">🔄 清除記憶，恢復預設值</button>
+
+  </div> <div id="screenshot-hint" class="screenshot-hint">
+    📸 請使用 <code>Win + Shift + S</code> (Mac: <code>Cmd + Shift + 4</code>) 進行截圖<br>
+    <span style="font-size: 12px; font-weight: normal; color: #cbd5e1; margin-top: 4px; display: block;">截圖完成後，請按鍵盤 <b>ESC</b> 鍵退出此模式</span>
+  </div>
 
   </div> <div class="preview-container">
     <div class="preview-header">

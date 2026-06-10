@@ -374,4 +374,16 @@ function downloadHTML() {
   a.click();
 }
 
+// 🟢 截圖模式開關與事件監聽
+function toggleScreenshotMode() {
+  document.body.classList.add('screenshot-mode');
+}
+
+// 監聽全域鍵盤事件：按下 ESC 鍵即可退出截圖模式
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.body.classList.contains('screenshot-mode')) {
+    document.body.classList.remove('screenshot-mode');
+  }
+});
+
 window.onload = init;
