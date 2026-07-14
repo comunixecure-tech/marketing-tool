@@ -65,18 +65,18 @@
     <div class="form-group">
       <label>5. 邊界留白 Padding (px)</label>
       <div class="padding-wrapper">
-        <input type="number" id="f-padding" class="input-field" value="40" min="0" oninput="drawCanvas()" style="flex:1;">
-        <button type="button" class="btn-sm-outline" onclick="resetPadding()">↻ 恢復預設 (40px)</button>
+        <input type="number" id="f-padding" class="input-field" value="0" min="0" oninput="drawCanvas()" style="flex:1;">
+        <button type="button" class="btn-sm-outline" onclick="resetPadding()">↻ 恢復預設 (0px)</button>
       </div>
     </div>
 
     <div class="form-group">
       <label>6. 匯出格式</label>
       <div class="radio-group">
-        <div class="radio-pill"><input type="radio" name="format" id="fmt-png" value="png" checked onchange="handleFormatChange()"><label for="fmt-png">PNG (透明底)</label></div>
-        <div class="radio-pill"><input type="radio" name="format" id="fmt-jpg" value="jpg" onchange="handleFormatChange()"><label for="fmt-jpg">JPG (含背景)</label></div>
-        <div class="radio-pill"><input type="radio" name="format" id="fmt-svg" value="svg" onchange="handleFormatChange()"><label for="fmt-svg">SVG (向量檔)</label></div>
-        <div class="radio-pill"><input type="radio" name="format" id="fmt-ai" value="ai" onchange="handleFormatChange()"><label for="fmt-ai">AI (原始檔)</label></div>
+        <div class="radio-pill"><input type="radio" name="format" id="fmt-png" value="png" checked onchange="handleFormatChange()"><label for="fmt-png">PNG 透明底</label></div>
+        <div class="radio-pill"><input type="radio" name="format" id="fmt-jpg" value="jpg" onchange="handleFormatChange()"><label for="fmt-jpg">JPG 含背景</label></div>
+        <div class="radio-pill"><input type="radio" name="format" id="fmt-svg" value="svg" onchange="handleFormatChange()"><label for="fmt-svg">SVG 向量檔</label></div>
+        <div class="radio-pill"><input type="radio" name="format" id="fmt-ai" value="ai" onchange="handleFormatChange()"><label for="fmt-ai">AI 原始檔</label></div>
       </div>
       <p id="format-hint" style="font-size: 13px; font-weight: bold; color: var(--primary); margin-top: 12px; display: none;"></p>
     </div>

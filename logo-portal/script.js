@@ -263,7 +263,7 @@ function handleFormatChange() {
 
 function resetPadding() {
   const paddingInput = document.getElementById('f-padding');
-  if (paddingInput) paddingInput.value = 40;
+  if (paddingInput) paddingInput.value = 0;
   drawCanvas();
 }
 
@@ -348,6 +348,20 @@ function drawCanvas() {
 // =========================================================
 // 4. 導出下載 (整合 AI 與 SVG 原檔抓取)
 // =========================================================
+function buildExportFilename(ext, includeSize) {
+  const canvas = document.getElementById('preview-canvas');
+  const sizePart = includeSize && canvas ? `_${canvas.width}x${canvas.height}` : '';
+
+  if (selectedBrand === 'upload' || !selectedBrand) {
+    return `${customFilename}${sizePart}.${ext}`;
+  }
+
+  const brandPart = selectedBrand.toUpperCase();
+  const layoutPart = (selectedLayout && selectedLayout !== 'standard') ? `${selectedLayout}_` : '';
+  const colorPart = selectedColor || 'full';
+  return `${brandPart}_${layoutPart}${colorPart}${sizePart}.${ext}`;
+}
+
 async function downloadImage() {
   try {
     const checkedFormat = document.querySelector('input[name="format"]:checked');
@@ -383,7 +397,7 @@ async function downloadImage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${customFilename}_vector.svg`;
+      a.download = buildExportFilename('svg', false);
       a.click();
       URL.revokeObjectURL(url);
       return;
@@ -395,7 +409,7 @@ async function downloadImage() {
     if (!canvas) return;
     
     const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
-    const filename = `${customFilename}_${canvas.width}x${canvas.height}.${format}`;
+    const filename = buildExportFilename(format, true);
 
     canvas.toBlob(function(blob) {
       if (!blob) { alert("圖檔生成失敗"); return; }
