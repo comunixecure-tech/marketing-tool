@@ -330,6 +330,8 @@ function generateEDM() {
 body { margin: 0; padding: 0; background-color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .container { width: 100%; max-width: 650px; margin: 0 auto; background-color: #ffffff; }
 .btn { display: inline-block; padding: 14px 45px; background-color: ${sColor}; color: #21234a; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 6px; }
+/* 列印/另存 PDF 時強制印出背景色與底色，避免瀏覽器預設忽略背景圖形 */
+* { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
 </style>
 </head>
 <body>
