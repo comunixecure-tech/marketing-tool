@@ -391,10 +391,26 @@ function updatePreview() {
     const html = generateEDM();
     const iframe = document.getElementById('preview-frame');
     iframe.srcdoc = html;
-    saveData(); 
+    saveData();
+    updateHtmlDownloadState();
   } catch (err) {
     console.error("預覽更新失敗", err);
   }
+}
+
+// 只要任何圖片欄位使用了本地上傳（Data URI），HTML 下載就不可靠，直接鎖住改導向 PDF
+function updateHtmlDownloadState() {
+  const imageValues = [
+    document.getElementById('f-banner').value,
+    ...[...document.querySelectorAll('.l-url')].map(el => el.value),
+    ...[...document.querySelectorAll('.a-img')].map(el => el.value)
+  ];
+  const hasLocalImage = imageValues.some(v => v.trim().startsWith('data:'));
+
+  const btn = document.getElementById('btn-download-html');
+  const hint = document.getElementById('html-disabled-hint');
+  if (btn) btn.disabled = hasLocalImage;
+  if (hint) hint.style.display = hasLocalImage ? 'block' : 'none';
 }
 
 function downloadHTML() {

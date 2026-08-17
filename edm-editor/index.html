@@ -23,12 +23,12 @@
       <p class="field-hint">建議比例約 2.7:1（例如 650 x 244px），圖片寬度會自動依螢幕縮放；貼網址才能正常寄信，上傳本地圖片僅適合內部用或匯出 PDF</p>
       <div style="display:flex; gap:10px; align-items:center;">
         <img id="banner-thumb" class="thumb-preview" src="">
-        <input type="text" id="f-banner" class="input-field" style="margin-bottom:0" value="https://www.unixecure.com/images/index-banner-image.png" oninput="updateThumb('f-banner','banner-thumb')">
+        <input type="text" id="f-banner" class="input-field" style="margin-bottom:0; flex:1;" value="https://www.unixecure.com/images/index-banner-image.png" oninput="updateThumb('f-banner','banner-thumb')">
+        <label class="file-upload-btn" style="cursor:pointer; margin:0;">
+          📁 或上傳本地圖片
+          <input type="file" accept="image/png, image/jpeg" style="display:none;" onchange="handleLocalImageUpload(this, '#f-banner')">
+        </label>
       </div>
-      <label class="file-upload-btn" style="cursor:pointer; display:inline-block;">
-        📁 或上傳本地圖片
-        <input type="file" accept="image/png, image/jpeg" style="display:none;" onchange="handleLocalImageUpload(this, '#f-banner')">
-      </label>
     </div>
 
     <div class="form-group">
@@ -142,7 +142,7 @@
     </button>
     <p class="field-hint" style="margin-top:0;">排版不跑版，點擊後會開啟列印視窗，選擇「另存為 PDF」即可下載，可避免 Outlook 常見的文字跑版、按鈕消失問題；列印視窗裡記得把「頁首及頁尾」關掉，才不會多印出網址與日期</p>
 
-    <button class="btn-download" onclick="downloadHTML()" style="margin-bottom: 10px; margin-top: 4px; background: #fff; color: var(--text-main); border: 1px solid var(--border-color); box-shadow: none;">
+    <button id="btn-download-html" class="btn-download" onclick="downloadHTML()" style="margin-bottom: 10px; margin-top: 4px; background: #fff; color: var(--text-main); border: 1px solid var(--border-color); box-shadow: none;">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
         <polyline points="7 10 12 15 17 10"></polyline>
@@ -150,6 +150,7 @@
       </svg>
       下載 EDM HTML 檔
     </button>
+    <p id="html-disabled-hint" class="field-hint" style="display:none; margin-top:-6px; color:var(--danger);">偵測到有欄位使用本地圖片，可能無法正常顯示於信件中，請改用圖片網址，或改用上方的 PDF 下載</p>
 
     <div class="section-card">
       <div class="form-group">
