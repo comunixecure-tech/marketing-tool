@@ -15,7 +15,7 @@
     </a>
     <div class="header">
       <h1>Logo 自助服務站</h1>
-      <p>支援多種格式匯出。如需原始檔請直接選擇下方 AI 格式下載。</p>
+      <p>支援多種格式匯出，如需原始檔請直接選擇下方 AI 格式下載</p>
     </div>
 
     <div class="form-group">
@@ -53,17 +53,19 @@
     <hr style="border:0; border-top:1px solid #e2e8f0; margin: 24px 0;">
 
     <div class="form-group">
-      <label>4. 目標畫布尺寸 (px)</label>
+      <label>4. 目標畫布尺寸</label>
+      <p class="field-hint" style="margin-top:-4px;">單位：px</p>
       <div class="size-inputs">
         <input type="number" id="f-width" class="input-field" value="500" min="50" oninput="drawCanvas()" placeholder="寬度">
         <span>×</span>
         <input type="number" id="f-height" class="input-field" value="500" min="50" oninput="drawCanvas()" placeholder="高度">
       </div>
-      <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">💡 系統會自動將 Logo 等比例縮放並完美置中於此畫布範圍內。</p>
+      <p class="field-hint">💡 系統會自動將 Logo 等比例縮放並完美置中於此畫布範圍內</p>
     </div>
 
     <div class="form-group">
-      <label>5. 邊界留白 Padding (px)</label>
+      <label>5. 邊界留白 Padding</label>
+      <p class="field-hint" style="margin-top:-4px;">單位：px</p>
       <div class="padding-wrapper">
         <input type="number" id="f-padding" class="input-field" value="0" min="0" oninput="drawCanvas()" style="flex:1;">
         <button type="button" class="btn-sm-outline" onclick="resetPadding()">↻ 恢復預設 (0px)</button>

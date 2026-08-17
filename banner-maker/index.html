@@ -15,7 +15,7 @@
     </a>
     <div class="header">
       <h1>Banner 產生器｜uniXecure</h1>
-      <p>標準 1200x450 完美置中排版，支援動態延展與長文案斷行。</p>
+      <p>標準 1200x450 完美置中排版，支援動態延展與長文案斷行</p>
     </div>
 
     <div class="color-picker-group">
@@ -43,7 +43,7 @@
           <button type="button" class="toolbar-btn" onclick="toggleAllLogoColors('white')">全反白色</button>
         </div>
       </div>
-      <p style="font-size:12px; color:var(--text-muted); margin-top:-8px; margin-bottom:12px;">拖曳 ::: 可調整排序</p>
+      <p class="field-hint" style="margin-top:-8px;">拖曳 ::: 可調整排序</p>
       
       <div id="banner-logo-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
       <button type="button" class="btn-sm-outline" style="width: 100%; margin-top: 12px;" onclick="addBannerLogo()">+ 新增主辦單位</button>
@@ -83,7 +83,8 @@
       </label>
       <div id="speaker-fields">
         <div class="form-group">
-          <label>講者照片 (自動裁切為圓形)</label>
+          <label>講者照片</label>
+          <p class="field-hint" style="margin-top:-4px;">自動裁切為圓形</p>
           <div class="file-upload-wrapper">
             <label class="file-upload-btn">
               選擇檔案
@@ -98,7 +99,8 @@
         </div>
 
         <div class="form-group" style="margin-bottom: 0;">
-          <label>講者職稱 / 單位 (支援長文案與自動換行)</label>
+          <label>講者職稱 / 單位</label>
+          <p class="field-hint" style="margin-top:-4px;">支援長文案與自動換行</p>
           <textarea id="f-speaker-title" class="input-field" style="min-height: 70px; resize: vertical; margin-bottom: 0;" oninput="drawCanvas()">資深技術顧問
 解決方案專家</textarea>
         </div>

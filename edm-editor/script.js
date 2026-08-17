@@ -81,6 +81,7 @@ function saveData() {
     location: document.getElementById('f-location').value,
     locationUrl: document.getElementById('f-location-url').value,
     contact: document.getElementById('f-contact').value,
+    hasCta: document.getElementById('f-has-cta').checked,
     btnText: document.getElementById('f-btn-text').value,
     link: document.getElementById('f-link').value,
     reminder: document.getElementById('f-reminder').value,
@@ -116,6 +117,8 @@ function loadData() {
     document.getElementById('f-location').value = data.location || '';
     document.getElementById('f-location-url').value = data.locationUrl || '';
     document.getElementById('f-contact').value = data.contact || '';
+    document.getElementById('f-has-cta').checked = data.hasCta !== undefined ? data.hasCta : true;
+    toggleSection('cta-section', document.getElementById('f-has-cta').checked);
     document.getElementById('f-btn-text').value = data.btnText || '立即報名';
     document.getElementById('f-link').value = data.link || '';
     document.getElementById('f-reminder').value = data.reminder !== undefined ? data.reminder : '';
@@ -290,12 +293,20 @@ function generateEDM() {
         logos += `<img src="${input.value.trim()}" height="60" style="display: inline-block; height: 60px; max-width: 250px; width: auto; margin-right: 25px; margin-bottom: 15px; vertical-align: middle;">`;
       }
     });
-    if (logos) organizerHTML = `<div style="font-size: 18px; font-weight: bold; color: #333; margin: 40px 0 15px;">主辦單位</div><div style="text-align: left;">${logos}</div>`;
+    if (logos) organizerHTML = `<div style="margin-top: 10px; padding-top: 25px; border-top: 1px solid #e2e8f0; text-align: left;">${logos}</div>`;
   }
 
   let reminderHTML = '';
   if (reminder) {
     reminderHTML = `<div style="margin-top: 15px; font-size: 14px; color: #E1251B; font-weight: bold; letter-spacing: 0.5px;">${reminder}</div>`;
+  }
+
+  let ctaHTML = '';
+  if (document.getElementById('f-has-cta').checked) {
+    ctaHTML = `<tr><td style="padding: 20px 40px 40px; text-align: center;">
+    <a href="${link}" class="btn">${btnText}</a>
+    ${reminderHTML}
+  </td></tr>`;
   }
 
   let noticeHTML = '';
@@ -334,14 +345,11 @@ body { margin: 0; padding: 0; background-color: #ffffff; font-family: 'Helvetica
       <tr><td valign="top">&#8226;&nbsp;</td><td><strong>地點：</strong>${locationHTML}</td></tr>
     </table>
     ${agendaHTML}
-    ${organizerHTML}
     <div style="font-size: 18px; font-weight: bold; color: #333; margin: 40px 0 15px;">聯絡窗口</div>
     <div style="font-size: 15px; color: #333; line-height: 1.8;">${contact}</div>
   </td></tr></table></td></tr>
-  <tr><td style="padding: 20px 40px 40px; text-align: center;">
-    <a href="${link}" class="btn">${btnText}</a>
-    ${reminderHTML}
-  </td></tr>
+  ${ctaHTML}
+  ${organizerHTML ? `<tr><td style="padding: 0 40px 30px;">${organizerHTML}</td></tr>` : ''}
   ${noticeHTML}
 </table>
 </td></tr></table>
@@ -372,6 +380,22 @@ function downloadHTML() {
   a.href = URL.createObjectURL(blob);
   a.download = filename;
   a.click();
+}
+
+// 用瀏覽器原生列印功能輸出 PDF，版面（文字、按鈕、圖片）完全依照畫面所見，不會跑版
+function downloadPDF() {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert("無法開啟列印視窗，請確認瀏覽器未封鎖此網站的彈出視窗。");
+    return;
+  }
+  printWindow.document.open();
+  printWindow.document.write(generateEDM());
+  printWindow.document.close();
+  printWindow.onload = () => {
+    printWindow.focus();
+    printWindow.print();
+  };
 }
 
 // ==========================================

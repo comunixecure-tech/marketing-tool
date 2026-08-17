@@ -15,11 +15,12 @@
     </a>
     <div class="header">
       <h1>eDM 產生器｜uniXecure</h1>
-      <p>修改左側欄位，右側即時更新。您的編輯內容會<strong>自動存檔</strong>。<br>拖曳 <span style="color:var(--primary)">:::</span> 可進行排序。</p>
+      <p>修改左側欄位，右側即時更新，您的編輯內容會<strong>自動存檔</strong></p>
     </div>
 
     <div class="form-group">
       <label>主視覺 Banner URL</label>
+      <p class="field-hint">建議比例約 2.7:1（例如 650 x 244px），圖片寬度會自動依螢幕縮放</p>
       <div style="display:flex; gap:10px; align-items:center;">
         <img id="banner-thumb" class="thumb-preview" src="">
         <input type="text" id="f-banner" class="input-field" style="margin-bottom:0" value="https://www.unixecure.com/images/index-banner-image.png" oninput="updateThumb('f-banner','banner-thumb')">
@@ -27,7 +28,8 @@
     </div>
 
     <div class="form-group">
-      <label>活動主標題 (顯示於信件與瀏覽器標籤)</label>
+      <label>活動主標題</label>
+      <p class="field-hint">顯示於信件與瀏覽器標籤</p>
       <input type="text" id="f-title" class="input-field" value="零信任世界中的 AI 安全金融">
     </div>
 
@@ -45,7 +47,8 @@
     </div>
 
     <div class="form-group">
-      <label>活動名稱 (顯示於資訊內)</label>
+      <label>活動名稱</label>
+      <p class="field-hint">顯示於資訊內</p>
       <input type="text" id="f-event-name" class="input-field" value="零信任世界中的 AI 安全金融">
     </div>
 
@@ -66,22 +69,10 @@
         包含議程表
       </div>
       <div id="agenda-section">
+        <p class="field-hint" style="margin-top:-8px;">拖曳 ::: 可調整排序</p>
         <div id="agenda-list">
         </div>
         <button type="button" onclick="addAgendaItem()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增議程</button>
-      </div>
-    </div>
-
-    <div class="section-card">
-      <div class="section-card-header">
-        <input type="checkbox" id="f-has-organizer" checked onchange="toggleSection('organizer-section', this.checked)">
-        包含主辦單位
-      </div>
-      <div id="organizer-section">
-        <p style="font-size:12px; color:var(--danger); margin-bottom:10px;">建議使用 PNG/JPG 避免破圖</p>
-        <div id="logo-list">
-        </div>
-        <button type="button" onclick="addLogoItem()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增 Logo</button>
       </div>
     </div>
 
@@ -92,23 +83,43 @@
 信箱：sylviahuang@unixecure.com.tw</textarea>
     </div>
 
-    <div class="form-group">
-      <label>報名按鈕文字</label>
-      <input type="text" id="f-btn-text" class="input-field" value="立即報名">
+    <div class="section-card">
+      <div class="section-card-header">
+        <input type="checkbox" id="f-has-cta" checked onchange="toggleSection('cta-section', this.checked)">
+        包含 CTA 按鈕
+      </div>
+      <div id="cta-section">
+        <div class="form-group">
+          <label>CTA 文字</label>
+          <input type="text" id="f-btn-text" class="input-field" value="立即報名">
+        </div>
+        <div class="form-group">
+          <label>報名網址</label>
+          <input type="text" id="f-link" class="input-field" value="https://tw.systexcloud.com/activity/now">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>提醒事項</label>
+          <input type="text" id="f-reminder" class="input-field" value="數量有限，報名從速" placeholder="選填，顯示於按鈕下方，例：數量有限，報名從速">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-header">
+        <input type="checkbox" id="f-has-organizer" checked onchange="toggleSection('organizer-section', this.checked)">
+        包含 Logo 區塊
+      </div>
+      <div id="organizer-section">
+        <p class="field-hint" style="margin-top:-8px;">置於頁尾，不限主辦或贊助；建議使用 PNG/JPG，尺寸高 120px、寬度依比例縮放最寬 500px；拖曳 ::: 可調整排序</p>
+        <div id="logo-list">
+        </div>
+        <button type="button" onclick="addLogoItem()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增 Logo</button>
+      </div>
     </div>
 
     <div class="form-group">
-      <label>報名網址 (URL)</label>
-      <input type="text" id="f-link" class="input-field" value="https://tw.systexcloud.com/activity/now">
-    </div>
-    
-    <div class="form-group">
-      <label>提醒事項 (顯示於按鈕下方，選填)</label>
-      <input type="text" id="f-reminder" class="input-field" value="數量有限，報名從速" placeholder="例：數量有限，報名從速">
-    </div>
-    
-    <div class="form-group">
-      <label>注意事項 (置於最底部，灰色小字)</label>
+      <label>注意事項</label>
+      <p class="field-hint">置於最底部，灰色小字</p>
       <textarea id="f-notice" class="input-field" style="min-height:150px; resize: vertical;">注意事項
 1. 主辦單位確認您的報名資料後，將於活動前寄發提醒函，屆時請留意報名填寫之 email 信箱。
 2. 主辦單位保留報名資格審核權，請勿偽造他人身分資料以免觸犯法律。
@@ -118,7 +129,16 @@
 6. 名額有限，盡速報名，主辦單位保有名單調整之權利</textarea>
     </div>
 
-    <button class="btn-download" onclick="downloadHTML()" style="margin-bottom: 10px;">
+    <button class="btn-download" onclick="downloadPDF()" style="margin-bottom: 4px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+      </svg>
+      下載 PDF 檔
+    </button>
+    <p class="field-hint" style="margin-top:0;">排版不跑版，點擊後會開啟列印視窗，選擇「另存為 PDF」即可下載，可避免 Outlook 常見的文字跑版、按鈕消失問題</p>
+
+    <button class="btn-download" onclick="downloadHTML()" style="margin-bottom: 10px; margin-top: 4px; background: #fff; color: var(--text-main); border: 1px solid var(--border-color); box-shadow: none;">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
         <polyline points="7 10 12 15 17 10"></polyline>
@@ -126,37 +146,39 @@
       </svg>
       下載 EDM HTML 檔
     </button>
-    
-    <button type="button" onclick="toggleScreenshotMode()" style="width: 100%; padding: 12px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; font-weight: bold; color: var(--text-main); cursor: pointer; transition: background 0.2s; margin-bottom: 20px;">
-      📸 進入全螢幕截圖模式
-    </button>
-    
+
     <div class="section-card">
       <div class="form-group">
         <label>如何將 EDM 內容正確貼入信件？</label>
         <p style="margin:0; font-size:13px; color:var(--danger); font-weight:bold;">
-          注意：請勿直接拖曳或複製檔案本身，這會變成信件附件。
+          注意：請勿直接拖曳或複製檔案本身，這會變成信件附件
         </p>
       </div>
 
       <div class="form-group">
-        <label>使用一般信箱 (Outlook / Gmail)</label>
+        <label>使用一般信箱</label>
+        <p class="field-hint" style="margin-top:-4px;">Outlook / Gmail</p>
         <ol style="margin:0; padding-left:20px; font-size:13px; color:var(--text-muted); line-height:1.6;">
-          <li>對剛下載的 .html 檔案點擊兩下，使用網頁瀏覽器 (如 Chrome 或 Edge) 開啟。</li>
-          <li>在瀏覽器畫面中按 Ctrl + A 全選，確認圖片與文字皆反白後，按 Ctrl + C 複製。</li>
-          <li>回到您的寫信畫面，點擊內文空白處按 Ctrl + V 貼上，顏色與排版即會完整呈現。</li>
+          <li>對剛下載的 .html 檔案點擊兩下，使用網頁瀏覽器 (如 Chrome 或 Edge) 開啟</li>
+          <li>在瀏覽器畫面中按 Ctrl + A 全選，確認圖片與文字皆反白後，按 Ctrl + C 複製</li>
+          <li>回到您的寫信畫面，點擊內文空白處按 Ctrl + V 貼上，顏色與排版即會完整呈現</li>
         </ol>
       </div>
 
       <div class="form-group" style="margin-bottom:0;">
-        <label>使用專業發信系統 (如 Mailchimp 等)</label>
+        <label>使用專業發信系統</label>
+        <p class="field-hint" style="margin-top:-4px;">如 Mailchimp 等</p>
         <ul style="margin:0; padding-left:20px; font-size:13px; color:var(--text-muted); line-height:1.6;">
-          <li>若系統支援上傳：請直接於後台使用「匯入 HTML」功能。</li>
-          <li>若系統需填寫原始碼：對 .html 檔案點擊右鍵，選擇「以記事本開啟」，按 Ctrl + A 全選並複製所有文字，再貼入系統中。</li>
+          <li>若系統支援上傳：請直接於後台使用「匯入 HTML」功能</li>
+          <li>若系統需填寫原始碼：對 .html 檔案點擊右鍵，選擇「以記事本開啟」，按 Ctrl + A 全選並複製所有文字，再貼入系統中</li>
         </ul>
       </div>
     </div>
-    
+
+    <button type="button" onclick="toggleScreenshotMode()" style="width: 100%; padding: 12px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; font-weight: bold; color: var(--text-main); cursor: pointer; transition: background 0.2s; margin-bottom: 20px;">
+      📸 進入全螢幕截圖模式
+    </button>
+
     <button class="btn-text-link" onclick="resetData()">🔄 清除記憶，恢復預設值</button>
 
   </div> <div id="screenshot-hint" class="screenshot-hint" onclick="this.style.display='none'">
