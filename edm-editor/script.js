@@ -389,10 +389,24 @@ function downloadPDF() {
     alert("無法開啟列印視窗，請確認瀏覽器未封鎖此網站的彈出視窗。");
     return;
   }
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+
   printWindow.document.open();
   printWindow.document.write(generateEDM());
   printWindow.document.close();
   printWindow.onload = () => {
+    // 另存 PDF 時瀏覽器會拿 <title> 當作預設檔名
+    printWindow.document.title = `${yyyy}${mm}${dd}_edm`;
+
+    // 依實際內容高度設定紙張尺寸，讓輸出剛好是 EDM 完整版面，不會被切成 A4 多頁
+    const contentHeight = printWindow.document.body.scrollHeight;
+    const pageStyle = printWindow.document.createElement('style');
+    pageStyle.textContent = `@page { size: 650px ${contentHeight}px; margin: 0; }`;
+    printWindow.document.head.appendChild(pageStyle);
+
     printWindow.focus();
     printWindow.print();
   };
