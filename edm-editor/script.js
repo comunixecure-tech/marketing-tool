@@ -166,6 +166,25 @@ function updateListThumbs() {
   });
 }
 
+// 上傳本地圖片：轉成 Data URI 直接填入對應的網址欄位（不會有跨網域讀取問題，但不建議用於實際寄信）
+function handleLocalImageUpload(fileInput, targetSelector) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const container = fileInput.closest('.sortable-item') || fileInput.closest('.form-group');
+  const textInput = container ? container.querySelector(targetSelector) : document.querySelector(targetSelector);
+  if (!textInput) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    textInput.value = e.target.result;
+    updateThumb('f-banner', 'banner-thumb');
+    updateListThumbs();
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+  fileInput.value = '';
+}
+
 function toggleSection(id, show) {
   document.getElementById(id).style.display = show ? 'block' : 'none';
   updatePreview();
@@ -221,6 +240,10 @@ function addAgendaItem(data = null) {
           <div style="display:flex; gap:5px;"><input type="text" class="input-field a-speaker" value="${sp}" oninput="updatePreview()"><input type="text" class="input-field a-title" value="${ti}" oninput="updatePreview()"></div>
           <div style="display:flex; gap:8px; align-items:center;">
             <img class="thumb-preview a-img-preview" src="${img}"><input type="text" class="input-field a-img" value="${img}" style="margin-bottom:0" placeholder="講者照片 URL (選填)" oninput="updateListThumbs(); updatePreview();">
+            <label class="btn-sm-outline" style="cursor:pointer; margin:0; white-space:nowrap;" title="上傳本地圖片">
+              📁
+              <input type="file" accept="image/png, image/jpeg" style="display:none;" onchange="handleLocalImageUpload(this, '.a-img')">
+            </label>
             <button type="button" class="btn-delete" onclick="this.closest('.agenda-item').remove(); updatePreview();">刪除</button>
           </div>
         </div></div>`;
@@ -233,6 +256,10 @@ function addLogoItem(url = "") {
         <div class="drag-handle">:::</div>
         <div style="display:flex; gap:8px; align-items:center; flex-grow:1;">
           <img class="thumb-preview l-img-preview" src="${url}"><input type="text" class="input-field l-url" value="${url}" style="margin-bottom:0" placeholder="圖片網址" oninput="updateListThumbs(); updatePreview();">
+          <label class="btn-sm-outline" style="cursor:pointer; margin:0; white-space:nowrap;" title="上傳本地圖片">
+            📁
+            <input type="file" accept="image/png, image/jpeg" style="display:none;" onchange="handleLocalImageUpload(this, '.l-url')">
+          </label>
           <button type="button" class="btn-delete" onclick="this.closest('.logo-item').remove(); updatePreview();">刪除</button>
         </div></div>`;
   document.getElementById('logo-list').insertAdjacentHTML('beforeend', html);

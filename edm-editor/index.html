@@ -20,11 +20,15 @@
 
     <div class="form-group">
       <label>主視覺 Banner URL</label>
-      <p class="field-hint">建議比例約 2.7:1（例如 650 x 244px），圖片寬度會自動依螢幕縮放</p>
+      <p class="field-hint">建議比例約 2.7:1（例如 650 x 244px），圖片寬度會自動依螢幕縮放；貼網址才能正常寄信，上傳本地圖片僅適合內部用或匯出 PDF</p>
       <div style="display:flex; gap:10px; align-items:center;">
         <img id="banner-thumb" class="thumb-preview" src="">
         <input type="text" id="f-banner" class="input-field" style="margin-bottom:0" value="https://www.unixecure.com/images/index-banner-image.png" oninput="updateThumb('f-banner','banner-thumb')">
       </div>
+      <label class="file-upload-btn" style="cursor:pointer; display:inline-block;">
+        📁 或上傳本地圖片
+        <input type="file" accept="image/png, image/jpeg" style="display:none;" onchange="handleLocalImageUpload(this, '#f-banner')">
+      </label>
     </div>
 
     <div class="form-group">
@@ -110,7 +114,7 @@
         包含 Logo 區塊
       </div>
       <div id="organizer-section">
-        <p class="field-hint" style="margin-top:-8px;">置於頁尾，不限主辦或贊助；建議使用 PNG/JPG，尺寸高 120px、寬度依比例縮放最寬 500px；拖曳 ::: 可調整排序</p>
+        <p class="field-hint" style="margin-top:-8px;">置於頁尾，不限主辦或贊助；建議使用 PNG/JPG，尺寸高 120px、寬度依比例縮放最寬 500px；拖曳 ::: 可調整排序；貼網址才能正常寄信，上傳本地圖片僅適合內部用或匯出 PDF</p>
         <div id="logo-list">
         </div>
         <button type="button" onclick="addLogoItem()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增 Logo</button>
