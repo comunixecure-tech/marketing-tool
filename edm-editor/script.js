@@ -91,6 +91,8 @@ function saveData() {
     btnText: document.getElementById('f-btn-text').value,
     link: document.getElementById('f-link').value,
     reminder: document.getElementById('f-reminder').value,
+    ctaBg: document.getElementById('f-cta-bg').value,
+    ctaTextColor: document.getElementById('f-cta-text-color').value,
     notice: document.getElementById('f-notice').value,
     hasAgenda: document.getElementById('f-has-agenda').checked,
     agenda: Array.from(document.querySelectorAll('.agenda-item')).map(item => ({
@@ -131,6 +133,8 @@ function loadData() {
     toggleSection('cta-section', document.getElementById('f-has-cta').checked);
     document.getElementById('f-btn-text').value = data.btnText || '立即報名';
     document.getElementById('f-link').value = data.link || '';
+    document.getElementById('f-cta-bg').value = data.ctaBg || '#ffb415';
+    document.getElementById('f-cta-text-color').value = data.ctaTextColor || '#21234a';
     document.getElementById('f-reminder').value = data.reminder !== undefined ? data.reminder : '';
     if(data.notice) document.getElementById('f-notice').value = data.notice;
     
@@ -197,6 +201,19 @@ function handleLocalImageUpload(fileInput, targetSelector) {
 
 function toggleSection(id, show) {
   document.getElementById(id).style.display = show ? 'block' : 'none';
+  updatePreview();
+}
+
+function setCtaColorPreset(preset) {
+  const bg = document.getElementById('f-cta-bg');
+  const txt = document.getElementById('f-cta-text-color');
+  if (preset === 'blue') {
+    bg.value = '#3c49ba';
+    txt.value = '#ffffff';
+  } else {
+    bg.value = '#ffb415';
+    txt.value = '#21234a';
+  }
   updatePreview();
 }
 
@@ -279,7 +296,8 @@ function addLogoItem(url = "") {
 // 產生最終 HTML 程式碼
 function generateEDM() {
   const pColor = '#3c49ba';
-  const sColor = '#ffb415';
+  const ctaBg = document.getElementById('f-cta-bg').value;
+  const ctaTextColor = document.getElementById('f-cta-text-color').value;
   const banner = document.getElementById('f-banner').value;
   const title = document.getElementById('f-title').value;
   const desc = document.getElementById('f-desc').innerHTML;
@@ -399,7 +417,7 @@ function generateEDM() {
  */
 body { margin: 0; padding: 0; background-color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .container { width: 100%; max-width: 650px; margin: 0 auto; background-color: #ffffff; }
-.btn { display: inline-block; padding: 14px 45px; background-color: ${sColor}; color: #21234a; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 6px; }
+.btn { display: inline-block; padding: 14px 45px; background-color: ${ctaBg}; color: ${ctaTextColor}; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 6px; }
 /* 列印/另存 PDF 時強制印出背景色與底色，避免瀏覽器預設忽略背景圖形 */
 * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
 </style>

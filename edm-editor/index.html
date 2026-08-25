@@ -112,9 +112,20 @@
           <label>報名網址</label>
           <input type="text" id="f-link" class="input-field" value="https://tw.systexcloud.com/activity/now">
         </div>
-        <div class="form-group" style="margin-bottom:0;">
+        <div class="form-group">
           <label>提醒事項</label>
           <input type="text" id="f-reminder" class="input-field" value="數量有限，報名從速" placeholder="選填，顯示於按鈕下方，例：數量有限，報名從速">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>CTA 顏色</label>
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <button type="button" class="btn-sm-outline" onclick="setCtaColorPreset('yellow')">黃底黑字</button>
+            <button type="button" class="btn-sm-outline" onclick="setCtaColorPreset('blue')">藍底白字</button>
+          </div>
+          <div style="display:flex; gap:20px; align-items:center;">
+            <label style="font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px;">底色 <input type="color" id="f-cta-bg" value="#ffb415" oninput="updatePreview()"></label>
+            <label style="font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px;">文字 <input type="color" id="f-cta-text-color" value="#21234a" oninput="updatePreview()"></label>
+          </div>
         </div>
       </div>
     </div>
