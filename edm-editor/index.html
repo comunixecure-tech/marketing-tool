@@ -32,13 +32,13 @@
     </div>
 
     <div class="form-group">
-      <label>活動主標題</label>
+      <label>主標題</label>
       <p class="field-hint">顯示於信件與瀏覽器標籤</p>
       <input type="text" id="f-title" class="input-field" value="零信任世界中的 AI 安全金融">
     </div>
 
     <div class="form-group">
-      <label>活動簡介</label>
+      <label>簡介</label>
       <div class="toolbar">
         <button type="button" class="toolbar-btn" onclick="execCmd('bold')" style="font-weight: bold;">B</button>
         <button type="button" class="toolbar-btn" onclick="execCmd('underline')" style="text-decoration: underline;">U</button>
@@ -50,21 +50,27 @@
       <div id="f-desc" class="editor-box" contenteditable="true" style="border: 1px solid var(--border-color); border-radius: 6px; background:#fff; height:auto; min-height:120px; line-height:1.8; font-size:15px; padding:10px; outline: none; transition: border-color 0.2s;" oninput="updatePreview()">人工智慧加速金融創新，同時帶來資安與合規新挑戰。誠邀您參與活動，深入了解如何在零信任架構下強化 AI 存取控管、資料保護與風險治理。<br>本活動為聚焦金融業 AI 應用下的資安與合規挑戰，將分享分段技術於跨據點安全連線的實務應用，解析如何兼顧監管要求與數位轉型，打造高韌性且安全的營運環境，以及解析零信任架構如何強化存取控管與資料保護。</div>
     </div>
 
-    <div class="form-group">
-      <label>活動名稱</label>
-      <p class="field-hint">顯示於資訊內</p>
-      <input type="text" id="f-event-name" class="input-field" value="零信任世界中的 AI 安全金融">
-    </div>
-
-    <div class="form-group">
-      <label>活動時間</label>
-      <input type="text" id="f-date" class="input-field" value="">
-    </div>
-
-    <div class="form-group">
-      <label>活動地點</label>
-      <input type="text" id="f-location" class="input-field" value="智慧資安科技（台北市內湖區瑞光路318號7樓）" placeholder="輸入地點名稱">
-      <input type="text" id="f-location-url" class="input-field" value="" placeholder="地點超連結 (如 Google Map 或 Teams 網址，選填)">
+    <div class="section-card">
+      <div class="section-card-header">
+        <input type="checkbox" id="f-has-info" checked onchange="toggleSection('info-section', this.checked)">
+        包含資訊區塊（名稱／時間／地點）
+      </div>
+      <div id="info-section">
+        <div class="form-group">
+          <label>名稱</label>
+          <p class="field-hint" style="margin-top:-4px;">顯示於資訊內</p>
+          <input type="text" id="f-event-name" class="input-field" value="零信任世界中的 AI 安全金融">
+        </div>
+        <div class="form-group">
+          <label>時間</label>
+          <input type="text" id="f-date" class="input-field" value="">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>地點</label>
+          <input type="text" id="f-location" class="input-field" value="智慧資安科技（台北市內湖區瑞光路318號7樓）" placeholder="輸入地點名稱">
+          <input type="text" id="f-location-url" class="input-field" style="margin-bottom:0;" value="" placeholder="地點超連結 (如 Google Map 或 Teams 網址，選填)">
+        </div>
+      </div>
     </div>
 
     <div class="section-card">
@@ -80,11 +86,16 @@
       </div>
     </div>
 
-    <div class="form-group">
-      <label>聯絡窗口</label>
-      <textarea id="f-contact" class="input-field" style="min-height:80px; resize: vertical;">智慧資安科技股份有限公司 Sylvia Huang
+    <div class="section-card">
+      <div class="section-card-header">
+        <input type="checkbox" id="f-has-contact" checked onchange="toggleSection('contact-section', this.checked)">
+        包含聯絡窗口
+      </div>
+      <div id="contact-section">
+        <textarea id="f-contact" class="input-field" style="min-height:80px; resize: vertical; margin-bottom:0;">智慧資安科技股份有限公司 Sylvia Huang
 電話：+886-2-87986088 #1634
 信箱：sylviahuang@unixecure.com.tw</textarea>
+      </div>
     </div>
 
     <div class="section-card">

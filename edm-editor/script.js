@@ -7,6 +7,10 @@ function encodeSvg(svgString) {
   return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgString)))}`;
 }
 
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 // 1. 啟動與資料載入
 function init() {
   const hasSaved = loadData();
@@ -76,10 +80,12 @@ function saveData() {
     banner: document.getElementById('f-banner').value,
     title: document.getElementById('f-title').value,
     desc: document.getElementById('f-desc').innerHTML,
+    hasInfo: document.getElementById('f-has-info').checked,
     eventName: document.getElementById('f-event-name').value,
     date: document.getElementById('f-date').value,
     location: document.getElementById('f-location').value,
     locationUrl: document.getElementById('f-location-url').value,
+    hasContact: document.getElementById('f-has-contact').checked,
     contact: document.getElementById('f-contact').value,
     hasCta: document.getElementById('f-has-cta').checked,
     btnText: document.getElementById('f-btn-text').value,
@@ -112,10 +118,14 @@ function loadData() {
     document.getElementById('f-banner').value = data.banner || '';
     document.getElementById('f-title').value = data.title || '';
     if(data.desc) document.getElementById('f-desc').innerHTML = data.desc;
+    document.getElementById('f-has-info').checked = data.hasInfo !== undefined ? data.hasInfo : true;
+    toggleSection('info-section', document.getElementById('f-has-info').checked);
     document.getElementById('f-event-name').value = data.eventName || '';
     document.getElementById('f-date').value = data.date || '';
     document.getElementById('f-location').value = data.location || '';
     document.getElementById('f-location-url').value = data.locationUrl || '';
+    document.getElementById('f-has-contact').checked = data.hasContact !== undefined ? data.hasContact : true;
+    toggleSection('contact-section', document.getElementById('f-has-contact').checked);
     document.getElementById('f-contact').value = data.contact || '';
     document.getElementById('f-has-cta').checked = data.hasCta !== undefined ? data.hasCta : true;
     toggleSection('cta-section', document.getElementById('f-has-cta').checked);
@@ -237,7 +247,7 @@ function addAgendaItem(data = null) {
         <div class="sortable-content" style="background:#fff; padding:12px; border-radius:6px; border:1px solid var(--border-color);">
           <input type="text" class="input-field a-time" value="${t}" oninput="updatePreview()">
           <input type="text" class="input-field a-topic" value="${tp}" oninput="updatePreview()">
-          <div style="display:flex; gap:5px;"><input type="text" class="input-field a-speaker" value="${sp}" oninput="updatePreview()"><input type="text" class="input-field a-title" value="${ti}" oninput="updatePreview()"></div>
+          <div style="display:flex; gap:5px;"><input type="text" class="input-field a-speaker" value="${sp}" oninput="updatePreview()" placeholder="講者姓名"><textarea class="input-field a-title" style="min-height:38px; resize:vertical;" oninput="updatePreview()" placeholder="稱謂／職稱，可換行">${escapeHtml(ti)}</textarea></div>
           <div style="display:flex; gap:8px; align-items:center;">
             <img class="thumb-preview a-img-preview" src="${img}"><input type="text" class="input-field a-img" value="${img}" style="margin-bottom:0" placeholder="講者照片 URL (選填)" oninput="updateListThumbs(); updatePreview();">
             <label class="btn-sm-outline" style="cursor:pointer; margin:0; white-space:nowrap;" title="上傳本地圖片">
@@ -288,6 +298,16 @@ function generateEDM() {
   const reminder = document.getElementById('f-reminder').value.trim();
   const notice = document.getElementById('f-notice').value.replace(/\n/g, '<br>');
 
+  let infoHTML = '';
+  if (document.getElementById('f-has-info').checked) {
+    infoHTML = `<div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 15px;">活動資訊</div>
+    <table style="font-size: 15px; color: #333; line-height: 1.8;" cellpadding="0" cellspacing="0" border="0">
+      <tr><td valign="top" width="15">&#8226;&nbsp;</td><td><strong>名稱：</strong>${eventName}</td></tr>
+      <tr><td valign="top">&#8226;&nbsp;</td><td><strong>時間：</strong>${date}</td></tr>
+      <tr><td valign="top">&#8226;&nbsp;</td><td><strong>地點：</strong>${locationHTML}</td></tr>
+    </table>`;
+  }
+
   let agendaHTML = '';
   if (document.getElementById('f-has-agenda').checked) {
     let rows = '';
@@ -295,21 +315,30 @@ function generateEDM() {
       const time = item.querySelector('.a-time').value;
       const topic = item.querySelector('.a-topic').value;
       const speaker = item.querySelector('.a-speaker').value;
-      const sTitle = item.querySelector('.a-title').value;
+      const sTitle = item.querySelector('.a-title').value.replace(/\n/g, '<br>');
       const img = item.querySelector('.a-img').value.trim();
       const border = (idx === arr.length - 1) ? '' : `border-bottom: 1px solid #e2e8f0;`;
-      
+
       const photoHTML = img ? `<td width="48" valign="middle" style="padding-right: 12px;"><img src="${img}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;"></td>` : '';
 
       rows += `<tr>
           <td valign="top" width="28%" style="padding: 20px 10px 20px 30px; font-size: 15px; color: #333; ${border}">${time}</td>
           <td valign="top" width="72%" style="padding: 20px 30px 20px 15px; ${border}">
             <div style="color: ${pColor}; font-weight: bold; font-size: 16px; margin-bottom: 8px;">${topic}</div>
-            <table cellpadding="0" cellspacing="0" border="0"><tr>${photoHTML}<td valign="middle" style="font-size: 15px; color: #555;">${speaker} ${sTitle}</td></tr></table>
+            <table cellpadding="0" cellspacing="0" border="0"><tr>${photoHTML}<td valign="middle" style="font-size: 15px; color: #555;">
+              <div>${speaker}</div>
+              ${sTitle ? `<div style="font-size: 13px; color: #888; margin-top: 2px;">${sTitle}</div>` : ''}
+            </td></tr></table>
           </td></tr>`;
     });
     agendaHTML = `<div style="font-size: 18px; font-weight: bold; color: #333; margin: 40px 0 15px;">議程</div>
                   <table width="100%" bgcolor="#ffffff" style="line-height: 1.5; border-radius: 6px; overflow: hidden;">${rows}</table>`;
+  }
+
+  let contactHTML = '';
+  if (document.getElementById('f-has-contact').checked) {
+    contactHTML = `<div style="font-size: 18px; font-weight: bold; color: #333; margin: 40px 0 15px;">聯絡窗口</div>
+    <div style="font-size: 15px; color: #333; line-height: 1.8;">${contact}</div>`;
   }
 
   let organizerHTML = '';
@@ -343,6 +372,13 @@ function generateEDM() {
     </td></tr>`;
   }
 
+  const greyBoxInner = infoHTML + agendaHTML + contactHTML;
+  const greyBoxHTML = greyBoxInner
+    ? `<tr><td style="padding: 10px 40px 30px;"><table width="100%" bgcolor="#f5f5f5" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 40px;">
+    ${greyBoxInner}
+  </td></tr></table></td></tr>`
+    : '';
+
   // 🟢 修正：加入三層版權防護機制的 HTML 結構
   return `<!DOCTYPE html>
 <html>
@@ -366,17 +402,7 @@ body { margin: 0; padding: 0; background-color: #ffffff; font-family: 'Helvetica
 <table width="100%" bgcolor="#ffffff" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
 <table class="container" cellpadding="0" cellspacing="0" border="0">
   <tr><td style="padding: 40px; line-height: 1.8; font-size: 15px; text-align: left;">${desc}</td></tr>
-  <tr><td style="padding: 10px 40px 30px;"><table width="100%" bgcolor="#f5f5f5" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 40px;">
-    <div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 15px;">活動資訊</div>
-    <table style="font-size: 15px; color: #333; line-height: 1.8;" cellpadding="0" cellspacing="0" border="0">
-      <tr><td valign="top" width="15">&#8226;&nbsp;</td><td><strong>名稱：</strong>${eventName}</td></tr>
-      <tr><td valign="top">&#8226;&nbsp;</td><td><strong>時間：</strong>${date}</td></tr>
-      <tr><td valign="top">&#8226;&nbsp;</td><td><strong>地點：</strong>${locationHTML}</td></tr>
-    </table>
-    ${agendaHTML}
-    <div style="font-size: 18px; font-weight: bold; color: #333; margin: 40px 0 15px;">聯絡窗口</div>
-    <div style="font-size: 15px; color: #333; line-height: 1.8;">${contact}</div>
-  </td></tr></table></td></tr>
+  ${greyBoxHTML}
   ${ctaHTML}
   ${organizerHTML ? `<tr><td style="padding: 0 40px 30px;">${organizerHTML}</td></tr>` : ''}
   ${noticeHTML}
