@@ -298,17 +298,19 @@ function generateEDM() {
   const reminder = document.getElementById('f-reminder').value.trim();
   const notice = document.getElementById('f-notice').value.replace(/\n/g, '<br>');
 
-  let infoHTML = '';
+  const greyBoxBlocks = [];
+
   if (document.getElementById('f-has-info').checked) {
-    infoHTML = `<div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 15px;">活動資訊</div>
-    <table style="font-size: 15px; color: #333; line-height: 1.8;" cellpadding="0" cellspacing="0" border="0">
+    greyBoxBlocks.push({
+      heading: '活動資訊',
+      body: `<table style="font-size: 15px; color: #333; line-height: 1.8;" cellpadding="0" cellspacing="0" border="0">
       <tr><td valign="top" width="15">&#8226;&nbsp;</td><td><strong>名稱：</strong>${eventName}</td></tr>
       <tr><td valign="top">&#8226;&nbsp;</td><td><strong>時間：</strong>${date}</td></tr>
       <tr><td valign="top">&#8226;&nbsp;</td><td><strong>地點：</strong>${locationHTML}</td></tr>
-    </table>`;
+    </table>`
+    });
   }
 
-  let agendaHTML = '';
   if (document.getElementById('f-has-agenda').checked) {
     let rows = '';
     document.querySelectorAll('.agenda-item').forEach((item, idx, arr) => {
@@ -331,14 +333,17 @@ function generateEDM() {
             </td></tr></table>
           </td></tr>`;
     });
-    agendaHTML = `<div style="font-size: 18px; font-weight: bold; color: #333; margin: 40px 0 15px;">議程</div>
-                  <table width="100%" bgcolor="#ffffff" style="line-height: 1.5; border-radius: 6px; overflow: hidden;">${rows}</table>`;
+    greyBoxBlocks.push({
+      heading: '議程',
+      body: `<table width="100%" bgcolor="#ffffff" style="line-height: 1.5; border-radius: 6px; overflow: hidden;">${rows}</table>`
+    });
   }
 
-  let contactHTML = '';
   if (document.getElementById('f-has-contact').checked) {
-    contactHTML = `<div style="font-size: 18px; font-weight: bold; color: #333; margin: 40px 0 15px;">聯絡窗口</div>
-    <div style="font-size: 15px; color: #333; line-height: 1.8;">${contact}</div>`;
+    greyBoxBlocks.push({
+      heading: '聯絡窗口',
+      body: `<div style="font-size: 15px; color: #333; line-height: 1.8;">${contact}</div>`
+    });
   }
 
   let organizerHTML = '';
@@ -372,7 +377,9 @@ function generateEDM() {
     </td></tr>`;
   }
 
-  const greyBoxInner = infoHTML + agendaHTML + contactHTML;
+  const greyBoxInner = greyBoxBlocks.map((block, idx) =>
+    `<div style="font-size: 18px; font-weight: bold; color: #333; margin: ${idx === 0 ? '0' : '40px'} 0 15px;">${block.heading}</div>${block.body}`
+  ).join('');
   const greyBoxHTML = greyBoxInner
     ? `<tr><td style="padding: 10px 40px 30px;"><table width="100%" bgcolor="#f5f5f5" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 40px;">
     ${greyBoxInner}
