@@ -165,7 +165,10 @@ function setTextColor(hexCode) {
 }
 
 function toggleSection(id, show) {
-  document.getElementById(id).style.display = show ? 'block' : 'none';
+  const content = document.getElementById(id);
+  content.style.display = show ? 'block' : 'none';
+  const header = content.closest('.section-card')?.querySelector('.section-card-header');
+  if (header) header.classList.toggle('collapsed', !show);
 }
 
 // ---------------------------------------------------------

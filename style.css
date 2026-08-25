@@ -93,6 +93,8 @@ body {
   display: flex; align-items: center; gap: 10px; font-size: 15px;
   font-weight: bold; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); cursor: pointer;
 }
+.section-card-header.collapsed { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.section-card-header input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; cursor: pointer; accent-color: var(--primary); }
 
 .toolbar { display: flex; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; width: fit-content; margin-bottom: 8px; }
 .toolbar-btn {
