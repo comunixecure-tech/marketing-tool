@@ -40,6 +40,14 @@
       <input type="number" id="f-page-number" class="input-field" min="1" value="1" placeholder="頁碼（從 1 開始）" style="margin-top:10px; display:none;" oninput="updatePreview()">
     </div>
 
+    <div class="form-group">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" id="f-bleed-safe" checked onchange="updatePreview()" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
+        2mm 出血安全間距
+      </label>
+      <p class="field-hint">footer 左右下方會內縮 2mm，不貼齊頁面邊緣，適合本身已含出血的印刷檔；若您的 PDF 沒有出血，請取消勾選</p>
+    </div>
+
     <div class="section-card">
       <div class="section-card-header" style="cursor:default;">
         公司資訊

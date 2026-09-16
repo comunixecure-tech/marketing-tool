@@ -233,7 +233,10 @@ async function getQrDataUrl(text) {
 // =========================================================
 // 8. 繪製 Footer（預覽與實際蓋章共用同一套邏輯）
 // =========================================================
-async function drawFooterToCanvas(canvas, widthPx) {
+const BLEED_MM = 2;
+const PT_PER_MM = 72 / 25.4;
+
+async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
   const heightPx = Math.round(widthPx * FOOTER_HEIGHT_RATIO);
   canvas.width = widthPx;
   canvas.height = heightPx;
@@ -247,10 +250,18 @@ async function drawFooterToCanvas(canvas, widthPx) {
 
   const scale = widthPx / 700; // 以 700px 為基準設計尺寸，再依實際寬度等比縮放
 
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, widthPx, heightPx);
+  // 出血安全間距：footer 左右下方內縮 2mm，不貼齊頁面邊緣（頂邊不算頁面裁切邊，不用內縮）
+  const bleedSafeOn = document.getElementById('f-bleed-safe')?.checked ?? true;
+  const insetPx = bleedSafeOn ? BLEED_MM * PT_PER_MM * (widthPx / pageWidthPt) : 0;
 
-  const padX = 28 * scale;
+  const barLeft = insetPx;
+  const barRight = widthPx - insetPx;
+  const barBottom = heightPx - insetPx; // canvas 座標由上往下，barBottom 是背景區塊在畫布上的下緣
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(barLeft, 0, barRight - barLeft, barBottom);
+
+  const padX = barLeft + 28 * scale;
   const nameLineH = 20 * scale;
   const rowLineH = 16 * scale;
 
@@ -263,7 +274,7 @@ async function drawFooterToCanvas(canvas, widthPx) {
 
   const hasCompany = !!company.trim();
   const totalH = (hasCompany ? nameLineH : 0) + rows.length * rowLineH;
-  let ty = heightPx / 2 - totalH / 2;
+  let ty = barBottom / 2 - totalH / 2;
 
   ctx.fillStyle = textColor;
   ctx.textBaseline = 'top';
@@ -284,7 +295,7 @@ async function drawFooterToCanvas(canvas, widthPx) {
   });
 
   // 右側：Logo + QR Code，從右往左排列
-  let rx = widthPx - 20 * scale;
+  let rx = barRight - 20 * scale;
 
   const qrItems = [...document.querySelectorAll('.qr-item')].map(item => ({
     url: item.querySelector('.qr-url').value,
@@ -299,7 +310,7 @@ async function drawFooterToCanvas(canvas, widthPx) {
     if (!dataUrl) continue;
     const img = await loadImage(dataUrl);
     rx -= qrBoxSize;
-    const qy = heightPx / 2 - qrBoxSize / 2 - 8 * scale;
+    const qy = barBottom / 2 - qrBoxSize / 2 - 8 * scale;
 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(rx, qy, qrBoxSize, qrBoxSize);
@@ -324,7 +335,7 @@ async function drawFooterToCanvas(canvas, widthPx) {
     const ratio = img.naturalWidth / img.naturalHeight || 1;
     const logoW = logoH * ratio;
     rx -= logoW;
-    ctx.drawImage(img, rx, heightPx / 2 - logoH / 2, logoW, logoH);
+    ctx.drawImage(img, rx, barBottom / 2 - logoH / 2, logoW, logoH);
     rx -= 20 * scale;
   }
 }
@@ -372,7 +383,7 @@ async function updatePreview() {
     await page.render({ canvasContext: bufferCtx, viewport }).promise;
 
     const footerCanvas = document.createElement('canvas');
-    await drawFooterToCanvas(footerCanvas, viewport.width);
+    await drawFooterToCanvas(footerCanvas, viewport.width, viewport.width / 2);
     bufferCtx.drawImage(footerCanvas, 0, buffer.height - footerCanvas.height);
 
     commit(buffer);
@@ -421,7 +432,7 @@ async function generateStampedPdf() {
     const pageWidthPt = firstPage.getWidth();
     const RENDER_SCALE = 4; // 提高解析度避免蓋章後模糊
     const canvas = document.createElement('canvas');
-    await drawFooterToCanvas(canvas, Math.round(pageWidthPt * RENDER_SCALE));
+    await drawFooterToCanvas(canvas, Math.round(pageWidthPt * RENDER_SCALE), pageWidthPt);
 
     const pngDataUrl = canvas.toDataURL('image/png');
     const pngBytes = await fetch(pngDataUrl).then(r => r.arrayBuffer());
@@ -471,6 +482,7 @@ function resetToDefaults() {
 
   document.getElementById('range-last').checked = true;
   document.getElementById('f-page-number').style.display = 'none';
+  document.getElementById('f-bleed-safe').checked = true;
 
   setFooterColorPreset('dark');
   loadDefaults();
