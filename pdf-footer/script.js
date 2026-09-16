@@ -421,7 +421,20 @@ async function updatePreview() {
 
   if (!uploadedPdfBytes) {
     const buffer = document.createElement('canvas');
-    await drawFooterToCanvas(buffer, 1400);
+    if (document.getElementById('f-footer-enabled').checked) {
+      await drawFooterToCanvas(buffer, 1400);
+    } else {
+      buffer.width = 1400;
+      buffer.height = 300;
+      const ctx = buffer.getContext('2d');
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, buffer.width, buffer.height);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '28px "Microsoft JhengHei", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('尚未加上 Footer，請上傳 PDF 預覽頁面尺寸調整結果', buffer.width / 2, buffer.height / 2);
+    }
     commit(buffer);
     return;
   }
