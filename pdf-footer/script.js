@@ -119,15 +119,22 @@ function addUnixecureLogo() {
         <div class="drag-handle">:::</div>
         <img class="thumb-preview fl-preview" src="">
         <input type="hidden" class="fl-url" value="">
-        <div style="flex-grow:1;">
-          <div style="font-size:13px; font-weight:bold;">uniXecure</div>
-          <p class="field-hint" style="margin:2px 0 0;">顏色會跟著下方配色自動切換</p>
-        </div>
-        <button type="button" class="btn-delete" onclick="this.closest('.footer-logo-item').remove(); updatePreview();">刪除</button>
+        <div style="flex-grow:1; font-size:13px; font-weight:bold;">uniXecure</div>
+        <button type="button" class="btn-sm-outline unixecure-toggle-btn" onclick="toggleUnixecureLogoVisibility(this)">隱藏</button>
       </div>`;
   document.getElementById('logo-list').insertAdjacentHTML('beforeend', html);
   const item = document.getElementById('logo-list').lastElementChild;
   setUnixecureLogoColor(item, unixecureColorModeForTheme(), false);
+}
+
+// uniXecure Logo 是固定帶入的預設項目，不提供刪除，只能隱藏/顯示
+function toggleUnixecureLogoVisibility(btn) {
+  const item = btn.closest('.footer-logo-item');
+  const hidden = item.getAttribute('data-hidden') === 'true';
+  item.setAttribute('data-hidden', hidden ? 'false' : 'true');
+  item.style.opacity = hidden ? '1' : '0.45';
+  btn.textContent = hidden ? '隱藏' : '顯示';
+  updatePreview();
 }
 
 // 配色切換時，畫面上所有 uniXecure Logo 一起跟著換色
@@ -349,7 +356,7 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
     rx -= 10 * scale;
   }
 
-  const logoUrls = [...document.querySelectorAll('.fl-url')].map(el => el.value).filter(v => v.trim());
+  const logoUrls = [...document.querySelectorAll('.footer-logo-item:not([data-hidden="true"]) .fl-url')].map(el => el.value).filter(v => v.trim());
   const logoImgs = await Promise.all(logoUrls.map(loadImage));
   const logoH = 50 * scale;
 
