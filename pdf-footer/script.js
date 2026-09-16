@@ -97,7 +97,7 @@ function addUnixecureLogo(colorMode = 'white') {
         <div style="flex-grow:1;">
           <div style="font-size:13px; font-weight:bold; margin-bottom:6px;">uniXecure</div>
           <div class="radio-group" style="margin-top:0; gap:6px;">
-            <div class="radio-pill"><input type="radio" name="${uid}" id="${uid}-dark" class="ul-color-radio" value="dark" ${colorMode === 'dark' ? 'checked' : ''} onchange="refreshUnixecureLogo(this)"><label for="${uid}-dark">黑色</label></div>
+            <div class="radio-pill"><input type="radio" name="${uid}" id="${uid}-full" class="ul-color-radio" value="full" ${colorMode === 'full' ? 'checked' : ''} onchange="refreshUnixecureLogo(this)"><label for="${uid}-full">黑色</label></div>
             <div class="radio-pill"><input type="radio" name="${uid}" id="${uid}-white" class="ul-color-radio" value="white" ${colorMode === 'white' ? 'checked' : ''} onchange="refreshUnixecureLogo(this)"><label for="${uid}-white">白色</label></div>
           </div>
         </div>
@@ -178,19 +178,19 @@ function updateListThumbs() {
 }
 
 // =========================================================
-// 5. 配色預設
+// 5. 配色（印刷色彩考量，固定兩組配色，不開放自訂顏色）
 // =========================================================
 function setFooterColorPreset(preset) {
-  const bg = document.getElementById('f-footer-bg');
-  const txt = document.getElementById('f-footer-text');
-  if (preset === 'light') {
-    bg.value = '#ffffff';
-    txt.value = '#222222';
-  } else {
-    bg.value = '#333333';
-    txt.value = '#ffffff';
-  }
+  const radio = document.getElementById(preset === 'light' ? 'theme-light' : 'theme-dark');
+  radio.checked = true;
   updatePreview();
+}
+
+function getFooterTheme() {
+  const preset = document.querySelector('input[name="footer-theme"]:checked').value;
+  return preset === 'light'
+    ? { bg: '#ffffff', text: '#333333' }
+    : { bg: '#333333', text: '#ffffff' };
 }
 
 // =========================================================
@@ -235,8 +235,7 @@ async function drawFooterToCanvas(canvas, widthPx) {
   canvas.height = heightPx;
   const ctx = canvas.getContext('2d');
 
-  const bg = document.getElementById('f-footer-bg').value;
-  const textColor = document.getElementById('f-footer-text').value;
+  const { bg, text: textColor } = getFooterTheme();
   const company = document.getElementById('f-company').value;
   const phone = document.getElementById('f-phone').value;
   const email = document.getElementById('f-email').value;

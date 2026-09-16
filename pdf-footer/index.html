@@ -82,13 +82,10 @@
       <div class="section-card-header" style="cursor:default;">
         配色
       </div>
-      <div style="display:flex; gap:8px; margin-bottom:10px;">
-        <button type="button" class="btn-sm-outline" onclick="setFooterColorPreset('dark')">深色底白字</button>
-        <button type="button" class="btn-sm-outline" onclick="setFooterColorPreset('light')">白底黑字</button>
-      </div>
-      <div style="display:flex; gap:20px; align-items:center;">
-        <label style="font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px;">底色 <input type="color" id="f-footer-bg" value="#333333" oninput="updatePreview()"></label>
-        <label style="font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px;">文字 <input type="color" id="f-footer-text" value="#ffffff" oninput="updatePreview()"></label>
+      <p class="field-hint" style="margin-top:-8px;">印刷色彩考量，僅提供以下兩種固定配色，不開放自訂顏色</p>
+      <div class="radio-group">
+        <div class="radio-pill"><input type="radio" name="footer-theme" id="theme-dark" value="dark" checked onchange="updatePreview()"><label for="theme-dark">深色底白字</label></div>
+        <div class="radio-pill"><input type="radio" name="footer-theme" id="theme-light" value="light" onchange="updatePreview()"><label for="theme-light">白底黑字</label></div>
       </div>
     </div>
 
