@@ -100,7 +100,9 @@
       </svg>
       下載蓋章後的 PDF
     </button>
-    <p id="generate-status" class="field-hint" style="margin-top:0;">請先上傳 PDF 檔案</p>
+    <p id="generate-status" class="field-hint" style="margin-top:0;"></p>
+
+    <button type="button" class="btn-text-link" onclick="resetToDefaults()">🔄 恢復預設資料</button>
 
   </div>
 
@@ -110,7 +112,6 @@
     </div>
     <div class="canvas-wrapper" style="padding: 40px; overflow:auto;">
       <canvas id="footer-canvas" style="width: 100%; max-width: 700px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.06); display:block; margin: 0 auto;"></canvas>
-      <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-top:16px;">上方為 footer 樣式預覽（等比例縮小），實際蓋章尺寸會依照您上傳的 PDF 頁面寬度自動調整</p>
     </div>
   </div>
 

@@ -42,6 +42,46 @@ async function handlePdfUpload(event) {
 // =========================================================
 // 2. Logo 清單
 // =========================================================
+function encodeSvg(svgString) {
+  if (!svgString) return '';
+  return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgString)))}`;
+}
+
+let unixecureLogoCounter = 0;
+
+// 預設帶入 Logo 自助服務站裡的 uniXecure 官方 Logo，可用 radio 切換黑色／白色版本
+function addUnixecureLogo(colorMode = 'white') {
+  const uid = `ul-${++unixecureLogoCounter}`;
+  const html = `<div class="sortable-item footer-logo-item" draggable="true" style="align-items:center; margin-bottom: 8px;">
+        <div class="drag-handle">:::</div>
+        <img class="thumb-preview fl-preview" src="">
+        <input type="hidden" class="fl-url" value="">
+        <div style="flex-grow:1;">
+          <div style="font-size:13px; font-weight:bold; margin-bottom:6px;">uniXecure</div>
+          <div class="radio-group" style="margin-top:0; gap:6px;">
+            <div class="radio-pill"><input type="radio" name="${uid}" id="${uid}-dark" class="ul-color-radio" value="dark" ${colorMode === 'dark' ? 'checked' : ''} onchange="refreshUnixecureLogo(this)"><label for="${uid}-dark">黑色</label></div>
+            <div class="radio-pill"><input type="radio" name="${uid}" id="${uid}-white" class="ul-color-radio" value="white" ${colorMode === 'white' ? 'checked' : ''} onchange="refreshUnixecureLogo(this)"><label for="${uid}-white">白色</label></div>
+          </div>
+        </div>
+        <button type="button" class="btn-delete" onclick="this.closest('.footer-logo-item').remove(); updatePreview();">刪除</button>
+      </div>`;
+  document.getElementById('logo-list').insertAdjacentHTML('beforeend', html);
+  const item = document.getElementById('logo-list').lastElementChild;
+  setUnixecureLogoColor(item, colorMode);
+}
+
+function refreshUnixecureLogo(radio) {
+  setUnixecureLogoColor(radio.closest('.footer-logo-item'), radio.value);
+}
+
+function setUnixecureLogoColor(item, colorMode) {
+  const svg = logoDB.unixecure.layouts.standard.colors[colorMode];
+  const dataUri = encodeSvg(svg);
+  item.querySelector('.fl-url').value = dataUri;
+  item.querySelector('.fl-preview').src = dataUri;
+  updatePreview();
+}
+
 function addFooterLogo(url = '') {
   const html = `<div class="sortable-item footer-logo-item" draggable="true" style="align-items:center; margin-bottom: 8px;">
         <div class="drag-handle">:::</div>
@@ -327,8 +367,28 @@ async function generateStampedPdf() {
 // =========================================================
 // 11. 初始化
 // =========================================================
-window.onload = () => {
+function loadDefaults() {
+  document.getElementById('logo-list').innerHTML = '';
+  document.getElementById('qr-list').innerHTML = '';
+  addUnixecureLogo('white');
   addQrItem('https://www.unixecure.com/tw/index', '官方網站');
   addQrItem('https://www.facebook.com/uniXecure/', 'Facebook');
   updatePreview();
-};
+}
+
+function resetToDefaults() {
+  if (!confirm('確定要恢復預設資料嗎？目前填寫的內容會被清除。')) return;
+
+  document.getElementById('f-company').value = '智慧資安科技股份有限公司';
+  document.getElementById('f-phone').value = '04-24523928 分機 300、301、302';
+  document.getElementById('f-email').value = 'servicedesk@unixecure.com.tw';
+  document.getElementById('f-address').value = '114 台北市內湖區瑞光路 318 號 7 樓';
+
+  document.getElementById('range-last').checked = true;
+  document.getElementById('f-page-number').style.display = 'none';
+
+  setFooterColorPreset('dark');
+  loadDefaults();
+}
+
+window.onload = loadDefaults;
