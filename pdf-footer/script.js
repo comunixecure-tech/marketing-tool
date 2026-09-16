@@ -288,7 +288,7 @@ async function getQrDataUrl(text) {
 }
 
 // =========================================================
-// 8. 繪製 Footer（預覽與實際蓋章共用同一套邏輯）
+// 8. 繪製 Footer（預覽與實際輸出共用同一套邏輯）
 // =========================================================
 const BLEED_MM = 2;
 const PT_PER_MM = 72 / 25.4;
@@ -488,7 +488,7 @@ async function updatePreview() {
     }
 
     // 純視覺參考：畫面上用虛線標示 2mm 出血裁切線位置，不會畫進實際下載的 PDF 裡
-    // 獨立於「加上 Footer 蓋章」之外，調整頁面尺寸時同樣可能需要看這條參考線
+    // 獨立於「加上 Footer」之外，調整頁面尺寸時同樣可能需要看這條參考線
     const showBleedGuide = document.getElementById('f-show-bleed-guide').checked;
     if (showBleedGuide) {
       const trimInsetPx = BLEED_MM * PT_PER_MM * PREVIEW_SCALE;
@@ -510,7 +510,7 @@ async function updatePreview() {
 }
 
 // =========================================================
-// 10. 產生蓋章後的 PDF
+// 10. 產生處理後的 PDF
 // =========================================================
 async function generateStampedPdf() {
   if (!uploadedPdfBytes) {
@@ -544,7 +544,7 @@ async function generateStampedPdf() {
     const footerEnabled = document.getElementById('f-footer-enabled').checked;
     const resizeEnabled = document.getElementById('f-resize-enabled').checked;
     if (!footerEnabled && !resizeEnabled) {
-      alert('請至少選擇「加上 Footer 蓋章」或「調整頁面尺寸」其中一項');
+      alert('請至少選擇「加上 Footer」或「調整頁面尺寸」其中一項');
       statusTag.textContent = '確認設定後即可下載';
       return;
     }
@@ -583,7 +583,7 @@ async function generateStampedPdf() {
     // 依每個目標頁面「各自實際的寬度」分別繪製高解析度 footer 圖片
     // 頁面寬度不同時（例如混合尺寸的 PDF）不能只做一張圖去套用到所有頁，會被拉伸變形
     if (footerEnabled) {
-      const RENDER_SCALE = 4; // 提高解析度避免蓋章後模糊
+      const RENDER_SCALE = 4; // 提高解析度避免輸出後模糊
       const pngImageCache = new Map(); // 同寬度的頁面共用同一張圖，不用重繪
 
       for (const idx of targetIndexes) {
@@ -612,7 +612,7 @@ async function generateStampedPdf() {
     a.download = `${uploadedPdfName}_footer.pdf`;
     a.click();
 
-    statusTag.textContent = '已下載完成，可以打開確認蓋章結果';
+    statusTag.textContent = '已下載完成，可以打開確認結果';
   } catch (err) {
     console.error('產生 PDF 失敗', err);
     alert('產生 PDF 時發生錯誤，請確認檔案是否正常');

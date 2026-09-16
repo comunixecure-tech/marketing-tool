@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>PDF Footer 蓋章工具｜uniXecure</title>
+    <title>PDF Footer 工具｜uniXecure</title>
     <link rel="icon" href="https://www.unixecure.com/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../style.css">
 </head>
@@ -14,13 +14,12 @@
         返回主頁
     </a>
     <div class="header">
-      <h1>PDF Footer 蓋章工具</h1>
+      <h1>PDF Footer 工具</h1>
       <p>上傳 PDF，自動蓋上聯絡資訊、Logo 與 QR Code footer<br>檔案不會上傳到任何伺服器，全部在瀏覽器本機處理</p>
     </div>
 
     <div class="form-group">
       <label>1. 選擇 PDF 檔案</label>
-      <p class="field-hint">建議上傳標準 A4 尺寸 PDF</p>
       <div class="file-upload-wrapper">
         <label class="file-upload-btn" style="width: 100%; text-align: center;">
           點擊選擇 PDF 檔案...
@@ -32,7 +31,6 @@
 
     <div class="form-group">
       <label>2. 套用範圍</label>
-      <p class="field-hint" style="margin-top:-4px;">加上 Footer、調整頁面尺寸都只會套用到以下選擇的頁面</p>
       <div class="radio-group">
         <div class="radio-pill"><input type="radio" name="page-range" id="range-last" value="last" checked onchange="updatePreview()"><label for="range-last">最後一頁</label></div>
         <div class="radio-pill"><input type="radio" name="page-range" id="range-all" value="all" onchange="updatePreview()"><label for="range-all">全部頁面</label></div>
@@ -44,17 +42,15 @@
     <div class="form-group">
       <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
         <input type="checkbox" id="f-show-bleed-guide" checked onchange="updatePreview()" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
-        顯示 2mm 出血參考線
+        預覽出血線
       </label>
-      <p class="field-hint">只是畫面上的預覽輔助線，不會畫進實際下載的 PDF 裡</p>
     </div>
 
     <div class="form-group">
       <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
         <input type="checkbox" id="f-footer-enabled" checked onchange="toggleFooterConfig(); updatePreview();" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
-        加上 Footer 蓋章
+        加上 Footer
       </label>
-      <p class="field-hint">取消勾選可以只調整頁面尺寸、不加 Footer，以下的 Footer 設定也會一併隱藏</p>
     </div>
 
     <div id="footer-config-section">
@@ -108,7 +104,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group section-card-primary">
       <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
         <input type="checkbox" id="f-resize-enabled" checked onchange="toggleResizeInputs(); updatePreview();" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
         調整頁面尺寸
@@ -140,7 +136,7 @@
         <polyline points="7 10 12 15 17 10"></polyline>
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
-      下載蓋章後的 PDF
+      下載處理後的 PDF
     </button>
     <p id="generate-status" class="field-hint" style="margin-top:0;"></p>
 
