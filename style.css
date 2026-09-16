@@ -112,6 +112,7 @@ body {
    6. 下載按鈕共用樣式
    ========================================= */
 .btn-download {
+  box-sizing: border-box;
   display: flex; justify-content: center; align-items: center; gap: 8px;
   width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), #2563eb);
   color: white; text-align: center; border: none; border-radius: 8px; 
