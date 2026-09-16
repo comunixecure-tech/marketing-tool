@@ -335,10 +335,21 @@ async function drawFooterToCanvas(canvas, widthPx) {
 let previewToken = 0;
 async function updatePreview() {
   const token = ++previewToken;
-  const canvas = document.getElementById('footer-canvas');
+  const displayCanvas = document.getElementById('footer-canvas');
+
+  // 全部畫在畫面外的暫存 canvas，確認仍是最新一次請求後才一次性換到畫面上
+  // 避免使用者連續操作時，前後兩次非同步繪製結果互相疊加造成重影／錯位
+  const commit = (buffer) => {
+    if (token !== previewToken) return;
+    displayCanvas.width = buffer.width;
+    displayCanvas.height = buffer.height;
+    displayCanvas.getContext('2d').drawImage(buffer, 0, 0);
+  };
 
   if (!uploadedPdfBytes) {
-    await drawFooterToCanvas(canvas, 1400);
+    const buffer = document.createElement('canvas');
+    await drawFooterToCanvas(buffer, 1400);
+    commit(buffer);
     return;
   }
 
@@ -354,22 +365,22 @@ async function updatePreview() {
     const page = await pdf.getPage(previewPageNum);
     const viewport = page.getViewport({ scale: 2 });
 
-    if (token !== previewToken) return; // 避免非同步結果互相覆蓋
-
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    const ctx = canvas.getContext('2d');
-    await page.render({ canvasContext: ctx, viewport }).promise;
-
-    if (token !== previewToken) return;
+    const buffer = document.createElement('canvas');
+    buffer.width = viewport.width;
+    buffer.height = viewport.height;
+    const bufferCtx = buffer.getContext('2d');
+    await page.render({ canvasContext: bufferCtx, viewport }).promise;
 
     const footerCanvas = document.createElement('canvas');
     await drawFooterToCanvas(footerCanvas, viewport.width);
-    if (token !== previewToken) return;
-    ctx.drawImage(footerCanvas, 0, canvas.height - footerCanvas.height);
+    bufferCtx.drawImage(footerCanvas, 0, buffer.height - footerCanvas.height);
+
+    commit(buffer);
   } catch (err) {
     console.error('PDF 預覽產生失敗', err);
-    await drawFooterToCanvas(canvas, 1400);
+    const buffer = document.createElement('canvas');
+    await drawFooterToCanvas(buffer, 1400);
+    commit(buffer);
   }
 }
 
