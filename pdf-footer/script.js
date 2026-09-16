@@ -7,6 +7,44 @@ let uploadedPdfPageCount = 0;
 const FOOTER_HEIGHT_RATIO = 0.16; // footer 高度佔頁面寬度的比例
 
 // =========================================================
+// 拖曳排序（事件綁在容器上，清單重建後仍然有效）
+// =========================================================
+function initSortable(container) {
+  container.addEventListener('dragstart', (e) => {
+    if (!e.target.classList.contains('sortable-item')) return;
+    e.target.classList.add('dragging');
+  });
+  container.addEventListener('dragend', (e) => {
+    e.target.classList.remove('dragging');
+    updatePreview();
+  });
+  container.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const dragging = container.querySelector('.dragging');
+    if (!dragging) return;
+    const afterElement = getDragAfterElement(container, e.clientY);
+    if (afterElement == null) {
+      container.appendChild(dragging);
+    } else {
+      container.insertBefore(dragging, afterElement);
+    }
+  });
+}
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// =========================================================
 // 1. PDF 上傳
 // =========================================================
 async function handlePdfUpload(event) {
@@ -391,4 +429,8 @@ function resetToDefaults() {
   loadDefaults();
 }
 
-window.onload = loadDefaults;
+window.onload = () => {
+  initSortable(document.getElementById('logo-list'));
+  initSortable(document.getElementById('qr-list'));
+  loadDefaults();
+};
