@@ -6,6 +6,10 @@ let uploadedPdfName = '';
 let uploadedPdfPageCount = 0;
 const FOOTER_HEIGHT_RATIO = 0.16; // footer 高度佔頁面寬度的比例
 
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+}
+
 // =========================================================
 // 拖曳排序（事件綁在容器上，清單重建後仍然有效）
 // =========================================================
@@ -312,7 +316,7 @@ async function drawFooterToCanvas(canvas, widthPx) {
 
   const logoUrls = [...document.querySelectorAll('.fl-url')].map(el => el.value).filter(v => v.trim());
   const logoImgs = await Promise.all(logoUrls.map(loadImage));
-  const logoH = 34 * scale;
+  const logoH = 50 * scale;
 
   for (let i = logoImgs.length - 1; i >= 0; i--) {
     const img = logoImgs[i];
@@ -332,8 +336,41 @@ let previewToken = 0;
 async function updatePreview() {
   const token = ++previewToken;
   const canvas = document.getElementById('footer-canvas');
-  await drawFooterToCanvas(canvas, 1400);
-  if (token !== previewToken) return; // 避免非同步結果互相覆蓋
+
+  if (!uploadedPdfBytes) {
+    await drawFooterToCanvas(canvas, 1400);
+    return;
+  }
+
+  try {
+    const rangeType = document.querySelector('input[name="page-range"]:checked').value;
+    let previewPageNum = uploadedPdfPageCount;
+    if (rangeType === 'custom') {
+      const n = parseInt(document.getElementById('f-page-number').value, 10);
+      if (n >= 1 && n <= uploadedPdfPageCount) previewPageNum = n;
+    }
+
+    const pdf = await pdfjsLib.getDocument({ data: uploadedPdfBytes.slice(0) }).promise;
+    const page = await pdf.getPage(previewPageNum);
+    const viewport = page.getViewport({ scale: 2 });
+
+    if (token !== previewToken) return; // 避免非同步結果互相覆蓋
+
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    if (token !== previewToken) return;
+
+    const footerCanvas = document.createElement('canvas');
+    await drawFooterToCanvas(footerCanvas, viewport.width);
+    if (token !== previewToken) return;
+    ctx.drawImage(footerCanvas, 0, canvas.height - footerCanvas.height);
+  } catch (err) {
+    console.error('PDF 預覽產生失敗', err);
+    await drawFooterToCanvas(canvas, 1400);
+  }
 }
 
 // =========================================================
