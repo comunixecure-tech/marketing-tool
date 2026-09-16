@@ -31,13 +31,22 @@
     </div>
 
     <div class="form-group">
-      <label>2. 蓋章範圍</label>
+      <label>2. 套用範圍</label>
+      <p class="field-hint" style="margin-top:-4px;">加上 Footer、調整頁面尺寸都只會套用到以下選擇的頁面</p>
       <div class="radio-group">
         <div class="radio-pill"><input type="radio" name="page-range" id="range-last" value="last" checked onchange="updatePreview()"><label for="range-last">最後一頁</label></div>
         <div class="radio-pill"><input type="radio" name="page-range" id="range-all" value="all" onchange="updatePreview()"><label for="range-all">全部頁面</label></div>
         <div class="radio-pill"><input type="radio" name="page-range" id="range-custom" value="custom" onchange="updatePreview()"><label for="range-custom">指定頁碼</label></div>
       </div>
       <input type="number" id="f-page-number" class="input-field" min="1" value="1" placeholder="頁碼（從 1 開始）" style="margin-top:10px; display:none;" oninput="updatePreview()">
+    </div>
+
+    <div class="form-group">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" id="f-footer-enabled" checked onchange="updatePreview()" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
+        加上 Footer 蓋章
+      </label>
+      <p class="field-hint">取消勾選可以只調整頁面尺寸、不加 Footer</p>
     </div>
 
     <div class="form-group">
@@ -51,7 +60,7 @@
         <input type="number" id="f-target-height-cm" class="input-field" step="0.01" min="1" value="30.1" style="margin-bottom:0;" oninput="updatePreview()">
         <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">公分</span>
       </div>
-      <p class="field-hint">預設為 A4（21 x 29.7cm）四邊各加 2mm 出血，可自行調整為廠商指定的尺寸；內容會等比例縮放並置中，多出的空間補白邊、不會變形</p>
+      <p id="resize-hint" class="field-hint">預設為 A4（21 x 29.7cm）四邊各加 2mm 出血，可自行調整為廠商指定的尺寸；內容會等比例縮放並置中，多出的空間補白邊、不會變形</p>
     </div>
 
     <div class="form-group">

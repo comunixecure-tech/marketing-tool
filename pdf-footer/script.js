@@ -10,6 +10,7 @@ const PT_PER_CM = 72 / 2.54;
 function toggleResizeInputs() {
   const enabled = document.getElementById('f-resize-enabled').checked;
   document.getElementById('resize-size-inputs').style.display = enabled ? 'flex' : 'none';
+  document.getElementById('resize-hint').style.display = enabled ? 'block' : 'none';
 }
 
 function getTargetSizePt() {
@@ -265,18 +266,19 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
   // 頁面變寬只會讓中間留白變多，不會整體跟著放大
   const scale = ptToPx;
 
-  // 出血安全間距：footer 左右下方內縮 2mm，不貼齊頁面邊緣（頂邊不算頁面裁切邊，不用內縮）
+  // 出血安全間距：底色本身貼齊頁面邊緣正常出血，只有「內容」（文字／Logo／QR Code）
+  // 左右下方內縮 2mm 不貼邊，避免裁切誤差切到重要資訊（頂邊不算頁面裁切邊，不用內縮）
   const bleedSafeOn = document.getElementById('f-bleed-safe')?.checked ?? true;
   const insetPx = bleedSafeOn ? BLEED_MM * PT_PER_MM * ptToPx : 0;
 
-  const barLeft = insetPx;
-  const barRight = widthPx - insetPx;
-  const barBottom = heightPx - insetPx; // canvas 座標由上往下，barBottom 是背景區塊在畫布上的下緣
+  const safeLeft = insetPx;
+  const safeRight = widthPx - insetPx;
+  const safeBottom = heightPx - insetPx; // canvas 座標由上往下，safeBottom 是內容安全區在畫布上的下緣
 
   ctx.fillStyle = bg;
-  ctx.fillRect(barLeft, 0, barRight - barLeft, barBottom);
+  ctx.fillRect(0, 0, widthPx, heightPx);
 
-  const padX = barLeft + 28 * scale;
+  const padX = safeLeft + 28 * scale;
   const nameLineH = 20 * scale;
   const rowLineH = 16 * scale;
 
@@ -289,7 +291,7 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
 
   const hasCompany = !!company.trim();
   const totalH = (hasCompany ? nameLineH : 0) + rows.length * rowLineH;
-  let ty = barBottom / 2 - totalH / 2;
+  let ty = safeBottom / 2 - totalH / 2;
 
   ctx.fillStyle = textColor;
   ctx.textBaseline = 'top';
@@ -310,7 +312,7 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
   });
 
   // 右側：Logo + QR Code，從右往左排列
-  let rx = barRight - 20 * scale;
+  let rx = safeRight - 20 * scale;
 
   const qrItems = [...document.querySelectorAll('.qr-item')].map(item => ({
     url: item.querySelector('.qr-url').value,
@@ -325,7 +327,7 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
     if (!dataUrl) continue;
     const img = await loadImage(dataUrl);
     rx -= qrBoxSize;
-    const qy = barBottom / 2 - qrBoxSize / 2 - 8 * scale;
+    const qy = safeBottom / 2 - qrBoxSize / 2 - 8 * scale;
 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(rx, qy, qrBoxSize, qrBoxSize);
@@ -350,7 +352,7 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
     const ratio = img.naturalWidth / img.naturalHeight || 1;
     const logoW = logoH * ratio;
     rx -= logoW;
-    ctx.drawImage(img, rx, barBottom / 2 - logoH / 2, logoW, logoH);
+    ctx.drawImage(img, rx, safeBottom / 2 - logoH / 2, logoW, logoH);
     rx -= 20 * scale;
   }
 }
@@ -427,9 +429,12 @@ async function updatePreview() {
     await page.render({ canvasContext: pageCanvas.getContext('2d'), viewport: pageViewport }).promise;
     bufferCtx.drawImage(pageCanvas, drawOffsetXPx, drawOffsetYPx);
 
-    const footerCanvas = document.createElement('canvas');
-    await drawFooterToCanvas(footerCanvas, buffer.width, pageWidthPt);
-    bufferCtx.drawImage(footerCanvas, 0, buffer.height - footerCanvas.height);
+    const footerEnabled = document.getElementById('f-footer-enabled').checked;
+    if (footerEnabled) {
+      const footerCanvas = document.createElement('canvas');
+      await drawFooterToCanvas(footerCanvas, buffer.width, pageWidthPt);
+      bufferCtx.drawImage(footerCanvas, 0, buffer.height - footerCanvas.height);
+    }
 
     // 純視覺參考：畫面上用虛線標示 2mm 出血裁切線位置，不會畫進實際下載的 PDF 裡
     const bleedSafeOn = document.getElementById('f-bleed-safe')?.checked ?? true;
@@ -484,9 +489,16 @@ async function generateStampedPdf() {
       targetIndexes = [srcPages.length - 1];
     }
 
-    // 頁面尺寸調整：只調整需要蓋章的目標頁，其餘頁面維持原樣不動
-    // 內容用等比例縮放＋置中放進新尺寸，不會變形，多出的空間補白邊
+    const footerEnabled = document.getElementById('f-footer-enabled').checked;
     const resizeEnabled = document.getElementById('f-resize-enabled').checked;
+    if (!footerEnabled && !resizeEnabled) {
+      alert('請至少選擇「加上 Footer 蓋章」或「調整頁面尺寸」其中一項');
+      statusTag.textContent = '確認設定後即可下載';
+      return;
+    }
+
+    // 頁面尺寸調整：只調整需要套用的目標頁，其餘頁面維持原樣不動
+    // 內容用等比例縮放＋置中放進新尺寸，不會變形，多出的空間補白邊
     let pdfDoc, pages;
 
     if (resizeEnabled) {
@@ -518,25 +530,27 @@ async function generateStampedPdf() {
 
     // 依每個目標頁面「各自實際的寬度」分別繪製高解析度 footer 圖片
     // 頁面寬度不同時（例如混合尺寸的 PDF）不能只做一張圖去套用到所有頁，會被拉伸變形
-    const RENDER_SCALE = 4; // 提高解析度避免蓋章後模糊
-    const pngImageCache = new Map(); // 同寬度的頁面共用同一張圖，不用重繪
+    if (footerEnabled) {
+      const RENDER_SCALE = 4; // 提高解析度避免蓋章後模糊
+      const pngImageCache = new Map(); // 同寬度的頁面共用同一張圖，不用重繪
 
-    for (const idx of targetIndexes) {
-      const page = pages[idx];
-      const w = page.getWidth();
-      const h = FOOTER_HEIGHT_PT; // 固定高度，不隨頁面寬度縮放
+      for (const idx of targetIndexes) {
+        const page = pages[idx];
+        const w = page.getWidth();
+        const h = FOOTER_HEIGHT_PT; // 固定高度，不隨頁面寬度縮放
 
-      let pngImage = pngImageCache.get(w);
-      if (!pngImage) {
-        const canvas = document.createElement('canvas');
-        await drawFooterToCanvas(canvas, Math.round(w * RENDER_SCALE), w);
-        const pngDataUrl = canvas.toDataURL('image/png');
-        const pngBytes = await fetch(pngDataUrl).then(r => r.arrayBuffer());
-        pngImage = await pdfDoc.embedPng(pngBytes);
-        pngImageCache.set(w, pngImage);
+        let pngImage = pngImageCache.get(w);
+        if (!pngImage) {
+          const canvas = document.createElement('canvas');
+          await drawFooterToCanvas(canvas, Math.round(w * RENDER_SCALE), w);
+          const pngDataUrl = canvas.toDataURL('image/png');
+          const pngBytes = await fetch(pngDataUrl).then(r => r.arrayBuffer());
+          pngImage = await pdfDoc.embedPng(pngBytes);
+          pngImageCache.set(w, pngImage);
+        }
+
+        page.drawImage(pngImage, { x: 0, y: 0, width: w, height: h });
       }
-
-      page.drawImage(pngImage, { x: 0, y: 0, width: w, height: h });
     }
 
     const outBytes = await pdfDoc.save();
@@ -577,6 +591,7 @@ function resetToDefaults() {
   document.getElementById('range-last').checked = true;
   document.getElementById('f-page-number').style.display = 'none';
   document.getElementById('f-bleed-safe').checked = true;
+  document.getElementById('f-footer-enabled').checked = true;
 
   document.getElementById('f-resize-enabled').checked = true;
   document.getElementById('f-target-width-cm').value = '21.4';
