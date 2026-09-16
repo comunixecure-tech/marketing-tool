@@ -50,14 +50,6 @@
     </div>
 
     <div id="footer-config-section">
-      <div class="form-group">
-        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-          <input type="checkbox" id="f-bleed-safe" checked onchange="updatePreview()" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
-          2mm 出血安全間距
-        </label>
-        <p class="field-hint">footer 左右下方會內縮 2mm，不貼齊頁面邊緣，適合本身已含出血的印刷檔；若您的 PDF 沒有出血，請取消勾選</p>
-      </div>
-
       <div class="section-card">
         <div class="section-card-header" style="cursor:default;">
           公司資訊
@@ -149,9 +141,16 @@
     <div class="preview-header">
       <span>Footer 預覽</span>
     </div>
-    <div class="canvas-wrapper" style="padding: 40px; overflow:auto;">
-      <canvas id="footer-canvas" style="width: 100%; max-width: 700px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.06); display:block; margin: 0 auto;"></canvas>
+    <div class="canvas-wrapper" style="padding: 40px; overflow:auto; position:relative;">
+      <canvas id="footer-canvas" style="width: 100%; max-width: 700px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: none; display:block; margin: 0 auto;"></canvas>
+      <div id="preview-loading" style="display:none; position:absolute; top:16px; right:16px; background:rgba(51,51,51,0.9); color:#fff; font-size:13px; padding:6px 14px; border-radius:20px; align-items:center; gap:8px;">
+        <span class="preview-loading-spinner" style="width:12px; height:12px; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; display:inline-block; animation: preview-spin 0.7s linear infinite;"></span>
+        預覽產生中
+      </div>
     </div>
+    <style>
+      @keyframes preview-spin { to { transform: rotate(360deg); } }
+    </style>
   </div>
 
   <script src="../js/common.js" defer></script>

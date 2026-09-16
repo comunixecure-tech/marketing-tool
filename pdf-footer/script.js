@@ -272,9 +272,8 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
   const scale = ptToPx;
 
   // 出血安全間距：底色本身貼齊頁面邊緣正常出血，只有「內容」（文字／Logo／QR Code）
-  // 左右下方內縮 2mm 不貼邊，避免裁切誤差切到重要資訊（頂邊不算頁面裁切邊，不用內縮）
-  const bleedSafeOn = document.getElementById('f-bleed-safe')?.checked ?? true;
-  const insetPx = bleedSafeOn ? BLEED_MM * PT_PER_MM * ptToPx : 0;
+  // 左右下方固定內縮 2mm 不貼邊，避免裁切誤差切到重要資訊（頂邊不算頁面裁切邊，不用內縮）
+  const insetPx = BLEED_MM * PT_PER_MM * ptToPx;
 
   const safeLeft = insetPx;
   const safeRight = widthPx - insetPx;
@@ -369,6 +368,8 @@ let previewToken = 0;
 async function updatePreview() {
   const token = ++previewToken;
   const displayCanvas = document.getElementById('footer-canvas');
+  const loadingTag = document.getElementById('preview-loading');
+  loadingTag.style.display = 'flex';
 
   // 全部畫在畫面外的暫存 canvas，確認仍是最新一次請求後才一次性換到畫面上
   // 避免使用者連續操作時，前後兩次非同步繪製結果互相疊加造成重影／錯位
@@ -377,6 +378,7 @@ async function updatePreview() {
     displayCanvas.width = buffer.width;
     displayCanvas.height = buffer.height;
     displayCanvas.getContext('2d').drawImage(buffer, 0, 0);
+    loadingTag.style.display = 'none';
   };
 
   if (!uploadedPdfBytes) {
@@ -442,16 +444,14 @@ async function updatePreview() {
     }
 
     // 純視覺參考：畫面上用虛線標示 2mm 出血裁切線位置，不會畫進實際下載的 PDF 裡
-    const bleedSafeOn = document.getElementById('f-bleed-safe')?.checked ?? true;
-    if (bleedSafeOn) {
-      const trimInsetPx = BLEED_MM * PT_PER_MM * PREVIEW_SCALE;
-      bufferCtx.save();
-      bufferCtx.strokeStyle = '#ff3b30';
-      bufferCtx.lineWidth = 1.5;
-      bufferCtx.setLineDash([6, 5]);
-      bufferCtx.strokeRect(trimInsetPx, trimInsetPx, buffer.width - trimInsetPx * 2, buffer.height - trimInsetPx * 2);
-      bufferCtx.restore();
-    }
+    // 不論有沒有加 Footer 都會顯示，調整頁面尺寸時同樣需要這條參考線
+    const trimInsetPx = BLEED_MM * PT_PER_MM * PREVIEW_SCALE;
+    bufferCtx.save();
+    bufferCtx.strokeStyle = '#ff3b30';
+    bufferCtx.lineWidth = 1.5;
+    bufferCtx.setLineDash([6, 5]);
+    bufferCtx.strokeRect(trimInsetPx, trimInsetPx, buffer.width - trimInsetPx * 2, buffer.height - trimInsetPx * 2);
+    bufferCtx.restore();
 
     commit(buffer);
   } catch (err) {
@@ -595,7 +595,6 @@ function resetToDefaults() {
 
   document.getElementById('range-last').checked = true;
   document.getElementById('f-page-number').style.display = 'none';
-  document.getElementById('f-bleed-safe').checked = true;
   document.getElementById('f-footer-enabled').checked = true;
   toggleFooterConfig();
 
