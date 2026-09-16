@@ -4,7 +4,7 @@
 let uploadedPdfBytes = null;
 let uploadedPdfName = '';
 let uploadedPdfPageCount = 0;
-const FOOTER_HEIGHT_PT = 95; // footer 固定高度（PDF 點數，約 33.5mm），不隨頁面寬度縮放
+const FOOTER_HEIGHT_PT = 115; // footer 固定高度（PDF 點數，約 40.6mm），不隨頁面寬度縮放
 const PT_PER_CM = 72 / 2.54;
 
 function toggleResizeInputs() {
@@ -107,39 +107,42 @@ function encodeSvg(svgString) {
   return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgString)))}`;
 }
 
-let unixecureLogoCounter = 0;
+// uniXecure Logo 顏色綁死跟著配色走，深底白字配白 Logo、白底黑字配黑 Logo，不開放手動選色
+function unixecureColorModeForTheme() {
+  const preset = document.querySelector('input[name="footer-theme"]:checked').value;
+  return preset === 'light' ? 'full' : 'white';
+}
 
-// 預設帶入 Logo 自助服務站裡的 uniXecure 官方 Logo，可用 radio 切換黑色／白色版本
-function addUnixecureLogo(colorMode = 'white') {
-  const uid = `ul-${++unixecureLogoCounter}`;
-  const html = `<div class="sortable-item footer-logo-item" draggable="true" style="align-items:center; margin-bottom: 8px;">
+// 預設帶入 Logo 自助服務站裡的 uniXecure 官方 Logo
+function addUnixecureLogo() {
+  const html = `<div class="sortable-item footer-logo-item unixecure-logo-item" draggable="true" style="align-items:center; margin-bottom: 8px;">
         <div class="drag-handle">:::</div>
         <img class="thumb-preview fl-preview" src="">
         <input type="hidden" class="fl-url" value="">
         <div style="flex-grow:1;">
-          <div style="font-size:13px; font-weight:bold; margin-bottom:6px;">uniXecure</div>
-          <div class="radio-group" style="margin-top:0; gap:6px;">
-            <div class="radio-pill"><input type="radio" name="${uid}" id="${uid}-full" class="ul-color-radio" value="full" ${colorMode === 'full' ? 'checked' : ''} onchange="refreshUnixecureLogo(this)"><label for="${uid}-full">黑色</label></div>
-            <div class="radio-pill"><input type="radio" name="${uid}" id="${uid}-white" class="ul-color-radio" value="white" ${colorMode === 'white' ? 'checked' : ''} onchange="refreshUnixecureLogo(this)"><label for="${uid}-white">白色</label></div>
-          </div>
+          <div style="font-size:13px; font-weight:bold;">uniXecure</div>
+          <p class="field-hint" style="margin:2px 0 0;">顏色會跟著下方配色自動切換</p>
         </div>
         <button type="button" class="btn-delete" onclick="this.closest('.footer-logo-item').remove(); updatePreview();">刪除</button>
       </div>`;
   document.getElementById('logo-list').insertAdjacentHTML('beforeend', html);
   const item = document.getElementById('logo-list').lastElementChild;
-  setUnixecureLogoColor(item, colorMode);
+  setUnixecureLogoColor(item, unixecureColorModeForTheme(), false);
 }
 
-function refreshUnixecureLogo(radio) {
-  setUnixecureLogoColor(radio.closest('.footer-logo-item'), radio.value);
+// 配色切換時，畫面上所有 uniXecure Logo 一起跟著換色
+function syncUnixecureLogoColors() {
+  const colorMode = unixecureColorModeForTheme();
+  document.querySelectorAll('.unixecure-logo-item').forEach(item => setUnixecureLogoColor(item, colorMode, false));
+  updatePreview();
 }
 
-function setUnixecureLogoColor(item, colorMode) {
+function setUnixecureLogoColor(item, colorMode, triggerPreview = true) {
   const svg = logoDB.unixecure.layouts.standard.colors[colorMode];
   const dataUri = encodeSvg(svg);
   item.querySelector('.fl-url').value = dataUri;
   item.querySelector('.fl-preview').src = dataUri;
-  updatePreview();
+  if (triggerPreview) updatePreview();
 }
 
 function addFooterLogo(url = '') {
@@ -205,7 +208,7 @@ function updateListThumbs() {
 function setFooterColorPreset(preset) {
   const radio = document.getElementById(preset === 'light' ? 'theme-light' : 'theme-dark');
   radio.checked = true;
-  updatePreview();
+  syncUnixecureLogoColors();
 }
 
 function getFooterTheme() {
@@ -283,7 +286,7 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
   ctx.fillRect(0, 0, widthPx, heightPx);
 
   const padX = safeLeft + 28 * scale;
-  const nameLineH = 20 * scale;
+  const nameLineH = 18 * scale;
   const rowLineH = 16 * scale;
 
   // 只有實際有填內容的欄位才會顯示，空白的欄位整行跳過，不佔位置
@@ -301,7 +304,7 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
   ctx.textBaseline = 'top';
 
   if (hasCompany) {
-    ctx.font = `bold ${15 * scale}px "Microsoft JhengHei", sans-serif`;
+    ctx.font = `bold ${13 * scale}px "Microsoft JhengHei", sans-serif`;
     ctx.fillText(company, padX, ty);
     ty += nameLineH;
   }
@@ -315,15 +318,15 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
     ty += rowLineH;
   });
 
-  // 右側：Logo + QR Code，從右往左排列
-  let rx = safeRight - 20 * scale;
+  // 右側：Logo + QR Code，從右往左排列，整組靠右一點
+  let rx = safeRight - 14 * scale;
 
   const qrItems = [...document.querySelectorAll('.qr-item')].map(item => ({
     url: item.querySelector('.qr-url').value,
     label: item.querySelector('.qr-label').value
   })).filter(q => q.url.trim());
 
-  const qrBoxSize = 62 * scale;
+  const qrBoxSize = 52 * scale;
   const qrDataUrls = await Promise.all(qrItems.map(q => getQrDataUrl(q.url)));
 
   for (let i = qrItems.length - 1; i >= 0; i--) {
@@ -343,7 +346,7 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
     ctx.fillText(qrItems[i].label || '', rx + qrBoxSize / 2, qy + qrBoxSize + 6 * scale);
     ctx.textAlign = 'left';
 
-    rx -= 16 * scale;
+    rx -= 10 * scale;
   }
 
   const logoUrls = [...document.querySelectorAll('.fl-url')].map(el => el.value).filter(v => v.trim());
@@ -440,7 +443,12 @@ async function updatePreview() {
     if (footerEnabled) {
       const footerCanvas = document.createElement('canvas');
       await drawFooterToCanvas(footerCanvas, buffer.width, pageWidthPt);
-      bufferCtx.drawImage(footerCanvas, 0, buffer.height - footerCanvas.height);
+      const footerY = buffer.height - footerCanvas.height;
+      // 像素捨入偶爾會在 footer 正上方留一條原頁面內容的細縫，這裡先墊一層純色蓋掉，
+      // 避免彩色 PDF 在接縫處透出一條顏色不一的線
+      bufferCtx.fillStyle = getFooterTheme().bg;
+      bufferCtx.fillRect(0, footerY - 2, buffer.width, footerCanvas.height + 2);
+      bufferCtx.drawImage(footerCanvas, 0, footerY);
     }
 
     // 純視覺參考：畫面上用虛線標示 2mm 出血裁切線位置，不會畫進實際下載的 PDF 裡
@@ -582,7 +590,7 @@ async function generateStampedPdf() {
 function loadDefaults() {
   document.getElementById('logo-list').innerHTML = '';
   document.getElementById('qr-list').innerHTML = '';
-  addUnixecureLogo('white');
+  addUnixecureLogo();
   addQrItem('https://www.unixecure.com/tw/index', '官方網站');
   addQrItem('https://www.facebook.com/uniXecure/', 'Facebook');
   updatePreview();
