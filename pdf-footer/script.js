@@ -4,7 +4,7 @@
 let uploadedPdfBytes = null;
 let uploadedPdfName = '';
 let uploadedPdfPageCount = 0;
-const FOOTER_HEIGHT_RATIO = 0.16; // footer 高度佔頁面寬度的比例
+const FOOTER_HEIGHT_PT = 95; // footer 固定高度（PDF 點數，約 33.5mm），不隨頁面寬度縮放
 
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
@@ -237,7 +237,8 @@ const BLEED_MM = 2;
 const PT_PER_MM = 72 / 25.4;
 
 async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
-  const heightPx = Math.round(widthPx * FOOTER_HEIGHT_RATIO);
+  const ptToPx = widthPx / pageWidthPt; // 每個 PDF 點數對應的畫布像素數，只決定輸出解析度
+  const heightPx = Math.round(FOOTER_HEIGHT_PT * ptToPx);
   canvas.width = widthPx;
   canvas.height = heightPx;
   const ctx = canvas.getContext('2d');
@@ -248,11 +249,13 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
   const email = document.getElementById('f-email').value;
   const address = document.getElementById('f-address').value;
 
-  const scale = widthPx / 700; // 以 700px 為基準設計尺寸，再依實際寬度等比縮放
+  // 文字、Logo、QR Code 尺寸固定用「PDF 點數」設計，不隨頁面寬度縮放，
+  // 頁面變寬只會讓中間留白變多，不會整體跟著放大
+  const scale = ptToPx;
 
   // 出血安全間距：footer 左右下方內縮 2mm，不貼齊頁面邊緣（頂邊不算頁面裁切邊，不用內縮）
   const bleedSafeOn = document.getElementById('f-bleed-safe')?.checked ?? true;
-  const insetPx = bleedSafeOn ? BLEED_MM * PT_PER_MM * (widthPx / pageWidthPt) : 0;
+  const insetPx = bleedSafeOn ? BLEED_MM * PT_PER_MM * ptToPx : 0;
 
   const barLeft = insetPx;
   const barRight = widthPx - insetPx;
@@ -435,7 +438,7 @@ async function generateStampedPdf() {
     for (const idx of targetIndexes) {
       const page = pages[idx];
       const w = page.getWidth();
-      const h = w * FOOTER_HEIGHT_RATIO;
+      const h = FOOTER_HEIGHT_PT; // 固定高度，不隨頁面寬度縮放
 
       let pngImage = pngImageCache.get(w);
       if (!pngImage) {
