@@ -5,6 +5,18 @@ let uploadedPdfBytes = null;
 let uploadedPdfName = '';
 let uploadedPdfPageCount = 0;
 const FOOTER_HEIGHT_PT = 95; // footer 固定高度（PDF 點數，約 33.5mm），不隨頁面寬度縮放
+const PT_PER_CM = 72 / 2.54;
+
+function toggleResizeInputs() {
+  const enabled = document.getElementById('f-resize-enabled').checked;
+  document.getElementById('resize-size-inputs').style.display = enabled ? 'flex' : 'none';
+}
+
+function getTargetSizePt() {
+  const wCm = parseFloat(document.getElementById('f-target-width-cm').value) || 21.4;
+  const hCm = parseFloat(document.getElementById('f-target-height-cm').value) || 30.1;
+  return { w: wCm * PT_PER_CM, h: hCm * PT_PER_CM };
+}
 
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
@@ -377,17 +389,59 @@ async function updatePreview() {
 
     const pdf = await pdfjsLib.getDocument({ data: uploadedPdfBytes.slice(0) }).promise;
     const page = await pdf.getPage(previewPageNum);
-    const viewport = page.getViewport({ scale: 2 });
+    const PREVIEW_SCALE = 2; // 每 PDF 點對應的預覽像素數
+    const nativeViewport = page.getViewport({ scale: 1 }); // scale:1 時單位即為 PDF 點數
+    const origW = nativeViewport.width;
+    const origH = nativeViewport.height;
+
+    const resizeEnabled = document.getElementById('f-resize-enabled').checked;
+    let pageWidthPt, pageHeightPt, drawOffsetXPx, drawOffsetYPx, renderScale;
+
+    if (resizeEnabled) {
+      const targetSize = getTargetSizePt();
+      pageWidthPt = targetSize.w;
+      pageHeightPt = targetSize.h;
+      const fitScale = Math.min(pageWidthPt / origW, pageHeightPt / origH);
+      renderScale = PREVIEW_SCALE * fitScale;
+      drawOffsetXPx = (pageWidthPt - origW * fitScale) / 2 * PREVIEW_SCALE;
+      drawOffsetYPx = (pageHeightPt - origH * fitScale) / 2 * PREVIEW_SCALE;
+    } else {
+      pageWidthPt = origW;
+      pageHeightPt = origH;
+      renderScale = PREVIEW_SCALE;
+      drawOffsetXPx = 0;
+      drawOffsetYPx = 0;
+    }
 
     const buffer = document.createElement('canvas');
-    buffer.width = viewport.width;
-    buffer.height = viewport.height;
+    buffer.width = Math.round(pageWidthPt * PREVIEW_SCALE);
+    buffer.height = Math.round(pageHeightPt * PREVIEW_SCALE);
     const bufferCtx = buffer.getContext('2d');
-    await page.render({ canvasContext: bufferCtx, viewport }).promise;
+    bufferCtx.fillStyle = '#ffffff';
+    bufferCtx.fillRect(0, 0, buffer.width, buffer.height);
+
+    const pageViewport = page.getViewport({ scale: renderScale });
+    const pageCanvas = document.createElement('canvas');
+    pageCanvas.width = pageViewport.width;
+    pageCanvas.height = pageViewport.height;
+    await page.render({ canvasContext: pageCanvas.getContext('2d'), viewport: pageViewport }).promise;
+    bufferCtx.drawImage(pageCanvas, drawOffsetXPx, drawOffsetYPx);
 
     const footerCanvas = document.createElement('canvas');
-    await drawFooterToCanvas(footerCanvas, viewport.width, viewport.width / 2);
+    await drawFooterToCanvas(footerCanvas, buffer.width, pageWidthPt);
     bufferCtx.drawImage(footerCanvas, 0, buffer.height - footerCanvas.height);
+
+    // 純視覺參考：畫面上用虛線標示 2mm 出血裁切線位置，不會畫進實際下載的 PDF 裡
+    const bleedSafeOn = document.getElementById('f-bleed-safe')?.checked ?? true;
+    if (bleedSafeOn) {
+      const trimInsetPx = BLEED_MM * PT_PER_MM * PREVIEW_SCALE;
+      bufferCtx.save();
+      bufferCtx.strokeStyle = '#ff3b30';
+      bufferCtx.lineWidth = 1.5;
+      bufferCtx.setLineDash([6, 5]);
+      bufferCtx.strokeRect(trimInsetPx, trimInsetPx, buffer.width - trimInsetPx * 2, buffer.height - trimInsetPx * 2);
+      bufferCtx.restore();
+    }
 
     commit(buffer);
   } catch (err) {
@@ -411,23 +465,55 @@ async function generateStampedPdf() {
   statusTag.textContent = '處理中，請稍候...';
 
   try {
-    const pdfDoc = await PDFLib.PDFDocument.load(uploadedPdfBytes);
-    const pages = pdfDoc.getPages();
+    const srcDoc = await PDFLib.PDFDocument.load(uploadedPdfBytes);
+    const srcPages = srcDoc.getPages();
 
     const rangeType = document.querySelector('input[name="page-range"]:checked').value;
     let targetIndexes = [];
     if (rangeType === 'all') {
-      targetIndexes = pages.map((_, i) => i);
+      targetIndexes = srcPages.map((_, i) => i);
     } else if (rangeType === 'custom') {
       const pageNum = parseInt(document.getElementById('f-page-number').value, 10);
-      if (!pageNum || pageNum < 1 || pageNum > pages.length) {
-        alert(`請輸入 1 到 ${pages.length} 之間的頁碼`);
+      if (!pageNum || pageNum < 1 || pageNum > srcPages.length) {
+        alert(`請輸入 1 到 ${srcPages.length} 之間的頁碼`);
         statusTag.textContent = '確認 footer 內容無誤後即可下載';
         return;
       }
       targetIndexes = [pageNum - 1];
     } else {
-      targetIndexes = [pages.length - 1];
+      targetIndexes = [srcPages.length - 1];
+    }
+
+    // 頁面尺寸調整：只調整需要蓋章的目標頁，其餘頁面維持原樣不動
+    // 內容用等比例縮放＋置中放進新尺寸，不會變形，多出的空間補白邊
+    const resizeEnabled = document.getElementById('f-resize-enabled').checked;
+    let pdfDoc, pages;
+
+    if (resizeEnabled) {
+      const targetSize = getTargetSizePt();
+      const outDoc = await PDFLib.PDFDocument.create();
+      for (let i = 0; i < srcPages.length; i++) {
+        if (targetIndexes.includes(i)) {
+          const origW = srcPages[i].getWidth();
+          const origH = srcPages[i].getHeight();
+          const embedded = await outDoc.embedPage(srcPages[i]);
+          const fitScale = Math.min(targetSize.w / origW, targetSize.h / origH);
+          const drawW = origW * fitScale;
+          const drawH = origH * fitScale;
+          const offsetX = (targetSize.w - drawW) / 2;
+          const offsetY = (targetSize.h - drawH) / 2;
+          const newPage = outDoc.addPage([targetSize.w, targetSize.h]);
+          newPage.drawPage(embedded, { x: offsetX, y: offsetY, width: drawW, height: drawH });
+        } else {
+          const [copiedPage] = await outDoc.copyPages(srcDoc, [i]);
+          outDoc.addPage(copiedPage);
+        }
+      }
+      pdfDoc = outDoc;
+      pages = outDoc.getPages();
+    } else {
+      pdfDoc = srcDoc;
+      pages = srcPages;
     }
 
     // 依每個目標頁面「各自實際的寬度」分別繪製高解析度 footer 圖片
@@ -491,6 +577,11 @@ function resetToDefaults() {
   document.getElementById('range-last').checked = true;
   document.getElementById('f-page-number').style.display = 'none';
   document.getElementById('f-bleed-safe').checked = true;
+
+  document.getElementById('f-resize-enabled').checked = true;
+  document.getElementById('f-target-width-cm').value = '21.4';
+  document.getElementById('f-target-height-cm').value = '30.1';
+  toggleResizeInputs();
 
   setFooterColorPreset('dark');
   loadDefaults();

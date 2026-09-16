@@ -42,6 +42,20 @@
 
     <div class="form-group">
       <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" id="f-resize-enabled" checked onchange="toggleResizeInputs(); updatePreview();" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
+        調整頁面尺寸
+      </label>
+      <div id="resize-size-inputs" style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+        <input type="number" id="f-target-width-cm" class="input-field" step="0.01" min="1" value="21.4" style="margin-bottom:0;" oninput="updatePreview()">
+        <span>x</span>
+        <input type="number" id="f-target-height-cm" class="input-field" step="0.01" min="1" value="30.1" style="margin-bottom:0;" oninput="updatePreview()">
+        <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">公分</span>
+      </div>
+      <p class="field-hint">預設為 A4（21 x 29.7cm）四邊各加 2mm 出血，可自行調整為廠商指定的尺寸；內容會等比例縮放並置中，多出的空間補白邊、不會變形</p>
+    </div>
+
+    <div class="form-group">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
         <input type="checkbox" id="f-bleed-safe" checked onchange="updatePreview()" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
         2mm 出血安全間距
       </label>
