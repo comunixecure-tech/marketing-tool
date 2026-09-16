@@ -51,7 +51,35 @@
     .tool-card:hover .tool-icon {
         background: #e0e7ff;
     }
-    
+
+    .tool-card.disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+        position: relative;
+    }
+
+    .tool-card.disabled:hover {
+        transform: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        border-color: var(--border-color);
+    }
+
+    .tool-card.disabled:hover .tool-icon {
+        background: #f1f5f9;
+    }
+
+    .tool-card-badge {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: #f1f5f9;
+        color: var(--text-muted);
+        font-size: 11px;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
     .tool-card h2 {
         font-size: 20px;
         font-weight: bold;
@@ -113,6 +141,19 @@
                 <h2>Logo 自助服務站</h2>
                 <p>產品線 Logo 集中管理，支援多種排版與單色/反白配置，自訂尺寸完美置中匯出</p>
             </a>
+
+            <div class="tool-card disabled" aria-disabled="true" title="開發中，暫未開放">
+                <span class="tool-card-badge">開發中</span>
+                <div class="tool-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="8" y1="17" x2="16" y2="17"></line>
+                    </svg>
+                </div>
+                <h2>PDF Footer 蓋章工具</h2>
+                <p>上傳 PDF，自動蓋上聯絡資訊、Logo 與 QR Code footer，開發中，敬請期待</p>
+            </div>
 
         </main>
     </div>
