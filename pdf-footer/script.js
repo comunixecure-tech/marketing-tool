@@ -9,8 +9,37 @@ const PT_PER_CM = 72 / 2.54;
 
 function toggleResizeInputs() {
   const enabled = document.getElementById('f-resize-enabled').checked;
-  document.getElementById('resize-size-inputs').style.display = enabled ? 'flex' : 'none';
+  document.getElementById('resize-size-inputs').style.display = enabled ? 'block' : 'none';
   document.getElementById('resize-hint').style.display = enabled ? 'block' : 'none';
+}
+
+// 頁面尺寸快速套用：A4／A3／A5 為未出血的紙張淨尺寸，出血勾選才會加上四邊各 2mm
+const PAGE_SIZE_PRESETS_CM = {
+  A4: { w: 21, h: 29.7 },
+  A3: { w: 29.7, h: 42 },
+  A5: { w: 14.8, h: 21 }
+};
+
+function applyPageSizePreset(preset) {
+  if (preset === 'custom') { updatePreview(); return; }
+  const base = PAGE_SIZE_PRESETS_CM[preset];
+  const includeBleed = document.getElementById('f-size-include-bleed').checked;
+  const bleedCm = includeBleed ? (BLEED_MM * 2) / 10 : 0; // 左右各 2mm／上下各 2mm，換算公分
+  document.getElementById('f-target-width-cm').value = (base.w + bleedCm).toFixed(2);
+  document.getElementById('f-target-height-cm').value = (base.h + bleedCm).toFixed(2);
+  updatePreview();
+}
+
+// 出血勾選變更時，若目前選的是預設尺寸就重新套用；自訂尺寸則維持使用者輸入的數字不動
+function handleBleedToggleChange() {
+  const preset = document.querySelector('input[name="page-size-preset"]:checked').value;
+  if (preset === 'custom') { updatePreview(); return; }
+  applyPageSizePreset(preset);
+}
+
+// 使用者直接手動改寬高數字時，自動切到「自訂」，避免跟預設按鈕的狀態對不上
+function markCustomSize() {
+  document.getElementById('size-custom').checked = true;
 }
 
 function toggleFooterConfig() {
@@ -618,8 +647,9 @@ function resetToDefaults() {
   toggleFooterConfig();
 
   document.getElementById('f-resize-enabled').checked = true;
-  document.getElementById('f-target-width-cm').value = '21.4';
-  document.getElementById('f-target-height-cm').value = '30.1';
+  document.getElementById('size-a4').checked = true;
+  document.getElementById('f-size-include-bleed').checked = true;
+  applyPageSizePreset('A4');
   toggleResizeInputs();
 
   setFooterColorPreset('dark');

@@ -113,13 +113,25 @@
         <input type="checkbox" id="f-resize-enabled" checked onchange="toggleResizeInputs(); updatePreview();" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
         調整頁面尺寸
       </label>
-      <div id="resize-size-inputs" style="display:flex; gap:10px; align-items:center; margin-top:10px;">
-        <input type="number" id="f-target-width-cm" class="input-field" step="0.01" min="1" value="21.4" style="margin-bottom:0;" oninput="updatePreview()">
-        <span>x</span>
-        <input type="number" id="f-target-height-cm" class="input-field" step="0.01" min="1" value="30.1" style="margin-bottom:0;" oninput="updatePreview()">
-        <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">公分</span>
+      <div id="resize-size-inputs" style="margin-top:10px;">
+        <div class="radio-group" style="margin-top:0;">
+          <div class="radio-pill"><input type="radio" name="page-size-preset" id="size-a4" value="A4" checked onchange="applyPageSizePreset(this.value)"><label for="size-a4">A4</label></div>
+          <div class="radio-pill"><input type="radio" name="page-size-preset" id="size-a3" value="A3" onchange="applyPageSizePreset(this.value)"><label for="size-a3">A3</label></div>
+          <div class="radio-pill"><input type="radio" name="page-size-preset" id="size-a5" value="A5" onchange="applyPageSizePreset(this.value)"><label for="size-a5">A5</label></div>
+          <div class="radio-pill"><input type="radio" name="page-size-preset" id="size-custom" value="custom" onchange="updatePreview()"><label for="size-custom">自訂</label></div>
+        </div>
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-top:10px; font-size:13px;">
+          <input type="checkbox" id="f-size-include-bleed" checked onchange="handleBleedToggleChange()" style="width:16px; height:16px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
+          尺寸含 2mm 出血
+        </label>
+        <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+          <input type="number" id="f-target-width-cm" class="input-field" step="0.01" min="1" value="21.4" style="margin-bottom:0;" oninput="markCustomSize(); updatePreview()">
+          <span>x</span>
+          <input type="number" id="f-target-height-cm" class="input-field" step="0.01" min="1" value="30.1" style="margin-bottom:0;" oninput="markCustomSize(); updatePreview()">
+          <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">公分</span>
+        </div>
       </div>
-      <p id="resize-hint" class="field-hint">預設為 A4（21 x 29.7cm）四邊各加 2mm 出血，可自行調整為廠商指定的尺寸；內容會等比例縮放並置中，多出的空間補白邊、不會變形</p>
+      <p id="resize-hint" class="field-hint">可用上方按鈕快速套用 A4／A3／A5，或直接輸入廠商指定的尺寸；內容會等比例縮放並置中，多出的空間補白邊、不會變形</p>
     </div>
 
     <button id="btn-generate-pdf" class="btn-download" onclick="generateStampedPdf()" disabled style="margin-bottom: 4px;">
