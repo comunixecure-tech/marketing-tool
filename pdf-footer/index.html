@@ -78,7 +78,7 @@
 
       <div class="section-card">
         <div class="section-card-header" style="cursor:default;">
-          Logo（可新增多個，例如代理商 Logo）
+          Logo
         </div>
         <div id="logo-list"></div>
         <button type="button" onclick="addFooterLogo()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增 Logo</button>
@@ -86,7 +86,7 @@
 
       <div class="section-card">
         <div class="section-card-header" style="cursor:default;">
-          QR Code（可新增多個）
+          QR Code
         </div>
         <div id="qr-list"></div>
         <button type="button" onclick="addQrItem()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增 QR Code</button>
@@ -96,7 +96,6 @@
         <div class="section-card-header" style="cursor:default;">
           配色
         </div>
-        <p class="field-hint" style="margin-top:-8px;">印刷色彩考量，僅提供以下兩種固定配色，不開放自訂顏色</p>
         <div class="radio-group">
           <div class="radio-pill"><input type="radio" name="footer-theme" id="theme-dark" value="dark" checked onchange="syncUnixecureLogoColors()"><label for="theme-dark">深色底白字</label></div>
           <div class="radio-pill"><input type="radio" name="footer-theme" id="theme-light" value="light" onchange="syncUnixecureLogoColors()"><label for="theme-light">白底黑字</label></div>
@@ -142,9 +141,8 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 22V12h6v10M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
       </svg>
-      前往雲端查看檔案
+      前往所有 DM・限 SYSTEX 帳號
     </a>
-    <p class="field-hint" style="margin-top:0;">限 SYSTEX 帳號瀏覽</p>
     <p class="field-hint" style="color:var(--danger);">如果此 Footer 為永久性更新，請告知 aimigio@unixecure.com.tw 去更新現有檔案，以免之後同仁誤用</p>
 
     <button type="button" class="btn-text-link" onclick="resetToDefaults()">🔄 恢復預設資料</button>
