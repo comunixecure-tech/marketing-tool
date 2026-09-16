@@ -427,23 +427,28 @@ async function generateStampedPdf() {
       targetIndexes = [pages.length - 1];
     }
 
-    // 依實際頁面寬度（PDF 點數，1pt = 1/72 吋）繪製高解析度 footer 圖片
-    const firstPage = pages[targetIndexes[0]];
-    const pageWidthPt = firstPage.getWidth();
+    // 依每個目標頁面「各自實際的寬度」分別繪製高解析度 footer 圖片
+    // 頁面寬度不同時（例如混合尺寸的 PDF）不能只做一張圖去套用到所有頁，會被拉伸變形
     const RENDER_SCALE = 4; // 提高解析度避免蓋章後模糊
-    const canvas = document.createElement('canvas');
-    await drawFooterToCanvas(canvas, Math.round(pageWidthPt * RENDER_SCALE), pageWidthPt);
+    const pngImageCache = new Map(); // 同寬度的頁面共用同一張圖，不用重繪
 
-    const pngDataUrl = canvas.toDataURL('image/png');
-    const pngBytes = await fetch(pngDataUrl).then(r => r.arrayBuffer());
-    const pngImage = await pdfDoc.embedPng(pngBytes);
-
-    targetIndexes.forEach(idx => {
+    for (const idx of targetIndexes) {
       const page = pages[idx];
       const w = page.getWidth();
       const h = w * FOOTER_HEIGHT_RATIO;
+
+      let pngImage = pngImageCache.get(w);
+      if (!pngImage) {
+        const canvas = document.createElement('canvas');
+        await drawFooterToCanvas(canvas, Math.round(w * RENDER_SCALE), w);
+        const pngDataUrl = canvas.toDataURL('image/png');
+        const pngBytes = await fetch(pngDataUrl).then(r => r.arrayBuffer());
+        pngImage = await pdfDoc.embedPng(pngBytes);
+        pngImageCache.set(w, pngImage);
+      }
+
       page.drawImage(pngImage, { x: 0, y: 0, width: w, height: h });
-    });
+    }
 
     const outBytes = await pdfDoc.save();
     const blob = new Blob([outBytes], { type: 'application/pdf' });
