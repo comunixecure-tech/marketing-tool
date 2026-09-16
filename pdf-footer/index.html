@@ -43,6 +43,14 @@
 
     <div class="form-group">
       <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" id="f-show-bleed-guide" checked onchange="updatePreview()" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
+        顯示 2mm 出血參考線
+      </label>
+      <p class="field-hint">只是畫面上的預覽輔助線，不會畫進實際下載的 PDF 裡</p>
+    </div>
+
+    <div class="form-group">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
         <input type="checkbox" id="f-footer-enabled" checked onchange="toggleFooterConfig(); updatePreview();" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
         加上 Footer 蓋章
       </label>

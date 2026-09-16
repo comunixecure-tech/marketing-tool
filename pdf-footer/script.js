@@ -444,14 +444,17 @@ async function updatePreview() {
     }
 
     // 純視覺參考：畫面上用虛線標示 2mm 出血裁切線位置，不會畫進實際下載的 PDF 裡
-    // 不論有沒有加 Footer 都會顯示，調整頁面尺寸時同樣需要這條參考線
-    const trimInsetPx = BLEED_MM * PT_PER_MM * PREVIEW_SCALE;
-    bufferCtx.save();
-    bufferCtx.strokeStyle = '#ff3b30';
-    bufferCtx.lineWidth = 1.5;
-    bufferCtx.setLineDash([6, 5]);
-    bufferCtx.strokeRect(trimInsetPx, trimInsetPx, buffer.width - trimInsetPx * 2, buffer.height - trimInsetPx * 2);
-    bufferCtx.restore();
+    // 獨立於「加上 Footer 蓋章」之外，調整頁面尺寸時同樣可能需要看這條參考線
+    const showBleedGuide = document.getElementById('f-show-bleed-guide').checked;
+    if (showBleedGuide) {
+      const trimInsetPx = BLEED_MM * PT_PER_MM * PREVIEW_SCALE;
+      bufferCtx.save();
+      bufferCtx.strokeStyle = '#ff3b30';
+      bufferCtx.lineWidth = 1.5;
+      bufferCtx.setLineDash([6, 5]);
+      bufferCtx.strokeRect(trimInsetPx, trimInsetPx, buffer.width - trimInsetPx * 2, buffer.height - trimInsetPx * 2);
+      bufferCtx.restore();
+    }
 
     commit(buffer);
   } catch (err) {
@@ -595,6 +598,7 @@ function resetToDefaults() {
 
   document.getElementById('range-last').checked = true;
   document.getElementById('f-page-number').style.display = 'none';
+  document.getElementById('f-show-bleed-guide').checked = true;
   document.getElementById('f-footer-enabled').checked = true;
   toggleFooterConfig();
 
