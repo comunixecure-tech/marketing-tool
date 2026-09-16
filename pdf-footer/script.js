@@ -13,6 +13,11 @@ function toggleResizeInputs() {
   document.getElementById('resize-hint').style.display = enabled ? 'block' : 'none';
 }
 
+function toggleFooterConfig() {
+  const enabled = document.getElementById('f-footer-enabled').checked;
+  document.getElementById('footer-config-section').style.display = enabled ? 'block' : 'none';
+}
+
 function getTargetSizePt() {
   const wCm = parseFloat(document.getElementById('f-target-width-cm').value) || 21.4;
   const hCm = parseFloat(document.getElementById('f-target-height-cm').value) || 30.1;
@@ -592,6 +597,7 @@ function resetToDefaults() {
   document.getElementById('f-page-number').style.display = 'none';
   document.getElementById('f-bleed-safe').checked = true;
   document.getElementById('f-footer-enabled').checked = true;
+  toggleFooterConfig();
 
   document.getElementById('f-resize-enabled').checked = true;
   document.getElementById('f-target-width-cm').value = '21.4';

@@ -43,10 +43,69 @@
 
     <div class="form-group">
       <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-        <input type="checkbox" id="f-footer-enabled" checked onchange="updatePreview()" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
+        <input type="checkbox" id="f-footer-enabled" checked onchange="toggleFooterConfig(); updatePreview();" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
         加上 Footer 蓋章
       </label>
-      <p class="field-hint">取消勾選可以只調整頁面尺寸、不加 Footer</p>
+      <p class="field-hint">取消勾選可以只調整頁面尺寸、不加 Footer，以下的 Footer 設定也會一併隱藏</p>
+    </div>
+
+    <div id="footer-config-section">
+      <div class="form-group">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="f-bleed-safe" checked onchange="updatePreview()" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
+          2mm 出血安全間距
+        </label>
+        <p class="field-hint">footer 左右下方會內縮 2mm，不貼齊頁面邊緣，適合本身已含出血的印刷檔；若您的 PDF 沒有出血，請取消勾選</p>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header" style="cursor:default;">
+          公司資訊
+        </div>
+        <div class="form-group">
+          <label>公司名稱</label>
+          <input type="text" id="f-company" class="input-field" value="智慧資安科技股份有限公司" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label>服務專線</label>
+          <input type="text" id="f-phone" class="input-field" value="04-24523928 分機 300、301、302" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label>電子信箱</label>
+          <input type="text" id="f-email" class="input-field" value="servicedesk@unixecure.com.tw" oninput="updatePreview()">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>台北據點</label>
+          <input type="text" id="f-address" class="input-field" value="114 台北市內湖區瑞光路 318 號 7 樓" oninput="updatePreview()">
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header" style="cursor:default;">
+          Logo（可新增多個，例如代理商 Logo）
+        </div>
+        <div id="logo-list"></div>
+        <button type="button" onclick="addFooterLogo()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增 Logo</button>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header" style="cursor:default;">
+          QR Code（可新增多個）
+        </div>
+        <div id="qr-list"></div>
+        <button type="button" onclick="addQrItem()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增 QR Code</button>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header" style="cursor:default;">
+          配色
+        </div>
+        <p class="field-hint" style="margin-top:-8px;">印刷色彩考量，僅提供以下兩種固定配色，不開放自訂顏色</p>
+        <div class="radio-group">
+          <div class="radio-pill"><input type="radio" name="footer-theme" id="theme-dark" value="dark" checked onchange="updatePreview()"><label for="theme-dark">深色底白字</label></div>
+          <div class="radio-pill"><input type="radio" name="footer-theme" id="theme-light" value="light" onchange="updatePreview()"><label for="theme-light">白底黑字</label></div>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
@@ -61,63 +120,6 @@
         <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">公分</span>
       </div>
       <p id="resize-hint" class="field-hint">預設為 A4（21 x 29.7cm）四邊各加 2mm 出血，可自行調整為廠商指定的尺寸；內容會等比例縮放並置中，多出的空間補白邊、不會變形</p>
-    </div>
-
-    <div class="form-group">
-      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-        <input type="checkbox" id="f-bleed-safe" checked onchange="updatePreview()" style="width:20px; height:20px; flex-shrink:0; cursor:pointer; accent-color: var(--primary);">
-        2mm 出血安全間距
-      </label>
-      <p class="field-hint">footer 左右下方會內縮 2mm，不貼齊頁面邊緣，適合本身已含出血的印刷檔；若您的 PDF 沒有出血，請取消勾選</p>
-    </div>
-
-    <div class="section-card">
-      <div class="section-card-header" style="cursor:default;">
-        公司資訊
-      </div>
-      <div class="form-group">
-        <label>公司名稱</label>
-        <input type="text" id="f-company" class="input-field" value="智慧資安科技股份有限公司" oninput="updatePreview()">
-      </div>
-      <div class="form-group">
-        <label>服務專線</label>
-        <input type="text" id="f-phone" class="input-field" value="04-24523928 分機 300、301、302" oninput="updatePreview()">
-      </div>
-      <div class="form-group">
-        <label>電子信箱</label>
-        <input type="text" id="f-email" class="input-field" value="servicedesk@unixecure.com.tw" oninput="updatePreview()">
-      </div>
-      <div class="form-group" style="margin-bottom:0;">
-        <label>台北據點</label>
-        <input type="text" id="f-address" class="input-field" value="114 台北市內湖區瑞光路 318 號 7 樓" oninput="updatePreview()">
-      </div>
-    </div>
-
-    <div class="section-card">
-      <div class="section-card-header" style="cursor:default;">
-        Logo（可新增多個，例如代理商 Logo）
-      </div>
-      <div id="logo-list"></div>
-      <button type="button" onclick="addFooterLogo()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增 Logo</button>
-    </div>
-
-    <div class="section-card">
-      <div class="section-card-header" style="cursor:default;">
-        QR Code（可新增多個）
-      </div>
-      <div id="qr-list"></div>
-      <button type="button" onclick="addQrItem()" style="font-size: 13px; padding: 10px; cursor: pointer; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; width: 100%; margin-top:10px;">+ 新增 QR Code</button>
-    </div>
-
-    <div class="section-card">
-      <div class="section-card-header" style="cursor:default;">
-        配色
-      </div>
-      <p class="field-hint" style="margin-top:-8px;">印刷色彩考量，僅提供以下兩種固定配色，不開放自訂顏色</p>
-      <div class="radio-group">
-        <div class="radio-pill"><input type="radio" name="footer-theme" id="theme-dark" value="dark" checked onchange="updatePreview()"><label for="theme-dark">深色底白字</label></div>
-        <div class="radio-pill"><input type="radio" name="footer-theme" id="theme-light" value="light" onchange="updatePreview()"><label for="theme-light">白底黑字</label></div>
-      </div>
     </div>
 
     <button id="btn-generate-pdf" class="btn-download" onclick="generateStampedPdf()" disabled style="margin-bottom: 4px;">
