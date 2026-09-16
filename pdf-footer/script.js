@@ -123,7 +123,6 @@ async function handlePdfUpload(event) {
   pageInput.max = uploadedPdfPageCount;
 
   document.getElementById('btn-generate-pdf').disabled = false;
-  document.getElementById('generate-status').textContent = '確認 footer 內容無誤後即可下載';
 
   updatePreview();
 }
@@ -518,9 +517,6 @@ async function generateStampedPdf() {
     return;
   }
 
-  const statusTag = document.getElementById('generate-status');
-  statusTag.textContent = '處理中，請稍候...';
-
   try {
     const srcDoc = await PDFLib.PDFDocument.load(uploadedPdfBytes);
     const srcPages = srcDoc.getPages();
@@ -533,7 +529,6 @@ async function generateStampedPdf() {
       const pageNum = parseInt(document.getElementById('f-page-number').value, 10);
       if (!pageNum || pageNum < 1 || pageNum > srcPages.length) {
         alert(`請輸入 1 到 ${srcPages.length} 之間的頁碼`);
-        statusTag.textContent = '確認 footer 內容無誤後即可下載';
         return;
       }
       targetIndexes = [pageNum - 1];
@@ -545,7 +540,6 @@ async function generateStampedPdf() {
     const resizeEnabled = document.getElementById('f-resize-enabled').checked;
     if (!footerEnabled && !resizeEnabled) {
       alert('請至少選擇「加上 Footer」或「調整頁面尺寸」其中一項');
-      statusTag.textContent = '確認設定後即可下載';
       return;
     }
 
@@ -611,12 +605,9 @@ async function generateStampedPdf() {
     a.href = URL.createObjectURL(blob);
     a.download = `${uploadedPdfName}_footer.pdf`;
     a.click();
-
-    statusTag.textContent = '已下載完成，可以打開確認結果';
   } catch (err) {
     console.error('產生 PDF 失敗', err);
     alert('產生 PDF 時發生錯誤，請確認檔案是否正常');
-    statusTag.textContent = '確認 footer 內容無誤後即可下載';
   }
 }
 
