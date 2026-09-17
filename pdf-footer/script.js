@@ -121,6 +121,11 @@ async function handlePdfUpload(event) {
 
   const pageInput = document.getElementById('f-page-number');
   pageInput.max = uploadedPdfPageCount;
+  // 換一份頁數較少的 PDF 時，先前指定的頁碼可能已經超出範圍，重設避免預覽跟實際下載對不上
+  const currentPageNum = parseInt(pageInput.value, 10);
+  if (!currentPageNum || currentPageNum < 1 || currentPageNum > uploadedPdfPageCount) {
+    pageInput.value = 1;
+  }
 
   document.getElementById('btn-generate-pdf').disabled = false;
 
@@ -141,18 +146,39 @@ function unixecureColorModeForTheme() {
   return preset === 'light' ? 'full' : 'white';
 }
 
-// 預設帶入 Logo 自助服務站裡的 uniXecure 官方 Logo
+// 預設帶入 Logo 自助服務站裡的 uniXecure 官方 Logo，也開放上傳自己的圖檔取代，
+// 避免共用 Logo 資料來源哪天失效或改版時沒有備案
 function addUnixecureLogo() {
   const html = `<div class="sortable-item footer-logo-item unixecure-logo-item" draggable="true" style="align-items:center; margin-bottom: 8px;">
         <div class="drag-handle">:::</div>
         <img class="thumb-preview fl-preview" src="">
         <input type="hidden" class="fl-url" value="">
         <div style="flex-grow:1; font-size:13px; font-weight:bold;">uniXecure</div>
+        <label class="btn-sm-outline" style="cursor:pointer; margin:0; white-space:nowrap;" title="改用自己上傳的圖檔，不再跟著配色自動換色">
+          📁
+          <input type="file" accept="image/png, image/jpeg, image/svg+xml" style="display:none;" onchange="handleUnixecureLogoUpload(this)">
+        </label>
         <button type="button" class="btn-sm-outline unixecure-toggle-btn" onclick="toggleUnixecureLogoVisibility(this)">隱藏</button>
       </div>`;
   document.getElementById('logo-list').insertAdjacentHTML('beforeend', html);
   const item = document.getElementById('logo-list').lastElementChild;
   setUnixecureLogoColor(item, unixecureColorModeForTheme(), false);
+}
+
+// 使用者上傳自己的圖檔取代自動產生的 uniXecure Logo，之後配色切換就不會再覆蓋這個項目
+function handleUnixecureLogoUpload(fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const item = fileInput.closest('.footer-logo-item');
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    item.querySelector('.fl-url').value = e.target.result;
+    item.querySelector('.fl-preview').src = e.target.result;
+    item.setAttribute('data-custom-override', 'true');
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+  fileInput.value = '';
 }
 
 // uniXecure Logo 是固定帶入的預設項目，不提供刪除，只能隱藏/顯示
@@ -165,10 +191,10 @@ function toggleUnixecureLogoVisibility(btn) {
   updatePreview();
 }
 
-// 配色切換時，畫面上所有 uniXecure Logo 一起跟著換色
+// 配色切換時，畫面上所有 uniXecure Logo 一起跟著換色；使用者已手動上傳圖檔覆蓋的項目不受影響
 function syncUnixecureLogoColors() {
   const colorMode = unixecureColorModeForTheme();
-  document.querySelectorAll('.unixecure-logo-item').forEach(item => setUnixecureLogoColor(item, colorMode, false));
+  document.querySelectorAll('.unixecure-logo-item:not([data-custom-override="true"])').forEach(item => setUnixecureLogoColor(item, colorMode, false));
   updatePreview();
 }
 
@@ -530,6 +556,11 @@ async function generateStampedPdf() {
     return;
   }
 
+  const btn = document.getElementById('btn-generate-pdf');
+  const originalBtnHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '處理中，請稍候...';
+
   try {
     const srcDoc = await PDFLib.PDFDocument.load(uploadedPdfBytes);
     const srcPages = srcDoc.getPages();
@@ -621,6 +652,9 @@ async function generateStampedPdf() {
   } catch (err) {
     console.error('產生 PDF 失敗', err);
     alert('產生 PDF 時發生錯誤，請確認檔案是否正常');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHTML;
   }
 }
 
