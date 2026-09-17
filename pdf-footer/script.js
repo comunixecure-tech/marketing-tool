@@ -17,7 +17,8 @@ const FOOTER_LANG_PRESETS = {
     email: 'servicedesk@unixecure.com.tw',
     address: '114 台北市內湖區瑞光路 318 號 7 樓',
     labels: { phone: '服務專線', email: '電子信箱', address: '台北據點' },
-    defaultQrLabel: '官方網站'
+    defaultQrLabel: '官方網站',
+    defaultQrUrl: 'https://www.unixecure.com/tw/index'
   },
   en: {
     company: 'uniXecure Technology Corporation',
@@ -25,7 +26,8 @@ const FOOTER_LANG_PRESETS = {
     email: 'phoebeshih@unixecure.com.tw',
     address: 'No. 318, Rueiguang Rd., Neihu District, Taipei, Taiwan',
     labels: { phone: 'Service Hotline', email: 'Service Email', address: 'Taipei office Address' },
-    defaultQrLabel: 'Official Website'
+    defaultQrLabel: 'Website',
+    defaultQrUrl: 'https://www.unixecure.com/en/index'
   },
   ja: {
     company: 'uniXecure Technology Corporation',
@@ -33,7 +35,8 @@ const FOOTER_LANG_PRESETS = {
     email: 'phoebeshih@unixecure.com.tw',
     address: '〒114 台北市内湖区瑞光路318号',
     labels: { phone: 'お電話でのお問い合わせ', email: 'お問い合わせメール', address: '台北オフィス住所' },
-    defaultQrLabel: '公式ウェブサイト'
+    defaultQrLabel: '公式サイト',
+    defaultQrUrl: 'https://www.unixecure.com/ja/index'
   }
 };
 
@@ -48,11 +51,13 @@ function applyFooterLanguage(lang) {
   document.getElementById('f-email').value = preset.email;
   document.getElementById('f-address').value = preset.address;
 
-  // 只翻譯還停留在「預設官網標籤」的 QR 項目，使用者自己改過的標籤（例如自訂活動頁名稱）不動
-  const knownDefaultLabels = Object.values(FOOTER_LANG_PRESETS).map(p => p.defaultQrLabel);
-  document.querySelectorAll('.qr-item .qr-label').forEach(input => {
-    if (knownDefaultLabels.includes(input.value)) {
-      input.value = preset.defaultQrLabel;
+  // 只翻譯還停留在「預設官網」的 QR 項目（用網址判斷），使用者自己改過網址（例如自訂活動頁）的項目不動
+  const knownDefaultUrls = Object.values(FOOTER_LANG_PRESETS).map(p => p.defaultQrUrl);
+  document.querySelectorAll('.qr-item').forEach(item => {
+    const urlInput = item.querySelector('.qr-url');
+    if (knownDefaultUrls.includes(urlInput.value)) {
+      urlInput.value = preset.defaultQrUrl;
+      item.querySelector('.qr-label').value = preset.defaultQrLabel;
     }
   });
 
