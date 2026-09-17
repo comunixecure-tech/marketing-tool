@@ -285,11 +285,42 @@ function addQrItem(url = '', label = '') {
   const html = `<div class="sortable-item qr-item" draggable="true" style="align-items:center; margin-bottom: 8px;">
         <div class="drag-handle">:::</div>
         <div style="display:flex; gap:8px; align-items:center; flex-grow:1;">
+          <img class="thumb-preview qr-thumb-preview" src="" style="display:none; cursor:pointer;" title="點擊清除上傳圖檔，改回用網址自動產生 QR Code" onclick="clearQrImage(this)">
+          <input type="hidden" class="qr-custom-image" value="">
           <input type="text" class="input-field qr-url" value="${url}" style="margin-bottom:0" placeholder="連結網址" oninput="updatePreview()">
           <input type="text" class="input-field qr-label" value="${label}" style="margin-bottom:0; max-width:110px;" placeholder="標籤文字" oninput="updatePreview()">
+          <label class="btn-sm-outline" style="cursor:pointer; margin:0; white-space:nowrap;" title="上傳現成的 QR Code 圖檔，優先使用上傳的圖檔">
+            📁
+            <input type="file" accept="image/png, image/jpeg, image/svg+xml" style="display:none;" onchange="handleQrImageUpload(this)">
+          </label>
           <button type="button" class="btn-delete" onclick="this.closest('.qr-item').remove(); updatePreview();">刪除</button>
         </div></div>`;
   document.getElementById('qr-list').insertAdjacentHTML('beforeend', html);
+  updatePreview();
+}
+
+// 上傳現成的 QR Code 圖檔取代自動產生，例如活動平台自己提供的報名 QR Code
+function handleQrImageUpload(fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const item = fileInput.closest('.qr-item');
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    item.querySelector('.qr-custom-image').value = e.target.result;
+    const thumb = item.querySelector('.qr-thumb-preview');
+    thumb.src = e.target.result;
+    thumb.style.display = 'block';
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+  fileInput.value = '';
+}
+
+function clearQrImage(imgEl) {
+  const item = imgEl.closest('.qr-item');
+  item.querySelector('.qr-custom-image').value = '';
+  imgEl.src = '';
+  imgEl.style.display = 'none';
   updatePreview();
 }
 
@@ -446,11 +477,13 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
 
   const qrItems = [...document.querySelectorAll('.qr-item')].map(item => ({
     url: item.querySelector('.qr-url').value,
-    label: item.querySelector('.qr-label').value
-  })).filter(q => q.url.trim());
+    label: item.querySelector('.qr-label').value,
+    customImage: item.querySelector('.qr-custom-image').value
+  })).filter(q => q.url.trim() || q.customImage.trim());
 
   const qrBoxSize = 52 * scale;
-  const qrDataUrls = await Promise.all(qrItems.map(q => getQrDataUrl(q.url)));
+  // 有上傳現成圖檔的話優先使用，不再另外產生 QR Code
+  const qrDataUrls = await Promise.all(qrItems.map(q => q.customImage ? Promise.resolve(q.customImage) : getQrDataUrl(q.url)));
 
   for (let i = qrItems.length - 1; i >= 0; i--) {
     const dataUrl = qrDataUrls[i];
