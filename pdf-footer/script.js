@@ -7,6 +7,58 @@ let uploadedPdfPageCount = 0;
 const FOOTER_HEIGHT_PT = 115; // footer 固定高度（PDF 點數，約 40.6mm），不隨頁面寬度縮放
 const PT_PER_CM = 72 / 2.54;
 
+// =========================================================
+// Footer 語言切換：公司資訊預設值、欄位標籤、QR Code 預設標籤都跟著換
+// =========================================================
+const FOOTER_LANG_PRESETS = {
+  zh: {
+    company: '智慧資安科技股份有限公司',
+    phone: '04-24523928 分機 300、301、302',
+    email: 'servicedesk@unixecure.com.tw',
+    address: '114 台北市內湖區瑞光路 318 號 7 樓',
+    labels: { phone: '服務專線', email: '電子信箱', address: '台北據點' },
+    defaultQrLabel: '官方網站'
+  },
+  en: {
+    company: 'uniXecure Technology Corporation',
+    phone: '+886 2-8798-6088 #1622',
+    email: 'phoebeshih@unixecure.com.tw',
+    address: 'No. 318, Rueiguang Rd., Neihu District, Taipei, Taiwan',
+    labels: { phone: 'Service Hotline', email: 'Service Email', address: 'Taipei office Address' },
+    defaultQrLabel: 'Official Website'
+  },
+  ja: {
+    company: 'uniXecure Technology Corporation',
+    phone: '+886 2-8798-6088（内線 1622）',
+    email: 'phoebeshih@unixecure.com.tw',
+    address: '〒114 台北市内湖区瑞光路318号',
+    labels: { phone: 'お電話でのお問い合わせ', email: 'お問い合わせメール', address: '台北オフィス住所' },
+    defaultQrLabel: '公式ウェブサイト'
+  }
+};
+
+function getFooterLang() {
+  return document.querySelector('input[name="footer-lang"]:checked')?.value || 'zh';
+}
+
+function applyFooterLanguage(lang) {
+  const preset = FOOTER_LANG_PRESETS[lang];
+  document.getElementById('f-company').value = preset.company;
+  document.getElementById('f-phone').value = preset.phone;
+  document.getElementById('f-email').value = preset.email;
+  document.getElementById('f-address').value = preset.address;
+
+  // 只翻譯還停留在「預設官網標籤」的 QR 項目，使用者自己改過的標籤（例如自訂活動頁名稱）不動
+  const knownDefaultLabels = Object.values(FOOTER_LANG_PRESETS).map(p => p.defaultQrLabel);
+  document.querySelectorAll('.qr-item .qr-label').forEach(input => {
+    if (knownDefaultLabels.includes(input.value)) {
+      input.value = preset.defaultQrLabel;
+    }
+  });
+
+  updatePreview();
+}
+
 function toggleResizeInputs() {
   const enabled = document.getElementById('f-resize-enabled').checked;
   document.getElementById('resize-size-inputs').style.display = enabled ? 'block' : 'none';
@@ -351,10 +403,11 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
   const rowLineH = 16 * scale;
 
   // 只有實際有填內容的欄位才會顯示，空白的欄位整行跳過，不佔位置
+  const fieldLabels = FOOTER_LANG_PRESETS[getFooterLang()].labels;
   const rows = [
-    ['服務專線', phone],
-    ['電子信箱', email],
-    ['台北據點', address]
+    [fieldLabels.phone, phone],
+    [fieldLabels.email, email],
+    [fieldLabels.address, address]
   ].filter(([, value]) => value.trim());
 
   const hasCompany = !!company.trim();
@@ -371,11 +424,15 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
   }
 
   ctx.font = `${11 * scale}px "Microsoft JhengHei", sans-serif`;
+  // 標籤欄寬度依目前語言實際量測，中英日文字數差很多，不能用固定間距，不然標籤跟內容會疊在一起
+  const labelGap = 14 * scale;
+  const maxLabelWidth = rows.reduce((max, [label]) => Math.max(max, ctx.measureText(label).width), 0);
+  const valueX = padX + maxLabelWidth + labelGap;
   rows.forEach(([label, value]) => {
     ctx.globalAlpha = 0.85;
     ctx.fillText(label, padX, ty);
     ctx.globalAlpha = 1;
-    ctx.fillText(value, padX + 62 * scale, ty);
+    ctx.fillText(value, valueX, ty);
     ty += rowLineH;
   });
 
@@ -673,10 +730,8 @@ function loadDefaults() {
 function resetToDefaults() {
   if (!confirm('確定要恢復預設資料嗎？目前填寫的內容會被清除。')) return;
 
-  document.getElementById('f-company').value = '智慧資安科技股份有限公司';
-  document.getElementById('f-phone').value = '04-24523928 分機 300、301、302';
-  document.getElementById('f-email').value = 'servicedesk@unixecure.com.tw';
-  document.getElementById('f-address').value = '114 台北市內湖區瑞光路 318 號 7 樓';
+  document.getElementById('lang-zh').checked = true;
+  applyFooterLanguage('zh');
 
   document.getElementById('range-last').checked = true;
   document.getElementById('f-page-number').style.display = 'none';

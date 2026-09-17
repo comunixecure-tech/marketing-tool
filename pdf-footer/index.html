@@ -54,6 +54,16 @@
     </div>
 
     <div id="footer-config-section">
+      <div class="form-group">
+        <label>Footer 語言</label>
+        <div class="radio-group">
+          <div class="radio-pill"><input type="radio" name="footer-lang" id="lang-zh" value="zh" checked onchange="applyFooterLanguage(this.value)"><label for="lang-zh">中文</label></div>
+          <div class="radio-pill"><input type="radio" name="footer-lang" id="lang-en" value="en" onchange="applyFooterLanguage(this.value)"><label for="lang-en">English</label></div>
+          <div class="radio-pill"><input type="radio" name="footer-lang" id="lang-ja" value="ja" onchange="applyFooterLanguage(this.value)"><label for="lang-ja">日本語</label></div>
+        </div>
+        <p class="field-hint">切換語言會自動帶入對應的公司資訊與 QR Code 標籤，欄位仍可自行修改</p>
+      </div>
+
       <div class="section-card">
         <div class="section-card-header" style="cursor:default;">
           公司資訊
