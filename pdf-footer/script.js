@@ -16,7 +16,7 @@ const FOOTER_LANG_PRESETS = {
     phone: '04-24523928 分機 300、301、302',
     email: 'servicedesk@unixecure.com.tw',
     address: '114 台北市內湖區瑞光路 318 號 7 樓',
-    labels: { phone: '服務專線', email: '電子信箱', address: '台北據點' },
+    labels: { phone: '電話', email: '信箱', address: '地址' },
     defaultQrLabel: '官方網站',
     defaultQrUrl: 'https://www.unixecure.com/tw/index'
   },
@@ -25,7 +25,7 @@ const FOOTER_LANG_PRESETS = {
     phone: '+886 2-8798-6088 #1622',
     email: 'phoebeshih@unixecure.com.tw',
     address: 'No. 318, Rueiguang Rd., Neihu District, Taipei, Taiwan',
-    labels: { phone: 'Service Hotline', email: 'Service Email', address: 'Taipei office Address' },
+    labels: { phone: 'Tel', email: 'Email', address: 'Address' },
     defaultQrLabel: 'Website',
     defaultQrUrl: 'https://www.unixecure.com/en/index'
   },
@@ -34,7 +34,7 @@ const FOOTER_LANG_PRESETS = {
     phone: '+886 2-8798-6088（内線 1622）',
     email: 'phoebeshih@unixecure.com.tw',
     address: '〒114 台北市内湖区瑞光路318号',
-    labels: { phone: 'お電話でのお問い合わせ', email: 'お問い合わせメール', address: '台北オフィス住所' },
+    labels: { phone: '電話', email: 'メール', address: '住所' },
     defaultQrLabel: '公式サイト',
     defaultQrUrl: 'https://www.unixecure.com/ja/index'
   }
