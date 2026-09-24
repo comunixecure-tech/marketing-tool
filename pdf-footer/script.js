@@ -472,8 +472,8 @@ async function drawFooterToCanvas(canvas, widthPx, pageWidthPt = 595) {
     ty += rowLineH;
   });
 
-  // 右側：Logo + QR Code，從右往左排列，整組靠右一點
-  let rx = safeRight - 14 * scale;
+  // 右側：Logo + QR Code，從右往左排列，跟左側文字用同樣的邊界間距，維持左右對稱
+  let rx = safeRight - 28 * scale;
 
   const qrItems = [...document.querySelectorAll('.qr-item')].map(item => ({
     url: item.querySelector('.qr-url').value,
