@@ -3,6 +3,8 @@
 // =========================================================
 let currentImage = new Image();
 let isImageLoaded = false;
+const AI_FOLDER_URL_UNIXECURE = 'https://systexgroup-my.sharepoint.com/:f:/r/personal/2200615_systex_com_tw/_layouts/15/onedrive.aspx?id=%2Fpersonal%2F2200615%5Fsystex%5Fcom%5Ftw%2FDocuments%2F%E2%AD%90%EF%B8%8F%E5%85%B1%E7%94%A8%E8%A8%AD%E8%A8%88%E6%AA%94%E6%A1%88%2F%F0%9F%94%B4%20LOGO%20%E6%88%96%E8%AA%8D%E8%AD%89%2F%F0%9F%9B%91%20uniXecure&share=cgrZk%5FdaiETKQ7qNKGmVPbnpEgUCG1cnMmCB0%5F0wzLDwAFHsmg';
+const AI_FOLDER_URL_PRODUCT = 'https://systexgroup-my.sharepoint.com/:f:/r/personal/2200615_systex_com_tw/_layouts/15/onedrive.aspx?id=%2Fpersonal%2F2200615%5Fsystex%5Fcom%5Ftw%2FDocuments%2F%E2%AD%90%EF%B8%8F%E5%85%B1%E7%94%A8%E8%A8%AD%E8%A8%88%E6%AA%94%E6%A1%88%2F%F0%9F%94%B4%20LOGO%20%E6%88%96%E8%AA%8D%E8%AD%89%2F%F0%9F%9B%91%20%E7%94%A2%E5%93%81%20LOGO&share=cgqgniPnPfK6ToFGup7c69Q2EgUC6sLVvWurqOadaE6vT0YSmg';
 let selectedBrand = '';
 let selectedLayout = '';
 let selectedColor = '';
@@ -369,7 +371,7 @@ async function downloadImage() {
 
     // [1] AI 檔處理：跳轉至雲端資料夾
     if (format === 'ai') {
-      window.open('https://systexgroup-my.sharepoint.com/:f:/g/personal/2200615_systex_com_tw/IgCqcp6hsQvbTZ6d3OI9n9RkATM2c9Q43c7C5SGHhwNVcXI?e=7FTNlS', '_blank');
+      window.open(selectedBrand === 'unixecure' ? AI_FOLDER_URL_UNIXECURE : AI_FOLDER_URL_PRODUCT, '_blank');
       return;
     }
 
