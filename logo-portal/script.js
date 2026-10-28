@@ -371,6 +371,10 @@ async function downloadImage() {
 
     // [1] AI 檔處理：跳轉至雲端資料夾
     if (format === 'ai') {
+      if (selectedBrand === 'systex') {
+        alert('SYSTEX 精誠集團的 AI 原始檔連結尚未設定，請先使用 SVG 向量檔，或洽 aimigio@unixecure.com.tw');
+        return;
+      }
       window.open(selectedBrand === 'unixecure' ? AI_FOLDER_URL_UNIXECURE : AI_FOLDER_URL_PRODUCT, '_blank');
       return;
     }
