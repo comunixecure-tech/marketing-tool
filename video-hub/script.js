@@ -26,7 +26,7 @@ let viewMode = 'group';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const groupOf = (v) => v.group || '';
+const groupOf = (v) => v.purpose || '';
 
 function store(key, val) { try { val == null ? localStorage.removeItem(key) : localStorage.setItem(key, val); } catch (e) { /* 無痕模式等情況略過 */ } }
 function recall(key) { try { return localStorage.getItem(key) || ''; } catch (e) { return ''; } }
