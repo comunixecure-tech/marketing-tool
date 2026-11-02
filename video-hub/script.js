@@ -56,8 +56,11 @@ async function fetchData(pw) {
 }
 
 function tagVideo(v) {
-  v.product = v.product || '其他';
-  v.search = `${productName(v.product)} ${v.purpose} ${v.desc} ${v.version} ${v.fileName} ${groupOf(v)} ${v.note} ${LANG_LABEL[v.lang] || v.lang}`.toLowerCase();
+  // 產品欄可複選：下拉多選在儲存格裡是用逗號分隔的文字，也容許頓號、換行
+  v.products = String(v.product || '').split(/[,，、;；\n]+/).map((p) => p.trim()).filter(Boolean);
+  if (!v.products.length) v.products = ['其他'];
+  v.product = v.products[0];
+  v.search = `${v.products.map(productName).join(' ')} ${v.purpose} ${v.desc} ${v.version} ${v.fileName} ${groupOf(v)} ${v.note} ${LANG_LABEL[v.lang] || v.lang}`.toLowerCase();
 }
 
 function setLocked(locked, message) {
@@ -114,7 +117,7 @@ function buildFilters() {
   fillSelect('f-group', 'group', '全部專案', groups.map((g) => [g, g]));
   fillSelect('f-lang', 'lang', '全部語系', langs.map((l) => [l, LANG_LABEL[l] || l]));
   const productCount = {};
-  allVideos.forEach((v) => { productCount[v.product] = (productCount[v.product] || 0) + 1; });
+  allVideos.forEach((v) => v.products.forEach((p) => { productCount[p] = (productCount[p] || 0) + 1; }));
   const productKeys = Object.keys(productCount).sort((x, y) => productCount[y] - productCount[x]);
   filters.products = new Set([...filters.products].filter((p) => productKeys.includes(p)));
   $('f-product').innerHTML = [['', '全部'], ...productKeys.map((k) => [k, productName(k)])]
@@ -139,7 +142,7 @@ function syncProductButtons() {
 function matches(v) {
   if (filters.q && !v.search.includes(filters.q.toLowerCase())) return false;
   if (filters.group && groupOf(v) !== filters.group) return false;
-  if (filters.products.size && !filters.products.has(v.product)) return false;
+  if (filters.products.size && !v.products.some((p) => filters.products.has(p))) return false;
   if (filters.lang && v.lang !== filters.lang) return false;
   if (!filters.dubs.has(v.dub === '配音' ? '配音' : '無')) return false;
   return true;
@@ -176,13 +179,17 @@ function linkBtn(label, url, id, kind) {
   return `<button type="button" class="vh-btn" data-copy="${kind}" data-id="${esc(id)}" title="複製${label}連結">${ICON_COPY}${label}</button>`;
 }
 
+function productsHTML(v) {
+  return v.products.map((p) => `<span class="vh-prod" style="color:${productColor(p)}">${esc(productName(p))}</span>`).join('<span class="vh-plus">＋</span>');
+}
+
 function headHTML(v) {
   const chips = [];
   const langTitle = `<span class="vh-langt">${esc(LANG_LABEL[v.lang] || v.lang || '語系未填')}</span><span class="vh-sep">｜</span>`;
   if (v.version) chips.push(`<span class="vh-chip ver">${esc(v.version)}</span>`);
   if (v.dub === '配音') chips.push('<span class="vh-chip dub">有配音</span>');
   return `<div class="vh-head">
-        <h3 class="vh-title">${langTitle}<span class="vh-prod" style="color:${productColor(v.product)}">${esc(productName(v.product))}</span>${v.purpose ? `<span class="vh-sep">｜</span><span class="vh-purpose">${esc(v.purpose)}</span>` : ''}</h3>
+        <h3 class="vh-title">${langTitle}${productsHTML(v)}${v.purpose ? `<span class="vh-sep">｜</span><span class="vh-purpose">${esc(v.purpose)}</span>` : ''}</h3>
         ${chips.join('')}
       </div>`;
 }
@@ -204,7 +211,7 @@ function cardHTML(v) {
   const can = inPage || !!v.publicUrl;
   const tip = inPage ? '線上預覽' : '查看影片連結';
   const thumb = v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : (can ? '' : ICON_FILM);
-  return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.product)}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${tip}：${esc(productName(v.product))}"` : 'title="尚未提供公開連結"'}>
+  return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.products[0])}${v.products.length > 1 ? `;--pc2:${productColor(v.products[1])}` : ''}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${tip}：${esc(v.products.map(productName).join('、'))}"` : 'title="尚未提供公開連結"'}>
     <div class="vh-thumb">${thumb}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
     <div class="vh-info">
       ${headHTML(v)}

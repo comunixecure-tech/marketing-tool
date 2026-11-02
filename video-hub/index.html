@@ -54,8 +54,8 @@
         .vh-card.can-preview { cursor: pointer; }
         .vh-card.can-preview:hover, .vh-card.can-preview:focus-visible { outline: none; border-color: var(--pc); background: color-mix(in srgb, var(--pc) 5%, #fff); box-shadow: 0 12px 28px color-mix(in srgb, var(--pc) 24%, transparent); transform: translateY(-3px); }
         .vh-thumb { flex: 0 0 128px; aspect-ratio: 16 / 9; border-radius: 8px; background: #eceff5; display: flex; align-items: center; justify-content: center; color: #b3bccb; position: relative; overflow: hidden; align-self: center; transition: background 0.18s ease; }
-        .vh-card.can-preview .vh-thumb { background: linear-gradient(135deg, var(--pc), color-mix(in srgb, var(--pc) 78%, #fff)); color: #fff; }
-        .vh-card.can-preview:hover .vh-thumb, .vh-card.can-preview:focus-visible .vh-thumb { background: linear-gradient(135deg, color-mix(in srgb, var(--pc) 78%, #000), var(--pc)); }
+        .vh-card.can-preview .vh-thumb { background: linear-gradient(135deg, var(--pc), var(--pc2, color-mix(in srgb, var(--pc) 78%, #fff))); color: #fff; }
+        .vh-card.can-preview:hover .vh-thumb, .vh-card.can-preview:focus-visible .vh-thumb { filter: brightness(0.88); }
         .vh-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
         .vh-group { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 14px 0 -4px; font-size: 15px; font-weight: 700; }
         .vh-group:first-child { margin-top: 0; }
@@ -66,6 +66,7 @@
         .vh-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
         .vh-title { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.4; color: var(--text-main); display: flex; align-items: center; flex-wrap: wrap; }
         .vh-langt { color: #64748b; }
+        .vh-plus { margin: 0 5px; font-weight: 400; color: #b3bccb; }
         .vh-sep { margin: 0 6px; font-weight: 400; color: #b3bccb; }
         .vh-new { position: absolute; top: 5px; left: 5px; z-index: 3; background: var(--danger); color: #fff; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
         .vh-date { position: absolute; left: 7px; bottom: 5px; z-index: 3; font-size: 11px; font-weight: 600; color: #6b7690; white-space: nowrap; }
