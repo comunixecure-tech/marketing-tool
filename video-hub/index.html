@@ -15,8 +15,6 @@
         .vh-top { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; padding: 4px 0 14px; }
         .vh-top .back-to-home { margin: 0; flex-shrink: 0; }
         .vh-top h1 { margin: 0; font-size: 22px; color: var(--primary); letter-spacing: -0.3px; white-space: nowrap; }
-        .vh-legend { flex: 1; min-width: 260px; font-size: 12.5px; color: var(--text-muted); line-height: 1.5; }
-        .vh-legend b { color: var(--text-main); font-weight: 700; }
         .vh-meta { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-muted); white-space: nowrap; }
         .vh-link-btn { background: none; border: none; padding: 0; color: var(--primary); font-size: 12.5px; cursor: pointer; font-family: inherit; }
         .vh-link-btn:hover { text-decoration: underline; }
@@ -102,13 +100,11 @@
         .vh-dlg-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 20px; padding-top: 14px; border-top: 1px solid var(--border-color); }
         .vh-dlg-date { font-size: 12.5px; color: var(--text-muted); white-space: nowrap; }
         .vh-dlg-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 12px 24px; margin-left: auto; }
-        .vh-linkrow { display: flex; align-items: center; gap: 8px; }
         .vh-seg-pair { display: inline-flex; }
         .vh-seg-pair .vh-mini { border-radius: 0; }
         .vh-seg-pair .vh-mini:first-child { border-radius: 7px 0 0 7px; }
         .vh-seg-pair .vh-mini:last-child { border-radius: 0 7px 7px 0; margin-left: -1px; }
         .vh-seg-pair .vh-mini:hover:not(:disabled) { position: relative; z-index: 1; }
-        .vh-linklabel { font-size: 12.5px; font-weight: 700; color: var(--text-muted); }
         .vh-mini:disabled { opacity: 0.45; cursor: default; }
         .vh-mini:disabled:hover { border-color: var(--border-color); color: var(--text-main); }
         .vh-mini { border: 1px solid var(--border-color); background: #fff; border-radius: 7px; padding: 8px 14px; font-size: 13px; cursor: pointer; color: var(--text-main); font-family: inherit; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; white-space: nowrap; }
@@ -156,7 +152,6 @@
                 返回主頁
             </a>
             <h1>影片領取區</h1>
-            <div class="vh-legend"><b>所有人</b>：不用登入就能觀看　<b>集團內</b>：需用公司帳號登入</div>
             <div class="vh-meta">
                 <span id="vh-updated"></span>
                 <button type="button" class="vh-link-btn" id="vh-refresh">重新整理</button>

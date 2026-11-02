@@ -174,9 +174,9 @@ const ICON_OPEN = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" s
 const ICON_PLAY = '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"></path></svg>';
 const ICON_FILM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2"></rect><line x1="7" y1="4" x2="7" y2="20"></line><line x1="17" y1="4" x2="17" y2="20"></line><line x1="2.5" y1="9" x2="7" y2="9"></line><line x1="2.5" y1="15" x2="7" y2="15"></line><line x1="17" y1="9" x2="21.5" y2="9"></line><line x1="17" y1="15" x2="21.5" y2="15"></line></svg>';
 
-function linkBtn(label, url, id, kind) {
+function linkBtn(url, id) {
   if (!url) return '';
-  return `<button type="button" class="vh-btn" data-copy="${kind}" data-id="${esc(id)}" title="複製${label}連結">${ICON_COPY}${label}</button>`;
+  return `<button type="button" class="vh-btn" data-copy data-id="${esc(id)}" title="複製影片連結">${ICON_COPY}複製連結</button>`;
 }
 
 function productsHTML(v) {
@@ -204,7 +204,7 @@ function descHTMLOf(v) {
 }
 
 function cardHTML(v) {
-  const actionsHTML = linkBtn('所有人', v.publicUrl, v.id, 'public') + linkBtn('集團內', v.orgUrl, v.id, 'org');
+  const actionsHTML = linkBtn(v.publicUrl, v.id);
   const descHTML = descHTMLOf(v);
   // 有公開連結就能點：能直接串流的在視窗內播放，其餘在新分頁開啟 SharePoint 播放頁
   const inPage = !!v.playUrl;
@@ -260,12 +260,9 @@ function watch(id) {
   if (v.playUrl) video.src = v.playUrl;
   $('vh-dlg-info').innerHTML = `${headHTML(v)}${descHTMLOf(v) ? `<p class="vh-desc">${descHTMLOf(v)}</p>` : ''}`;
   $('vh-dlg-date').textContent = v.date ? `更新時間 ${fmtDate(v.date)}` : '';
-  $('vh-dlg-actions').innerHTML = [['所有人', 'public', v.publicUrl], ['集團內', 'org', v.orgUrl]].filter(([, , url]) => url).map(([label, kind, url]) => `<div class="vh-linkrow">
-      <span class="vh-linklabel">${label}</span>
-      <div class="vh-seg-pair">${url
-        ? `<button type="button" class="vh-mini" data-copy="${kind}" data-id="${esc(v.id)}">${ICON_COPY}複製</button><a class="vh-mini" href="${esc(url)}" target="_blank" rel="noopener">${ICON_OPEN}開啟</a>`
-        : ''}</div>
-    </div>`).join('');
+  $('vh-dlg-actions').innerHTML = v.publicUrl
+    ? `<div class="vh-seg-pair"><button type="button" class="vh-mini" data-copy data-id="${esc(v.id)}">${ICON_COPY}複製</button><a class="vh-mini" href="${esc(v.publicUrl)}" target="_blank" rel="noopener">${ICON_OPEN}開啟</a></div>`
+    : '';
   $('vh-dialog').showModal();
   const p = v.playUrl ? video.play() : null;
   if (p && p.catch) p.catch(() => { /* 瀏覽器擋自動播放時使用者自己按播放 */ });
@@ -298,9 +295,9 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-async function copyLink(id, kind) {
+async function copyLink(id) {
   const v = allVideos.find((x) => x.id === id);
-  const url = v && (kind === 'org' ? v.orgUrl : v.publicUrl);
+  const url = v && v.publicUrl;
   if (!url) return;
   try {
     await navigator.clipboard.writeText(url);
@@ -312,7 +309,7 @@ async function copyLink(id, kind) {
     document.execCommand('copy');
     ta.remove();
   }
-  toast(kind === 'org' ? '已複製集團內連結' : '已複製所有人連結');
+  toast('已複製連結');
 }
 
 // =========================================================
@@ -320,7 +317,7 @@ async function copyLink(id, kind) {
 // =========================================================
 document.addEventListener('click', (e) => {
   const copyBtn = e.target.closest('[data-copy]');
-  if (copyBtn) { copyLink(copyBtn.dataset.id, copyBtn.dataset.copy); return; }
+  if (copyBtn) { copyLink(copyBtn.dataset.id); return; }
   if (e.target.closest('a')) return; // 備註連結等照常開新分頁，不觸發預覽
   const viewBtn = e.target.closest('#vh-view button');
   if (viewBtn) {
