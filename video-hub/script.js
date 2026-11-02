@@ -204,7 +204,7 @@ function cardHTML(v) {
   const tip = inPage ? '線上預覽' : '查看影片連結';
   const thumb = v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : (can ? '' : ICON_FILM);
   return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.product)}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${tip}：${esc(productName(v.product))}"` : 'title="尚未提供公開連結"'}>
-    <div class="vh-thumb">${thumb}<span class="vh-lang lang-${esc(v.lang)}">${esc(LANG_LABEL[v.lang] || v.lang || '語系未填')}</span>${can ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
+    <div class="vh-thumb">${thumb}<span class="vh-lang lang-${esc(v.lang)}">${esc(LANG_LABEL[v.lang] || v.lang || '語系未填')}</span>${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
     <div class="vh-info">
       ${headHTML(v)}
       ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
