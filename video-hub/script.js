@@ -182,7 +182,7 @@ function headHTML(v) {
   if (v.version) chips.push(`<span class="vh-chip ver">${esc(v.version)}</span>`);
   if (v.dub === '配音') chips.push('<span class="vh-chip dub">有配音</span>');
   return `<div class="vh-head">
-        <h3 class="vh-title">${langTitle}<span class="vh-prod" style="color:${productColor(v.product)}">${esc(productName(v.product))}</span>${v.purpose ? `<span class="vh-sep">｜</span><span class="vh-purpose">${esc(v.purpose)}</span>` : ''}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}</h3>
+        <h3 class="vh-title">${langTitle}<span class="vh-prod" style="color:${productColor(v.product)}">${esc(productName(v.product))}</span>${v.purpose ? `<span class="vh-sep">｜</span><span class="vh-purpose">${esc(v.purpose)}</span>` : ''}</h3>
         ${chips.join('')}
       </div>`;
 }
@@ -204,7 +204,7 @@ function cardHTML(v) {
   const tip = inPage ? '線上預覽' : '查看影片連結';
   const thumb = v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : (can ? '' : ICON_FILM);
   return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.product)}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${tip}：${esc(productName(v.product))}"` : 'title="尚未提供公開連結"'}>
-    <div class="vh-thumb">${thumb}${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
+    <div class="vh-thumb">${thumb}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
     <div class="vh-info">
       ${headHTML(v)}
       ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
