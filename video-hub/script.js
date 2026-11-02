@@ -3,7 +3,7 @@
 // =========================================================
 // 貼上 Apps Script 部署後的網址，就會即時讀取試算表（密碼也由試算表 A1 欄位把關）
 // 留空時是本機測試模式：改讀同資料夾的 data.local.json（含測試用密碼，不會上傳到 GitHub）
-const VIDEO_API_URL = '';
+const VIDEO_API_URL = 'https://script.google.com/macros/s/AKfycbzxNRvc0EesLOeoyZp4vVuC21SjFk_fRmYzaSgB2ijxA9sabMueG3LZ62i-t_nugZ3IqA/exec';
 
 // 產品欄位的值直接取自試算表，這裡只負責顯示名稱
 const PRODUCT_LABEL = { SOC: 'Autonomous SOC' };
