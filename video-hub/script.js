@@ -176,13 +176,13 @@ function linkBtn(label, url, id, kind) {
   return `<button type="button" class="vh-btn" data-copy="${kind}" data-id="${esc(id)}" title="複製${label}連結">${ICON_COPY}${label}</button>`;
 }
 
-function headHTML(v, withLang = false) {
+function headHTML(v) {
   const chips = [];
-  const langChip = withLang && v.lang ? `<span class="vh-chip lang">${esc(LANG_LABEL[v.lang] || v.lang)}</span>` : '';
+  const langTitle = `<span class="vh-langt">${esc(LANG_LABEL[v.lang] || v.lang || '語系未填')}</span><span class="vh-sep">｜</span>`;
   if (v.version) chips.push(`<span class="vh-chip ver">${esc(v.version)}</span>`);
   if (v.dub === '配音') chips.push('<span class="vh-chip dub">有配音</span>');
   return `<div class="vh-head">
-        <h3 class="vh-title">${langChip}<span class="vh-prod" style="color:${productColor(v.product)}">${esc(productName(v.product))}</span>${v.purpose ? `<span class="vh-sep">｜</span><span class="vh-purpose">${esc(v.purpose)}</span>` : ''}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}</h3>
+        <h3 class="vh-title">${langTitle}<span class="vh-prod" style="color:${productColor(v.product)}">${esc(productName(v.product))}</span>${v.purpose ? `<span class="vh-sep">｜</span><span class="vh-purpose">${esc(v.purpose)}</span>` : ''}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}</h3>
         ${chips.join('')}
       </div>`;
 }
@@ -204,7 +204,7 @@ function cardHTML(v) {
   const tip = inPage ? '線上預覽' : '查看影片連結';
   const thumb = v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : (can ? '' : ICON_FILM);
   return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.product)}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${tip}：${esc(productName(v.product))}"` : 'title="尚未提供公開連結"'}>
-    <div class="vh-thumb">${thumb}<span class="vh-lang lang-${esc(v.lang)}">${esc(LANG_LABEL[v.lang] || v.lang || '語系未填')}</span>${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
+    <div class="vh-thumb">${thumb}${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
     <div class="vh-info">
       ${headHTML(v)}
       ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
@@ -253,7 +253,7 @@ function watch(id) {
   stage.classList.toggle('failed', !v.playUrl);
   video.onerror = () => stage.classList.add('failed');
   if (v.playUrl) video.src = v.playUrl;
-  $('vh-dlg-info').innerHTML = `${headHTML(v, true)}${descHTMLOf(v) ? `<p class="vh-desc">${descHTMLOf(v)}</p>` : ''}`;
+  $('vh-dlg-info').innerHTML = `${headHTML(v)}${descHTMLOf(v) ? `<p class="vh-desc">${descHTMLOf(v)}</p>` : ''}`;
   $('vh-dlg-date').textContent = v.date ? `更新時間 ${fmtDate(v.date)}` : '';
   $('vh-dlg-actions').innerHTML = [['所有人', 'public', v.publicUrl], ['集團內', 'org', v.orgUrl]].map(([label, kind, url]) => `<div class="vh-linkrow">
       <span class="vh-linklabel">${label}</span>
