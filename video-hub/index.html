@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>影片領取區｜uniXecure</title>
+    <link rel="icon" href="https://www.unixecure.com/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .vh-wrap { max-width: 1040px; margin: 0 auto; padding: 16px 20px 80px; }
+        body.locked .vh-wrap { display: none; }
+
+        /* 頂部：標題、連結說明、更新資訊同一排 */
+        .vh-top { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; padding: 4px 0 14px; }
+        .vh-top .back-to-home { margin: 0; flex-shrink: 0; }
+        .vh-top h1 { margin: 0; font-size: 22px; color: var(--primary); letter-spacing: -0.3px; white-space: nowrap; }
+        .vh-legend { flex: 1; min-width: 260px; font-size: 12.5px; color: var(--text-muted); line-height: 1.5; }
+        .vh-legend b { color: var(--text-main); font-weight: 700; }
+        .vh-meta { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-muted); white-space: nowrap; }
+        .vh-link-btn { background: none; border: none; padding: 0; color: var(--primary); font-size: 12.5px; cursor: pointer; font-family: inherit; }
+        .vh-link-btn:hover { text-decoration: underline; }
+
+        /* 篩選列 */
+        .vh-toolbar { z-index: 20; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(8px); padding: 10px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; }
+        .vh-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .vh-search { position: relative; flex: 0 1 210px; min-width: 150px; }
+        .vh-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+        .vh-search input { width: 100%; box-sizing: border-box; padding: 8px 12px 8px 34px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: #fff; font-family: inherit; color: var(--text-main); }
+        .vh-search input:focus, .vh-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(60, 73, 186, 0.1); }
+        .vh-select { appearance: none; -webkit-appearance: none; border: 1px solid var(--border-color); border-radius: 8px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center; padding: 8px 28px 8px 12px; font-size: 14px; font-family: inherit; color: var(--text-main); cursor: pointer; max-width: 200px; }
+        .vh-select.on { border-color: var(--primary); color: var(--primary); font-weight: 700; background-color: rgba(60, 73, 186, 0.05); }
+        .vh-flabel { font-size: 13px; color: var(--text-muted); font-weight: 700; white-space: nowrap; margin-right: 2px; }
+        .vh-pill-group { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .vh-pill { cursor: pointer; }
+        .vh-pill input { position: absolute; opacity: 0; pointer-events: none; }
+        .vh-pill span, .vh-pillbtn { display: inline-block; padding: 6px 13px; border: 1px solid var(--border-color); border-radius: 999px; background: #fff; font-size: 13px; color: var(--text-main); font-family: inherit; cursor: pointer; transition: all 0.15s ease; }
+        .vh-pill:hover span, .vh-pillbtn:hover { border-color: var(--primary); color: var(--primary); }
+        .vh-pill input:checked + span, .vh-pillbtn[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
+        .vh-pill input:focus-visible + span { box-shadow: 0 0 0 3px rgba(60, 73, 186, 0.25); }
+        .vh-seg { display: inline-flex; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #fff; }
+        .vh-seg button { border: none; background: #fff; padding: 7px 12px; font-size: 13px; cursor: pointer; color: var(--text-muted); font-family: inherit; white-space: nowrap; }
+        .vh-seg button + button { border-left: 1px solid var(--border-color); }
+        .vh-seg button[aria-pressed="true"] { background: rgba(60, 73, 186, 0.08); color: var(--primary); font-weight: 700; }
+        #vh-count { font-size: 14px; color: var(--text-muted); white-space: nowrap; margin-left: auto; }
+        #vh-count b { color: var(--primary); font-size: 16px; }
+
+        /* 影片列表：像 YouTube 一樣橫排，縮圖在左、資訊在右 */
+        .vh-list { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 18px; }
+        .vh-card { position: relative; display: flex; align-items: center; gap: 16px; padding: 12px 16px 12px 12px; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease; }
+        .vh-card.can-preview { cursor: pointer; }
+        .vh-card.can-preview:hover, .vh-card.can-preview:focus-visible { outline: none; border-color: var(--primary); background: #f6f7ff; box-shadow: 0 12px 28px rgba(60, 73, 186, 0.2); transform: translateY(-3px); }
+        .vh-thumb { flex: 0 0 128px; aspect-ratio: 16 / 9; border-radius: 8px; background: #eceff5; display: flex; align-items: center; justify-content: center; color: #b3bccb; position: relative; overflow: hidden; align-self: center; transition: background 0.18s ease; }
+        .vh-card.can-preview .vh-thumb { background: linear-gradient(135deg, var(--primary), #5a68d6); color: #fff; }
+        .vh-card.can-preview:hover .vh-thumb, .vh-card.can-preview:focus-visible .vh-thumb { background: linear-gradient(135deg, #2c3896, var(--primary)); }
+        .vh-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .vh-lang { position: absolute; top: 5px; left: 5px; z-index: 3; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; color: #475569; background: #fff; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.22); }
+        .vh-lang.lang-TC { color: #3c49ba; }
+        .vh-lang.lang-EN { color: #047857; }
+        .vh-lang.lang-JP { color: #be123c; }
+        .vh-lang.lang-ID { color: #c2410c; }
+        .vh-group { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 14px 0 -4px; font-size: 15px; font-weight: 700; }
+        .vh-group:first-child { margin-top: 0; }
+        .vh-group small { font-size: 12.5px; font-weight: 400; color: var(--text-muted); }
+        .vh-play { position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; background: #fff; color: var(--primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22); transition: transform 0.18s ease; }
+        .vh-card.can-preview:hover .vh-play, .vh-card.can-preview:focus-visible .vh-play { transform: scale(1.22); }
+        .vh-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+        .vh-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
+        .vh-title { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.4; color: var(--text-main); display: flex; align-items: center; }
+        .vh-card.can-preview:hover .vh-title { color: var(--primary); }
+        .vh-new { margin-left: 8px; background: var(--danger); color: #fff; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+        .vh-date { position: absolute; left: 7px; bottom: 5px; z-index: 3; font-size: 11px; font-weight: 600; color: #6b7690; white-space: nowrap; }
+        .vh-card.can-preview .vh-date { color: #fff; }
+        .vh-chip { font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: #eef1f6; color: #475569; }
+        .vh-chip.ver { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); }
+        .vh-chip.dub { background: rgba(255, 180, 21, 0.22); color: #7a5300; }
+        .vh-desc { margin: 7px 0 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .vh-desc a { color: var(--primary); text-decoration: none; }
+        .vh-desc a:hover { text-decoration: underline; }
+        .vh-actions { display: flex; flex-direction: row; gap: 6px; flex-shrink: 0; }
+        .vh-btn { justify-content: center; border: 1px solid var(--border-color); background: #fff; color: var(--text-main); font-family: inherit; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 7px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .vh-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(60, 73, 186, 0.06); color: var(--primary); }
+        .vh-btn:disabled { opacity: 0.45; cursor: default; }
+
+        .vh-state { grid-column: 1 / -1; text-align: center; padding: 70px 20px; color: var(--text-muted); }
+        .vh-state h3 { color: var(--text-main); margin: 0 0 8px; }
+        .vh-skel { height: 150px; border-radius: 12px; background: linear-gradient(100deg, #eef1f6 30%, #f8fafc 50%, #eef1f6 70%); background-size: 200% 100%; animation: vh-shine 1.3s linear infinite; }
+        @keyframes vh-shine { to { background-position: -200% 0; } }
+
+        /* 預覽視窗 */
+        #vh-dialog { border: none; padding: 0; border-radius: 14px; width: min(960px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: hidden; box-shadow: 0 30px 80px rgba(15, 23, 42, 0.45); background: #fff; color: var(--text-main); }
+        #vh-dialog::backdrop { background: rgba(15, 23, 42, 0.62); backdrop-filter: blur(3px); }
+        .vh-stage { background: #000; position: relative; aspect-ratio: 16 / 9; max-height: 62vh; width: 100%; }
+        .vh-stage video { width: 100%; height: 100%; display: block; background: #000; }
+        .vh-stage .err { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; text-align: center; color: #e2e8f0; padding: 24px; font-size: 14px; line-height: 1.7; }
+        .vh-stage.failed .err { display: flex; }
+        .vh-stage.failed video { visibility: hidden; }
+        .vh-close { position: absolute; top: 10px; right: 10px; z-index: 5; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(15, 23, 42, 0.7); color: #fff; font-size: 16px; cursor: pointer; }
+        .vh-dlg-body { padding: 16px 20px 20px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+        .vh-dlg-body h3 { margin: 0; font-size: 18px; }
+        .vh-dlg-body p { margin: 4px 0 0; font-size: 13px; color: var(--text-muted); }
+        .vh-dlg-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .vh-mini { border: 1px solid var(--border-color); background: #fff; border-radius: 7px; padding: 8px 14px; font-size: 13px; cursor: pointer; color: var(--text-main); font-family: inherit; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; white-space: nowrap; }
+        .vh-mini:hover { border-color: var(--primary); color: var(--primary); }
+        .vh-mini.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .vh-mini.primary:hover { filter: brightness(1.1); color: #fff; }
+
+        /* 密碼畫面 */
+        #vh-gate { display: none; position: fixed; inset: 0; z-index: 200; background: #f8fafc; align-items: center; justify-content: center; padding: 20px; }
+        body.locked #vh-gate { display: flex; }
+        .vh-gate-card { width: 100%; max-width: 380px; background: #fff; border: 1px solid var(--border-color); border-radius: 14px; padding: 32px 28px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06); text-align: center; }
+        .vh-gate-card h1 { margin: 0 0 6px; font-size: 22px; color: var(--primary); }
+        .vh-gate-card p { margin: 0 0 20px; font-size: 14px; color: var(--text-muted); }
+        .vh-gate-card input { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; font-family: inherit; text-align: center; }
+        .vh-gate-card input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(60, 73, 186, 0.1); }
+        .vh-gate-card button { width: 100%; margin-top: 12px; padding: 12px; border: none; border-radius: 8px; background: var(--primary); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .vh-gate-card button:disabled { opacity: 0.6; cursor: wait; }
+        #vh-gate-err { min-height: 20px; margin-top: 10px; font-size: 13px; color: var(--danger); }
+
+        #vh-toast { position: fixed; left: 50%; bottom: 32px; transform: translate(-50%, 20px); background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 300; }
+        #vh-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+        @media (min-width: 900px) {
+            .vh-toolbar { position: sticky; top: 0; }
+        }
+        @media (max-width: 640px) {
+            .vh-list { gap: 10px; }
+            .vh-card { flex-wrap: wrap; }
+            .vh-actions { width: 100%; }
+            .vh-actions .vh-btn { flex: 1; }
+            .vh-thumb { flex-basis: 100px; }
+            .vh-select { max-width: none; flex: 1 1 45%; }
+            #vh-count { margin-left: 0; }
+        }
+    </style>
+</head>
+<body class="locked">
+    <div class="vh-wrap">
+        <div class="vh-top">
+            <a href="../index.html" class="back-to-home">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                返回主頁
+            </a>
+            <h1>影片領取區</h1>
+            <div class="vh-legend"><b>公開連結</b>：不用登入就能觀看　<b>內部連結</b>：需用公司帳號登入，沒有觀看期限</div>
+            <div class="vh-meta">
+                <span id="vh-updated"></span>
+                <button type="button" class="vh-link-btn" id="vh-refresh">重新整理</button>
+            </div>
+        </div>
+
+        <div class="vh-toolbar">
+            <div class="vh-row">
+                <div class="vh-search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input id="vh-q" type="search" placeholder="搜尋關鍵字" autocomplete="off">
+                </div>
+                <select class="vh-select" id="f-group" data-key="group" aria-label="專案"></select>
+                <select class="vh-select" id="f-lang" data-key="lang" aria-label="語系"></select>
+                <div class="vh-pill-group" role="group" aria-label="配音">
+                    <label class="vh-pill"><input type="checkbox" name="dub" value="配音" checked><span>有配音</span></label>
+                    <label class="vh-pill"><input type="checkbox" name="dub" value="無" checked><span>無配音</span></label>
+                </div>
+                <span id="vh-count"></span>
+                <div class="vh-seg" id="vh-view">
+                    <button type="button" data-view="group" aria-pressed="true">依專案</button>
+                    <button type="button" data-view="date" aria-pressed="false">依日期</button>
+                </div>
+            </div>
+            <div class="vh-row">
+                <span class="vh-flabel">產品</span>
+                <div class="vh-pill-group" id="f-product"></div>
+            </div>
+        </div>
+
+        <main id="vh-list" class="vh-list"></main>
+    </div>
+
+    <div id="vh-gate">
+        <form class="vh-gate-card" id="vh-gate-form">
+            <h1>影片領取區</h1>
+            <p>請輸入密碼才能查看影片清單</p>
+            <input type="password" id="vh-gate-pw" placeholder="密碼" autocomplete="current-password" required>
+            <div id="vh-gate-err"></div>
+            <button type="submit" id="vh-gate-btn">進入</button>
+        </form>
+    </div>
+
+    <dialog id="vh-dialog">
+        <div class="vh-stage" id="vh-stage">
+            <button type="button" class="vh-close" id="vh-close" aria-label="關閉">✕</button>
+            <video id="vh-video" controls playsinline preload="metadata"></video>
+            <div class="err"><div>這支影片暫時無法在這裡播放<br>請用下方按鈕開啟連結觀看</div></div>
+        </div>
+        <div class="vh-dlg-body">
+            <div>
+                <h3 id="vh-dlg-title"></h3>
+                <p id="vh-dlg-meta"></p>
+            </div>
+            <div class="vh-dlg-actions" id="vh-dlg-actions"></div>
+        </div>
+    </dialog>
+
+    <div id="vh-toast" role="status" aria-live="polite"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
