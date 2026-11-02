@@ -176,7 +176,7 @@ const ICON_FILM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" s
 
 function linkBtn(url, id) {
   if (!url) return '';
-  return `<button type="button" class="vh-btn" data-copy data-id="${esc(id)}" title="複製影片連結">${ICON_COPY}複製連結</button>`;
+  return `<button type="button" class="vh-btn" data-copy data-id="${esc(id)}" title="複製影片連結">${ICON_COPY}複製連結</button><a class="vh-btn" href="${esc(url)}" target="_blank" rel="noopener" title="在新分頁開啟">${ICON_OPEN}開啟</a>`;
 }
 
 function productsHTML(v) {
@@ -206,12 +206,12 @@ function descHTMLOf(v) {
 function cardHTML(v) {
   const actionsHTML = linkBtn(v.publicUrl, v.id);
   const descHTML = descHTMLOf(v);
-  // 有公開連結就能點：能直接串流的在視窗內播放，其餘在新分頁開啟 SharePoint 播放頁
+  // 有公開連結就能點：能直接串流的在卡片下方展開播放，其餘在新分頁開啟 SharePoint 播放頁
   const inPage = !!v.playUrl;
   const can = inPage || !!v.publicUrl;
-  const tip = inPage ? '線上預覽' : '查看影片連結';
+  const tip = inPage ? '點擊展開播放' : '這支影片的分享設定不開放在這裡直接播放，點擊會在新分頁開啟連結';
   const thumb = v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : (can ? '' : ICON_FILM);
-  return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.products[0])}${v.products.length > 1 ? `;--pc2:${productColor(v.products[1])}` : ''}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${tip}：${esc(v.products.map(productName).join('、'))}"` : 'title="尚未提供公開連結"'}>
+  return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.products[0])}${v.products.length > 1 ? `;--pc2:${productColor(v.products[1])}` : ''}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${esc(v.products.map(productName).join('、'))}：${tip}"${inPage ? ' aria-expanded="false"' : ''}` : 'title="尚未提供公開連結"'}>
     <div class="vh-thumb">${thumb}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
     <div class="vh-info">
       ${headHTML(v)}
@@ -248,36 +248,44 @@ function render() {
 }
 
 // =========================================================
-// 預覽：公開連結能直接串流的在視窗內播放，其他開新分頁
+// 預覽：能直接串流的在卡片下方展開播放，其他開新分頁
 // =========================================================
-function watch(id) {
-  const v = allVideos.find((x) => x.id === id);
-  if (!v) return;
-  const stage = $('vh-stage');
-  const video = $('vh-video');
-  stage.classList.toggle('failed', !v.playUrl);
-  video.onerror = () => stage.classList.add('failed');
-  if (v.playUrl) video.src = v.playUrl;
-  $('vh-dlg-info').innerHTML = `${headHTML(v)}${descHTMLOf(v) ? `<p class="vh-desc">${descHTMLOf(v)}</p>` : ''}`;
-  $('vh-dlg-date').textContent = v.date ? `更新時間 ${fmtDate(v.date)}` : '';
-  $('vh-dlg-actions').innerHTML = v.publicUrl
-    ? `<div class="vh-seg-pair"><button type="button" class="vh-mini" data-copy data-id="${esc(v.id)}">${ICON_COPY}複製</button><a class="vh-mini" href="${esc(v.publicUrl)}" target="_blank" rel="noopener">${ICON_OPEN}開啟</a></div>`
-    : '';
-  $('vh-dialog').showModal();
-  const p = v.playUrl ? video.play() : null;
-  if (p && p.catch) p.catch(() => { /* 瀏覽器擋自動播放時使用者自己按播放 */ });
-}
-
-function closePreview() {
-  const dlg = $('vh-dialog');
-  if (dlg.open) dlg.close();
-}
-
-function resetPlayer() {
-  const video = $('vh-video');
+function collapseCard(card) {
+  const player = card.querySelector('.vh-player');
+  if (!player) return;
+  const video = player.querySelector('video');
   video.pause();
   video.removeAttribute('src');
   video.load();
+  player.remove();
+  card.classList.remove('open');
+  card.setAttribute('aria-expanded', 'false');
+}
+
+function watch(id) {
+  const v = allVideos.find((x) => x.id === id);
+  const card = document.querySelector(`.vh-card[data-preview="${CSS.escape(id)}"]`);
+  if (!v || !card) return;
+  if (!v.playUrl) {
+    window.open(v.publicUrl, '_blank', 'noopener');
+    return;
+  }
+  if (card.classList.contains('open')) { collapseCard(card); return; }
+  document.querySelectorAll('.vh-card.open').forEach(collapseCard); // 一次只展開一支
+  card.classList.add('open');
+  card.setAttribute('aria-expanded', 'true');
+  card.insertAdjacentHTML('beforeend', `<div class="vh-player">
+    <video controls playsinline preload="metadata"></video>
+    <div class="err"><div>這支影片暫時無法在這裡播放<br>請改用右上方的「開啟」在新分頁觀看</div></div>
+    <button type="button" class="vh-collapse" data-collapse>收合</button>
+  </div>`);
+  const player = card.querySelector('.vh-player');
+  const video = player.querySelector('video');
+  video.onerror = () => player.classList.add('failed');
+  video.src = v.playUrl;
+  const p = video.play();
+  if (p && p.catch) p.catch(() => { /* 瀏覽器擋自動播放時使用者自己按播放 */ });
+  player.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 // =========================================================
@@ -286,9 +294,6 @@ function resetPlayer() {
 let toastTimer = null;
 function toast(msg) {
   const t = $('vh-toast');
-  // 彈窗會蓋在最上層，提示要放進彈窗裡才看得到
-  const dlg = $('vh-dialog');
-  (dlg.open ? dlg : document.body).appendChild(t);
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
@@ -318,6 +323,9 @@ async function copyLink(id) {
 document.addEventListener('click', (e) => {
   const copyBtn = e.target.closest('[data-copy]');
   if (copyBtn) { copyLink(copyBtn.dataset.id); return; }
+  const collapseBtn = e.target.closest('[data-collapse]');
+  if (collapseBtn) { collapseCard(collapseBtn.closest('.vh-card')); return; }
+  if (e.target.closest('.vh-player')) return; // 操作播放器本身不收合
   if (e.target.closest('a')) return; // 備註連結等照常開新分頁，不觸發預覽
   const viewBtn = e.target.closest('#vh-view button');
   if (viewBtn) {
@@ -341,6 +349,7 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') document.querySelectorAll('.vh-card.open').forEach(collapseCard);
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.vh-card[data-preview]')) {
     e.preventDefault();
     watch(e.target.dataset.preview);
@@ -367,9 +376,6 @@ document.querySelectorAll('input[name="dub"]').forEach((box) => {
 
 $('vh-q').addEventListener('input', (e) => { filters.q = e.target.value.trim(); render(); });
 $('vh-refresh').addEventListener('click', () => start(recall(PW_KEY)));
-$('vh-close').addEventListener('click', closePreview);
-$('vh-dialog').addEventListener('click', (e) => { if (e.target === $('vh-dialog')) closePreview(); });
-$('vh-dialog').addEventListener('close', resetPlayer);
 
 $('vh-gate-form').addEventListener('submit', async (e) => {
   e.preventDefault();
