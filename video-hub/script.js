@@ -8,6 +8,9 @@ const VIDEO_API_URL = 'https://script.google.com/macros/s/AKfycbzxNRvc0EesLOeoyZ
 // 產品欄位的值直接取自試算表，這裡只負責顯示名稱
 const PRODUCT_LABEL = { SOC: 'Autonomous SOC' };
 const productName = (k) => PRODUCT_LABEL[k] || k;
+// 產品識別色：RAVEN 藍、HEIS 綠、LUCAS 橘、SRMAS 紫（公司規範），其餘自訂；沒登記的用深灰藍
+const PRODUCT_COLOR = { RAVEN: '#3c49ba', HEIS: '#15803d', LUCAS: '#c2410c', SRMAS: '#7e3af2', SOC: '#232e8a', uberAgent: '#0284c7', 'Q-Atlas': '#0e7490' };
+const productColor = (k) => PRODUCT_COLOR[k] || '#475569';
 const LANG_LABEL = { TC: '繁體中文', EN: '英文', JP: '日文', ID: '印尼文' };
 const NEW_DAYS = 30;
 const PW_KEY = 'vh-pw';
@@ -115,7 +118,7 @@ function buildFilters() {
   const productKeys = Object.keys(productCount).sort((x, y) => productCount[y] - productCount[x]);
   filters.products = new Set([...filters.products].filter((p) => productKeys.includes(p)));
   $('f-product').innerHTML = [['', '全部'], ...productKeys.map((k) => [k, productName(k)])]
-    .map(([val, label]) => `<button type="button" class="vh-pillbtn" data-product="${esc(val)}" aria-pressed="false">${esc(label)}</button>`).join('');
+    .map(([val, label]) => `<button type="button" class="vh-pillbtn" data-product="${esc(val)}"${val ? ` style="--pc:${productColor(val)}"` : ''} aria-pressed="false">${esc(label)}</button>`).join('');
   syncProductButtons();
 }
 
@@ -169,37 +172,46 @@ const ICON_PLAY = '<svg width="11" height="11" viewBox="0 0 24 24" fill="current
 const ICON_FILM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2"></rect><line x1="7" y1="4" x2="7" y2="20"></line><line x1="17" y1="4" x2="17" y2="20"></line><line x1="2.5" y1="9" x2="7" y2="9"></line><line x1="2.5" y1="15" x2="7" y2="15"></line><line x1="17" y1="9" x2="21.5" y2="9"></line><line x1="17" y1="15" x2="21.5" y2="15"></line></svg>';
 
 function linkBtn(label, url, id, kind) {
-  if (!url) return `<button type="button" class="vh-btn" disabled>${ICON_COPY}${label}（未提供）</button>`;
-  return `<button type="button" class="vh-btn" data-copy="${kind}" data-id="${esc(id)}" title="複製${label}">${ICON_COPY}${label}</button>`;
+  if (!url) return `<button type="button" class="vh-btn" disabled>${ICON_COPY}${label}</button>`;
+  return `<button type="button" class="vh-btn" data-copy="${kind}" data-id="${esc(id)}" title="複製${label}連結">${ICON_COPY}${label}</button>`;
 }
 
-function cardHTML(v) {
+function headHTML(v, withLang = false) {
   const chips = [];
+  const langChip = withLang && v.lang ? `<span class="vh-chip lang">${esc(LANG_LABEL[v.lang] || v.lang)}</span>` : '';
   if (v.version) chips.push(`<span class="vh-chip ver">${esc(v.version)}</span>`);
   if (v.dub === '配音') chips.push('<span class="vh-chip dub">有配音</span>');
+  return `<div class="vh-head">
+        <h3 class="vh-title">${langChip}<span class="vh-prod" style="color:${productColor(v.product)}">${esc(productName(v.product))}</span>${v.purpose ? `<span class="vh-sep">｜</span><span class="vh-purpose">${esc(v.purpose)}</span>` : ''}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}</h3>
+        ${chips.join('')}
+      </div>`;
+}
+
+function descHTMLOf(v) {
   // 用途與備註接在一起當說明內文；備註若帶連結就把備註文字做成連結
   const noteHTML = v.noteUrl
     ? `<a href="${esc(v.noteUrl)}" target="_blank" rel="noopener">${esc(noteLabel(v))}</a>`
     : esc(v.note);
-  const descText = [v.purpose, v.desc].filter(Boolean).join(' ');
-  const descHTML = [esc(descText), noteHTML].filter(Boolean).join('　');
+  const descText = v.desc;
+  return [esc(descText), noteHTML].filter(Boolean).join('　');
+}
+
+function cardHTML(v) {
+  const descHTML = descHTMLOf(v);
   // 有公開連結就能點：能直接串流的在視窗內播放，其餘在新分頁開啟 SharePoint 播放頁
   const inPage = !!v.playUrl;
   const can = inPage || !!v.publicUrl;
-  const tip = inPage ? '線上預覽' : '在新分頁開啟影片';
+  const tip = inPage ? '線上預覽' : '查看影片連結';
   const thumb = v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : (can ? '' : ICON_FILM);
-  return `<article class="vh-card${can ? ' can-preview' : ''}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${tip}：${esc(productName(v.product))}"` : 'title="尚未提供公開連結"'}>
+  return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.product)}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${tip}：${esc(productName(v.product))}"` : 'title="尚未提供公開連結"'}>
     <div class="vh-thumb">${thumb}<span class="vh-lang lang-${esc(v.lang)}">${esc(LANG_LABEL[v.lang] || v.lang || '語系未填')}</span>${can ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
     <div class="vh-info">
-      <div class="vh-head">
-        <h3 class="vh-title">${esc(productName(v.product))}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}</h3>
-        ${chips.join('')}
-      </div>
+      ${headHTML(v)}
       ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
     </div>
     <div class="vh-actions">
-      ${linkBtn('公開連結', v.publicUrl, v.id, 'public')}
-      ${linkBtn('內部連結', v.orgUrl, v.id, 'org')}
+      ${linkBtn('所有人', v.publicUrl, v.id, 'public')}
+      ${linkBtn('集團內', v.orgUrl, v.id, 'org')}
     </div>
   </article>`;
 }
@@ -236,24 +248,21 @@ function render() {
 function watch(id) {
   const v = allVideos.find((x) => x.id === id);
   if (!v) return;
-  if (!v.playUrl) {
-    if (v.publicUrl) window.open(v.publicUrl, '_blank', 'noopener');
-    return;
-  }
   const stage = $('vh-stage');
   const video = $('vh-video');
-  stage.classList.remove('failed');
+  stage.classList.toggle('failed', !v.playUrl);
   video.onerror = () => stage.classList.add('failed');
-  video.src = v.playUrl;
-  $('vh-dlg-title').textContent = `${productName(v.product)}${v.version ? '（' + v.version + '）' : ''}`;
-  $('vh-dlg-meta').textContent = [fmtDate(v.date), LANG_LABEL[v.lang] || v.lang, v.dub === '配音' ? '有配音' : '', v.fileName].filter(Boolean).join(' ／ ');
-  const actions = [];
-  if (v.publicUrl) actions.push(`<button type="button" class="vh-mini primary" data-copy="public" data-id="${esc(v.id)}">${ICON_COPY}複製公開連結</button>`);
-  if (v.orgUrl) actions.push(`<button type="button" class="vh-mini" data-copy="org" data-id="${esc(v.id)}">${ICON_COPY}複製內部連結</button>`);
-  if (v.publicUrl) actions.push(`<a class="vh-mini" href="${esc(v.publicUrl)}" target="_blank" rel="noopener">${ICON_OPEN}開啟</a>`);
-  $('vh-dlg-actions').innerHTML = actions.join('');
+  if (v.playUrl) video.src = v.playUrl;
+  $('vh-dlg-info').innerHTML = `${headHTML(v, true)}${descHTMLOf(v) ? `<p class="vh-desc">${descHTMLOf(v)}</p>` : ''}`;
+  $('vh-dlg-date').textContent = v.date ? `更新時間 ${fmtDate(v.date)}` : '';
+  $('vh-dlg-actions').innerHTML = [['所有人', 'public', v.publicUrl], ['集團內', 'org', v.orgUrl]].map(([label, kind, url]) => `<div class="vh-linkrow">
+      <span class="vh-linklabel">${label}</span>
+      <div class="vh-seg-pair">${url
+        ? `<button type="button" class="vh-mini" data-copy="${kind}" data-id="${esc(v.id)}">${ICON_COPY}複製</button><a class="vh-mini" href="${esc(url)}" target="_blank" rel="noopener">${ICON_OPEN}開啟</a>`
+        : `<button type="button" class="vh-mini" disabled>${ICON_COPY}複製</button><button type="button" class="vh-mini" disabled>${ICON_OPEN}開啟</button>`}</div>
+    </div>`).join('');
   $('vh-dialog').showModal();
-  const p = video.play();
+  const p = v.playUrl ? video.play() : null;
   if (p && p.catch) p.catch(() => { /* 瀏覽器擋自動播放時使用者自己按播放 */ });
 }
 
@@ -275,6 +284,9 @@ function resetPlayer() {
 let toastTimer = null;
 function toast(msg) {
   const t = $('vh-toast');
+  // 彈窗會蓋在最上層，提示要放進彈窗裡才看得到
+  const dlg = $('vh-dialog');
+  (dlg.open ? dlg : document.body).appendChild(t);
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
@@ -295,7 +307,7 @@ async function copyLink(id, kind) {
     document.execCommand('copy');
     ta.remove();
   }
-  toast(kind === 'org' ? '已複製內部連結' : '已複製公開連結');
+  toast(kind === 'org' ? '已複製集團內連結' : '已複製所有人連結');
 }
 
 // =========================================================
@@ -362,7 +374,9 @@ $('vh-gate-form').addEventListener('submit', async (e) => {
   const btn = $('vh-gate-btn');
   btn.disabled = true;
   btn.textContent = '確認中...';
+  const slow = setTimeout(() => { btn.textContent = '正在更新資料，約需 30 秒...'; }, 4000);
   await start($('vh-gate-pw').value.trim(), { fromGate: true });
+  clearTimeout(slow);
   btn.disabled = false;
   btn.textContent = '進入';
 });
