@@ -172,7 +172,7 @@ const ICON_PLAY = '<svg width="11" height="11" viewBox="0 0 24 24" fill="current
 const ICON_FILM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2"></rect><line x1="7" y1="4" x2="7" y2="20"></line><line x1="17" y1="4" x2="17" y2="20"></line><line x1="2.5" y1="9" x2="7" y2="9"></line><line x1="2.5" y1="15" x2="7" y2="15"></line><line x1="17" y1="9" x2="21.5" y2="9"></line><line x1="17" y1="15" x2="21.5" y2="15"></line></svg>';
 
 function linkBtn(label, url, id, kind) {
-  if (!url) return `<button type="button" class="vh-btn" disabled>${ICON_COPY}${label}</button>`;
+  if (!url) return '';
   return `<button type="button" class="vh-btn" data-copy="${kind}" data-id="${esc(id)}" title="複製${label}連結">${ICON_COPY}${label}</button>`;
 }
 
@@ -197,6 +197,7 @@ function descHTMLOf(v) {
 }
 
 function cardHTML(v) {
+  const actionsHTML = linkBtn('所有人', v.publicUrl, v.id, 'public') + linkBtn('集團內', v.orgUrl, v.id, 'org');
   const descHTML = descHTMLOf(v);
   // 有公開連結就能點：能直接串流的在視窗內播放，其餘在新分頁開啟 SharePoint 播放頁
   const inPage = !!v.playUrl;
@@ -209,10 +210,7 @@ function cardHTML(v) {
       ${headHTML(v)}
       ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
     </div>
-    <div class="vh-actions">
-      ${linkBtn('所有人', v.publicUrl, v.id, 'public')}
-      ${linkBtn('集團內', v.orgUrl, v.id, 'org')}
-    </div>
+    ${actionsHTML ? `<div class="vh-actions">${actionsHTML}</div>` : ''}
   </article>`;
 }
 
@@ -255,11 +253,11 @@ function watch(id) {
   if (v.playUrl) video.src = v.playUrl;
   $('vh-dlg-info').innerHTML = `${headHTML(v)}${descHTMLOf(v) ? `<p class="vh-desc">${descHTMLOf(v)}</p>` : ''}`;
   $('vh-dlg-date').textContent = v.date ? `更新時間 ${fmtDate(v.date)}` : '';
-  $('vh-dlg-actions').innerHTML = [['所有人', 'public', v.publicUrl], ['集團內', 'org', v.orgUrl]].map(([label, kind, url]) => `<div class="vh-linkrow">
+  $('vh-dlg-actions').innerHTML = [['所有人', 'public', v.publicUrl], ['集團內', 'org', v.orgUrl]].filter(([, , url]) => url).map(([label, kind, url]) => `<div class="vh-linkrow">
       <span class="vh-linklabel">${label}</span>
       <div class="vh-seg-pair">${url
         ? `<button type="button" class="vh-mini" data-copy="${kind}" data-id="${esc(v.id)}">${ICON_COPY}複製</button><a class="vh-mini" href="${esc(url)}" target="_blank" rel="noopener">${ICON_OPEN}開啟</a>`
-        : `<button type="button" class="vh-mini" disabled>${ICON_COPY}複製</button><button type="button" class="vh-mini" disabled>${ICON_OPEN}開啟</button>`}</div>
+        : ''}</div>
     </div>`).join('');
   $('vh-dialog').showModal();
   const p = v.playUrl ? video.play() : null;
