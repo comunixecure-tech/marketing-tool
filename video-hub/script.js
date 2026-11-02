@@ -180,7 +180,7 @@ function linkBtn(label, url, id, kind) {
 }
 
 function productsHTML(v) {
-  return v.products.map((p) => `<span class="vh-prod" style="color:${productColor(p)}">${esc(productName(p))}</span>`).join('<span class="vh-plus">＋</span>');
+  return v.products.map((p) => `<span class="vh-prod" style="color:${productColor(p)}">${esc(productName(p))}</span>`).join('<span class="vh-plus">x</span>');
 }
 
 function headHTML(v) {
