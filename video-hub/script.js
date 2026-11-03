@@ -216,6 +216,7 @@ function cardHTML(v) {
     <div class="vh-info">
       ${headHTML(v)}
       ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
+      <p class="vh-udate">更新時間　${esc(fmtDate(v.date))}</p>
     </div>
     ${actionsHTML ? `<div class="vh-actions">${actionsHTML}</div>` : ''}
   </article>`;
