@@ -160,9 +160,8 @@ function headHTML(v) {
   const chips = [];
   const sep = '<span class="vh-sep">｜</span>';
   const parts = [productsHTML(v)];
+  if (v.version) chips.push(`<span class="vh-chip ver">${esc(v.version)}</span>`);
   if (v.purpose) parts.push(`<span class="vh-purpose">${esc(v.purpose)}</span>`);
-  if (v.version) parts.push(`<span class="vh-ver">${esc(v.version)}</span>`);
-  if (v.date) parts.push(`<span class="vh-when">${esc(fmtDate(v.date))}</span>`);
   if (v.dub === '配音') chips.push('<span class="vh-chip dub">有配音</span>');
   return `<div class="vh-head">
         <h3 class="vh-title">${parts.join(sep)}</h3>
@@ -193,7 +192,7 @@ function cardHTML(v) {
       ${headHTML(v)}
       ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
     </div>
-    ${actionsHTML ? `<div class="vh-actions">${actionsHTML}</div>` : ''}
+    <div class="vh-actions">${v.date ? `<span class="vh-when">${esc(fmtDate(v.date))}</span>` : ''}${actionsHTML}</div>
   </article>`;
 }
 
