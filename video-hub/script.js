@@ -13,7 +13,6 @@ const PRODUCT_COLOR = { RAVEN: '#3c49ba', HEIS: '#15803d', LUCAS: '#c2410c', SRM
 const productColor = (k) => PRODUCT_COLOR[k] || '#475569';
 const LANG_LABEL = { TC: '繁體中文', EN: '英文', JP: '日文', ID: '印尼文' };
 const NEW_DAYS = 30;
-const PW_KEY = 'vh-pw';
 
 // =========================================================
 // 狀態
@@ -28,31 +27,23 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const groupOf = (v) => v.purpose || '';
 
-function store(key, val) { try { val == null ? localStorage.removeItem(key) : localStorage.setItem(key, val); } catch (e) { /* 無痕模式等情況略過 */ } }
-function recall(key) { try { return localStorage.getItem(key) || ''; } catch (e) { return ''; } }
 
 // =========================================================
 // 資料載入與密碼
 // =========================================================
-class AuthError extends Error {}
-
 async function fetchJson(url) {
   const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) throw new Error(res.status);
   return res.json();
 }
 
-async function fetchData(pw) {
+async function fetchData() {
   if (VIDEO_API_URL) {
-    const data = await fetchJson(`${VIDEO_API_URL}?pw=${encodeURIComponent(pw)}`);
-    if (data.error === 'auth') throw new AuthError('密碼不正確');
-    if (data.error === 'nopw') throw new AuthError('管理者尚未設定密碼');
+    const data = await fetchJson(VIDEO_API_URL);
     if (!Array.isArray(data.videos)) throw new Error('格式不符');
     return { data, label: 'live' };
   }
-  const data = await fetchJson('data.local.json');
-  if (data.password !== pw) throw new AuthError('密碼不正確');
-  return { data, label: 'backup' };
+  return { data: await fetchJson('data.local.json'), label: 'backup' };
 }
 
 function tagVideo(v) {
@@ -63,43 +54,23 @@ function tagVideo(v) {
   v.search = `${v.products.map(productName).join(' ')} ${v.purpose} ${v.desc} ${v.version} ${v.fileName} ${groupOf(v)} ${v.note} ${LANG_LABEL[v.lang] || v.lang}`.toLowerCase();
 }
 
-function setLocked(locked, message) {
-  document.body.classList.toggle('locked', locked);
-  $('vh-gate-err').textContent = message || '';
-  if (locked) setTimeout(() => $('vh-gate-pw').focus(), 50);
-}
-
-async function start(pw, { fromGate = false } = {}) {
+async function start() {
   $('vh-list').innerHTML = '<div class="vh-skel"></div>'.repeat(8);
   try {
-    const { data, label } = await fetchData(pw);
-    store(PW_KEY, pw);
+    const { data, label } = await fetchData();
     allVideos = data.videos;
     allVideos.forEach(tagVideo);
     dataSource = label;
     updatedAt = data.updatedAt || '';
-    setLocked(false);
     renderMeta();
     buildFilters();
     render();
   } catch (e) {
-    if (e instanceof AuthError) {
-      store(PW_KEY, null);
-      $('vh-gate-pw').value = '';
-      setLocked(true, fromGate ? e.message : '密碼已更新，請重新輸入');
-    } else {
-      setLocked(false);
-      $('vh-list').innerHTML = '<div class="vh-state"><h3>讀取不到影片清單</h3><p>請檢查網路後按右上角「重新整理」</p></div>';
-      $('vh-count').textContent = '';
-    }
+    $('vh-list').innerHTML = '<div class="vh-state"><h3>讀取不到影片清單</h3><p>請檢查網路後按右上角「重新整理」</p></div>';
+    $('vh-count').textContent = '';
   }
 }
 
-function init() {
-  const saved = recall(PW_KEY);
-  if (saved) start(saved);
-  else setLocked(true);
-}
 
 function renderMeta() {
   const d = updatedAt ? new Date(updatedAt) : null;
@@ -376,18 +347,7 @@ document.querySelectorAll('input[name="dub"]').forEach((box) => {
 });
 
 $('vh-q').addEventListener('input', (e) => { filters.q = e.target.value.trim(); render(); });
-$('vh-refresh').addEventListener('click', () => start(recall(PW_KEY)));
+$('vh-refresh').addEventListener('click', start);
 
-$('vh-gate-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = $('vh-gate-btn');
-  btn.disabled = true;
-  btn.textContent = '確認中...';
-  const slow = setTimeout(() => { btn.textContent = '正在更新資料，約需 30 秒...'; }, 4000);
-  await start($('vh-gate-pw').value.trim(), { fromGate: true });
-  clearTimeout(slow);
-  btn.disabled = false;
-  btn.textContent = '進入';
-});
+start();
 
-init();

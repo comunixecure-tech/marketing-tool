@@ -7,9 +7,7 @@
  *    執行身分：我；誰可以存取：所有人
  * 3. 複製產生的網址，貼到 video-hub/script.js 最上方的 VIDEO_API_URL
  *
- * 密碼：寫在工作表的 A1 儲存格。A 欄固定是「更新時間」，A1 因為要放密碼所以不寫標題。
- *   前端輸入的密碼由這支程式在伺服器端比對，正確才會回傳影片清單，所以改 A1 就能讓舊密碼立刻失效。
- *   A1 留空（或還是「更新時間」）時，所有人都進不來。
+ * 沒有密碼，網址打開就能看。
  *
  * 欄位：標題列是含「產品」的那一列，依標題文字找欄位，順序調整或插欄都沒問題：
  *   產品／用途／版本／語系／是否配音／公開影片位置／組織內影片位置／路徑／說明（舊標題「備註」也認得）
@@ -21,17 +19,7 @@ const CACHE_KEY = 'video-hub-payload';
 const CACHE_SECONDS = 300;
 const PLAY_CACHE_KEY = 'video-hub-play';
 
-function doGet(e) {
-  const given = String((e && e.parameter && e.parameter.pw) || '').trim();
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-  const secret = sheet ? String(sheet.getRange('A1').getDisplayValue()).trim() : '';
-
-  if (!secret || secret === '更新時間') return json_({ ok: false, error: 'nopw' });
-  if (given !== secret) {
-    Utilities.sleep(1500); // 放慢猜密碼的速度
-    return json_({ ok: false, error: 'auth' });
-  }
-
+function doGet() {
   const cache = CacheService.getScriptCache();
   let body = cache.get(CACHE_KEY);
   if (!body) {

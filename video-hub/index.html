@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="../style.css">
     <style>
         .vh-wrap { max-width: 1040px; margin: 0 auto; padding: 16px 20px 80px; }
-        body.locked .vh-wrap { display: none; }
 
         /* 頂部：標題、連結說明、更新資訊同一排 */
         .vh-top { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; padding: 4px 0 14px; }
@@ -101,19 +100,6 @@
         .vh-player.failed video { visibility: hidden; }
         .vh-collapse { position: absolute; top: 10px; right: 10px; z-index: 5; border: none; border-radius: 999px; padding: 6px 14px; background: rgba(15, 23, 42, 0.7); color: #fff; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
         .vh-collapse:hover { background: rgba(15, 23, 42, 0.9); }
-        #vh-gate { display: none; position: fixed; inset: 0; z-index: 200; background: #f8fafc; align-items: center; justify-content: center; padding: 20px; }
-        body.locked #vh-gate { display: flex; }
-        .vh-gate-card { width: 100%; max-width: 380px; background: #fff; border: 1px solid var(--border-color); border-radius: 14px; padding: 32px 28px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06); text-align: center; }
-        .vh-gate-card h1 { margin: 0 0 6px; font-size: 22px; color: var(--primary); }
-        .vh-gate-card p { margin: 0 0 20px; font-size: 14px; color: var(--text-muted); }
-        .vh-gate-card input { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; font-family: inherit; text-align: center; }
-        .vh-gate-card input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(60, 73, 186, 0.1); }
-        .vh-gate-card button { width: 100%; margin-top: 12px; padding: 12px; border: none; border-radius: 8px; background: var(--primary); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
-        .vh-gate-card button:disabled { opacity: 0.6; cursor: wait; }
-        .vh-gate-hint { margin: -8px 0 16px; font-size: 13px; line-height: 1.6; color: var(--text-muted); }
-        .vh-gate-hint a { color: var(--primary); font-weight: 600; text-decoration: none; }
-        .vh-gate-hint a:hover { text-decoration: underline; }
-        #vh-gate-err { min-height: 20px; margin-top: 10px; font-size: 13px; color: var(--danger); }
 
         #vh-toast { position: fixed; left: 50%; bottom: 32px; transform: translate(-50%, 20px); background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 300; }
         #vh-toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -132,7 +118,7 @@
         }
     </style>
 </head>
-<body class="locked">
+<body>
     <div class="vh-wrap">
         <div class="vh-top">
             <a href="../index.html" class="back-to-home">
@@ -173,16 +159,6 @@
         <main id="vh-list" class="vh-list"></main>
     </div>
 
-    <div id="vh-gate">
-        <form class="vh-gate-card" id="vh-gate-form">
-            <h1>影片領取區</h1>
-            <p>請輸入密碼才能查看影片清單</p>
-            <div class="vh-gate-hint">密碼在影片試算表「所有影片」工作表的 A1 儲存格<br><a href="https://docs.google.com/spreadsheets/d/1mT2pOip5gJuajrvFdFhEEOyPICKv5LVMSKjyeBzDas4/edit?gid=1546853672" target="_blank" rel="noopener">開啟試算表查看</a></div>
-            <input type="password" id="vh-gate-pw" placeholder="密碼" autocomplete="current-password" required>
-            <div id="vh-gate-err"></div>
-            <button type="submit" id="vh-gate-btn">進入</button>
-        </form>
-    </div>
 
     <div id="vh-toast" role="status" aria-live="polite"></div>
 
