@@ -154,13 +154,18 @@ function productsHTML(v) {
   return v.products.map((p) => `<span class="vh-prod" style="color:${productColor(p)}">${esc(productName(p))}</span>`).join('<span class="vh-plus">x</span>');
 }
 
+const langName = (v) => LANG_LABEL[v.lang] || v.lang || '語系未填';
+
 function headHTML(v) {
   const chips = [];
-  const langTitle = `<span class="vh-langt">${esc(LANG_LABEL[v.lang] || v.lang || '語系未填')}</span><span class="vh-sep">｜</span>`;
-  if (v.version) chips.push(`<span class="vh-chip ver">${esc(v.version)}</span>`);
+  const sep = '<span class="vh-sep">｜</span>';
+  const parts = [productsHTML(v)];
+  if (v.purpose) parts.push(`<span class="vh-purpose">${esc(v.purpose)}</span>`);
+  if (v.version) parts.push(`<span class="vh-ver">${esc(v.version)}</span>`);
+  if (v.date) parts.push(`<span class="vh-when">${esc(fmtDate(v.date))}</span>`);
   if (v.dub === '配音') chips.push('<span class="vh-chip dub">有配音</span>');
   return `<div class="vh-head">
-        <h3 class="vh-title">${langTitle}${productsHTML(v)}${v.purpose ? `<span class="vh-sep">｜</span><span class="vh-purpose">${esc(v.purpose)}</span>` : ''}</h3>
+        <h3 class="vh-title">${parts.join(sep)}</h3>
         ${chips.join('')}
       </div>`;
 }
@@ -183,11 +188,10 @@ function cardHTML(v) {
   const tip = inPage ? '點擊展開播放' : '這支影片的分享設定不開放在這裡直接播放，點擊會在新分頁開啟連結';
   const thumb = v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : (can ? '' : ICON_FILM);
   return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.products[0])}${v.products.length > 1 ? `;--pc2:${productColor(v.products[1])}` : ''}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${esc(v.products.map(productName).join('、'))}：${tip}"${inPage ? ' aria-expanded="false"' : ''}` : 'title="尚未提供公開連結"'}>
-    <div class="vh-thumb">${thumb}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-date">${esc(fmtDate(v.date))}</span></div>
+    <div class="vh-thumb">${thumb}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-lang">${esc(langName(v))}</span></div>
     <div class="vh-info">
       ${headHTML(v)}
       ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
-      <p class="vh-udate">更新時間　${esc(fmtDate(v.date))}</p>
     </div>
     ${actionsHTML ? `<div class="vh-actions">${actionsHTML}</div>` : ''}
   </article>`;
@@ -249,6 +253,7 @@ function watch(id) {
   card.insertAdjacentHTML('beforeend', `<div class="vh-player">
     <video controls playsinline preload="metadata"></video>
     <div class="err"><div>這支影片暫時無法在這裡播放<br>請改用右上方的「開啟」在新分頁觀看</div></div>
+    <span class="vh-lang">${esc(langName(v))}</span>
     <button type="button" class="vh-collapse" data-collapse>收合</button>
   </div>`);
   const player = card.querySelector('.vh-player');
