@@ -57,8 +57,6 @@
         .vh-group { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 14px 0 -4px; font-size: 15px; font-weight: 700; }
         .vh-group:first-child { margin-top: 0; }
         .vh-group small { font-size: 12.5px; font-weight: 400; color: var(--text-muted); }
-        .vh-play { position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; background: #fff; color: var(--pc, var(--primary)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22); transition: transform 0.18s ease; }
-        .vh-card.can-preview:hover .vh-play, .vh-card.can-preview:focus-visible .vh-play { transform: scale(1.22); }
         .vh-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
         .vh-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
         .vh-title { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.4; color: var(--text-main); display: flex; align-items: center; flex-wrap: wrap; }
@@ -66,7 +64,6 @@
         .vh-sep { margin: 0 6px; font-weight: 400; color: #b3bccb; }
         .vh-new { position: absolute; top: 5px; left: 5px; z-index: 3; background: var(--danger); color: #fff; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
         .vh-lang { position: absolute; top: 5px; right: 5px; z-index: 3; background: rgba(255, 255, 255, 0.92); color: #334155; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
-        .vh-player .vh-lang { top: 10px; right: auto; left: 10px; font-size: 12px; padding: 3px 10px; }
         .vh-chip.ver { background: #334155; color: #fff; }
         .vh-when { margin-right: 4px; font-size: 11.5px; color: var(--text-muted); white-space: nowrap; align-self: center; }
         .vh-chip { font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: #eef1f6; color: #475569; }
@@ -88,16 +85,6 @@
 
         /* 密碼畫面 */
         .vh-btn { text-decoration: none; }
-        .vh-card.open { flex-wrap: wrap; cursor: default; }
-        .vh-card.open .vh-thumb { display: none; }
-        .vh-card.open:hover, .vh-card.open:focus-visible { transform: none; box-shadow: 0 6px 18px color-mix(in srgb, var(--pc) 18%, transparent); }
-        .vh-player { flex: 0 0 100%; position: relative; aspect-ratio: 16 / 9; max-height: 70vh; margin-top: 2px; background: #000; border-radius: 10px; overflow: hidden; cursor: default; }
-        .vh-player video { width: 100%; height: 100%; display: block; background: #000; }
-        .vh-player .err { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; text-align: center; color: #e2e8f0; padding: 24px; font-size: 14px; line-height: 1.7; }
-        .vh-player.failed .err { display: flex; }
-        .vh-player.failed video { visibility: hidden; }
-        .vh-collapse { position: absolute; top: 10px; right: 10px; z-index: 5; border: none; border-radius: 999px; padding: 6px 14px; background: rgba(15, 23, 42, 0.7); color: #fff; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
-        .vh-collapse:hover { background: rgba(15, 23, 42, 0.9); }
 
         #vh-toast { position: fixed; left: 50%; bottom: 32px; transform: translate(-50%, 20px); background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 300; }
         #vh-toast.show { opacity: 1; transform: translate(-50%, 0); }

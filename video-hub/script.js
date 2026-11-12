@@ -142,7 +142,6 @@ function noteLabel(v) {
 
 const ICON_COPY = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 const ICON_OPEN = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
-const ICON_PLAY = '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"></path></svg>';
 const ICON_FILM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2"></rect><line x1="7" y1="4" x2="7" y2="20"></line><line x1="17" y1="4" x2="17" y2="20"></line><line x1="2.5" y1="9" x2="7" y2="9"></line><line x1="2.5" y1="15" x2="7" y2="15"></line><line x1="17" y1="9" x2="21.5" y2="9"></line><line x1="17" y1="15" x2="21.5" y2="15"></line></svg>';
 
 function linkBtn(url, id) {
@@ -181,13 +180,12 @@ function descHTMLOf(v) {
 function cardHTML(v) {
   const actionsHTML = linkBtn(v.publicUrl, v.id);
   const descHTML = descHTMLOf(v);
-  // 有公開連結就能點：能直接串流的在卡片下方展開播放，其餘在新分頁開啟 SharePoint 播放頁
-  const inPage = !!v.playUrl;
-  const can = inPage || !!v.publicUrl;
-  const tip = inPage ? '點擊展開播放' : '這支影片的分享設定不開放在這裡直接播放，點擊會在新分頁開啟連結';
+  // 有公開連結就能點，一律在新分頁開啟 SharePoint 播放頁（不在站內預覽，避免看到舊版影片）
+  const can = !!v.publicUrl;
+  const tip = '點擊在新分頁開啟影片';
   const thumb = v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : (can ? '' : ICON_FILM);
-  return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.products[0])}${v.products.length > 1 ? `;--pc2:${productColor(v.products[1])}` : ''}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${esc(v.products.map(productName).join('、'))}：${tip}"${inPage ? ' aria-expanded="false"' : ''}` : 'title="尚未提供公開連結"'}>
-    <div class="vh-thumb">${thumb}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}${inPage ? `<span class="vh-play">${ICON_PLAY}</span>` : ''}<span class="vh-lang">${esc(langName(v))}</span></div>
+  return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.products[0])}${v.products.length > 1 ? `;--pc2:${productColor(v.products[1])}` : ''}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${esc(v.products.map(productName).join('、'))}：${tip}"` : 'title="尚未提供公開連結"'}>
+    <div class="vh-thumb">${thumb}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}<span class="vh-lang">${esc(langName(v))}</span></div>
     <div class="vh-info">
       ${headHTML(v)}
       ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
@@ -223,74 +221,11 @@ function render() {
 }
 
 // =========================================================
-// 預覽：能直接串流的在卡片下方展開播放，其他開新分頁
+// 開啟影片
 // =========================================================
-function collapseCard(card) {
-  const player = card.querySelector('.vh-player');
-  if (!player) return;
-  const video = player.querySelector('video');
-  video.pause();
-  video.removeAttribute('src');
-  video.load();
-  player.remove();
-  card.classList.remove('open');
-  card.setAttribute('aria-expanded', 'false');
-}
-
 function watch(id) {
   const v = allVideos.find((x) => x.id === id);
-  const card = document.querySelector(`.vh-card[data-preview="${CSS.escape(id)}"]`);
-  if (!v || !card) return;
-  if (!v.playUrl) {
-    window.open(v.publicUrl, '_blank', 'noopener');
-    return;
-  }
-  if (card.classList.contains('open')) { collapseCard(card); return; }
-  document.querySelectorAll('.vh-card.open').forEach(collapseCard); // 一次只展開一支
-  card.classList.add('open');
-  card.setAttribute('aria-expanded', 'true');
-  card.insertAdjacentHTML('beforeend', `<div class="vh-player">
-    <video controls playsinline preload="metadata"></video>
-    <div class="err"><div>這支影片暫時無法在這裡播放<br>請改用右上方的「開啟」在新分頁觀看</div></div>
-    <span class="vh-lang">${esc(langName(v))}</span>
-    <button type="button" class="vh-collapse" data-collapse>收合</button>
-  </div>`);
-  const player = card.querySelector('.vh-player');
-  const video = player.querySelector('video');
-  video.onerror = () => player.classList.add('failed');
-  video.src = v.playUrl;
-  const p = video.play();
-  if (p && p.catch) p.catch(() => { /* 瀏覽器擋自動播放時使用者自己按播放 */ });
-  player.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-}
-
-// =========================================================
-// 複製連結與提示
-// =========================================================
-let toastTimer = null;
-function toast(msg) {
-  const t = $('vh-toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
-}
-
-async function copyLink(id) {
-  const v = allVideos.find((x) => x.id === id);
-  const url = v && v.publicUrl;
-  if (!url) return;
-  try {
-    await navigator.clipboard.writeText(url);
-  } catch (e) {
-    const ta = document.createElement('textarea');
-    ta.value = url;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
-  }
-  toast('已複製連結');
+  if (v && v.publicUrl) window.open(v.publicUrl, '_blank', 'noopener');
 }
 
 // =========================================================
@@ -299,9 +234,6 @@ async function copyLink(id) {
 document.addEventListener('click', (e) => {
   const copyBtn = e.target.closest('[data-copy]');
   if (copyBtn) { copyLink(copyBtn.dataset.id); return; }
-  const collapseBtn = e.target.closest('[data-collapse]');
-  if (collapseBtn) { collapseCard(collapseBtn.closest('.vh-card')); return; }
-  if (e.target.closest('.vh-player')) return; // 操作播放器本身不收合
   if (e.target.closest('a')) return; // 備註連結等照常開新分頁，不觸發預覽
   const viewBtn = e.target.closest('#vh-view button');
   if (viewBtn) {
@@ -325,7 +257,6 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') document.querySelectorAll('.vh-card.open').forEach(collapseCard);
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.vh-card[data-preview]')) {
     e.preventDefault();
     watch(e.target.dataset.preview);
