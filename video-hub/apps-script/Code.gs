@@ -17,7 +17,6 @@
 const SHEET_NAME = '所有影片';
 const CACHE_KEY = 'video-hub-payload';
 const CACHE_SECONDS = 300;
-const PLAY_CACHE_KEY = 'video-hub-play';
 
 function doGet() {
   const cache = CacheService.getScriptCache();
@@ -90,61 +89,5 @@ function buildPayload_() {
     });
   }
 
-  resolvePlayable_(videos);
   return { updatedAt: new Date().toISOString(), videos: videos };
-}
-
-/**
- * 公開連結（SharePoint 匿名分享）本身是網頁，瀏覽器沒辦法直接播放。
- * 這裡順著轉址取出分享代碼，組成可以直接播放的檔案網址，再確認連結還有效；
- * 抓不到影片本體的（例如設成不可下載的連結）就不提供線上預覽，改由前端開新分頁觀看。
- */
-function resolvePlayable_(videos) {
-  // 逐支確認很慢（每支都要連到 SharePoint），結果另外存起來：能播的存 6 小時，不能播的存 1 小時
-  const cache = CacheService.getScriptCache();
-  let known = {};
-  try { known = JSON.parse(cache.get(PLAY_CACHE_KEY) || '{}'); } catch (err) { known = {}; }
-  const now = Date.now();
-  let dirty = false;
-  videos.forEach((v) => {
-    v.playUrl = '';
-    if (!v.publicUrl) return;
-    const hit = known[v.publicUrl];
-    if (hit && now - hit.t < (hit.p ? 6 : 1) * 3600 * 1000) { v.playUrl = hit.p; return; }
-    v.playUrl = checkPlayable_(v.publicUrl);
-    known[v.publicUrl] = { p: v.playUrl, t: now };
-    dirty = true;
-  });
-  if (dirty) {
-    try { cache.put(PLAY_CACHE_KEY, JSON.stringify(known), 21600); } catch (err) { /* 太大放不下就下次重算 */ }
-  }
-}
-
-function checkPlayable_(publicUrl) {
-  const play = resolvePlayUrl_(publicUrl);
-  if (!play) return '';
-  try {
-    const res = UrlFetchApp.fetch(play, { headers: { Range: 'bytes=0-0' }, muteHttpExceptions: true, followRedirects: true });
-    const code = res.getResponseCode();
-    const type = String(res.getHeaders()['Content-Type'] || '');
-    if ((code === 200 || code === 206) && type.indexOf('video') === 0) return play;
-  } catch (err) { /* 抓不到影片本體就維持不能線上預覽，仍可用連結開啟 */ }
-  return '';
-}
-
-function resolvePlayUrl_(url) {
-  let u = url;
-  for (let i = 0; i < 5; i++) {
-    let res;
-    try {
-      res = UrlFetchApp.fetch(u, { followRedirects: false, muteHttpExceptions: true });
-    } catch (e) { return ''; }
-    const loc = res.getHeaders()['Location'] || res.getHeaders()['location'];
-    if (!loc) return '';
-    const share = loc.match(/[?&]share=([^&]+)/);
-    const base = loc.match(/^(https?:\/\/[^\/]+)(\/personal\/[^\/]+)\/_layouts/);
-    if (share && base) return base[1] + base[2] + '/_layouts/15/download.aspx?share=' + share[1];
-    u = /^https?:/.test(loc) ? loc : u.match(/^(https?:\/\/[^\/]+)/)[1] + loc;
-  }
-  return '';
 }

@@ -54,18 +54,35 @@ function tagVideo(v) {
   v.search = `${v.products.map(productName).join(' ')} ${v.purpose} ${v.desc} ${v.version} ${v.fileName} ${groupOf(v)} ${v.note} ${LANG_LABEL[v.lang] || v.lang}`.toLowerCase();
 }
 
+const CACHE_KEY = 'vh-last-payload';
+function readCache() { try { return JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (e) { return null; } }
+function writeCache(data) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) { /* 無痕模式或容量滿了就略過 */ } }
+
+function show(data, label) {
+  allVideos = data.videos;
+  allVideos.forEach(tagVideo);
+  dataSource = label;
+  updatedAt = data.updatedAt || '';
+  renderMeta();
+  buildFilters();
+  render();
+}
+
+// 讀取慢（試算表要現算）時，先用上次存在這台電腦的清單頂著，新資料回來再換掉
 async function start() {
-  $('vh-list').innerHTML = '<div class="vh-skel"></div>'.repeat(8);
+  const cached = readCache();
+  if (cached && Array.isArray(cached.videos)) {
+    show(cached, 'cache');
+    $('vh-updated').textContent = '正在更新清單…';
+  } else {
+    $('vh-list').innerHTML = '<div class="vh-skel"></div>'.repeat(8);
+  }
   try {
     const { data, label } = await fetchData();
-    allVideos = data.videos;
-    allVideos.forEach(tagVideo);
-    dataSource = label;
-    updatedAt = data.updatedAt || '';
-    renderMeta();
-    buildFilters();
-    render();
+    if (label === 'live') writeCache(data);
+    show(data, label);
   } catch (e) {
+    if (cached) { renderMeta(); return; }
     $('vh-list').innerHTML = '<div class="vh-state"><h3>讀取不到影片清單</h3><p>請檢查網路後按右上角「重新整理」</p></div>';
     $('vh-count').textContent = '';
   }
@@ -76,7 +93,7 @@ function renderMeta() {
   const d = updatedAt ? new Date(updatedAt) : null;
   const pad = (n) => String(n).padStart(2, '0');
   const when = d && !isNaN(d) ? `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}` : '';
-  $('vh-updated').textContent = `${dataSource === 'live' ? '清單更新於' : '備份資料'} ${when}`.trim();
+  $('vh-updated').textContent = `${{ live: '清單更新於', cache: '上次載入的清單', backup: '備份資料' }[dataSource]} ${when}`.trim();
 }
 
 // =========================================================
@@ -140,6 +157,7 @@ function noteLabel(v) {
   return '相關連結';
 }
 
+const ICON_CHECK = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const ICON_COPY = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 const ICON_OPEN = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
 const ICON_FILM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2"></rect><line x1="7" y1="4" x2="7" y2="20"></line><line x1="17" y1="4" x2="17" y2="20"></line><line x1="2.5" y1="9" x2="7" y2="9"></line><line x1="2.5" y1="15" x2="7" y2="15"></line><line x1="17" y1="9" x2="21.5" y2="9"></line><line x1="17" y1="15" x2="21.5" y2="15"></line></svg>';
@@ -229,11 +247,58 @@ function watch(id) {
 }
 
 // =========================================================
+// 複製連結
+// =========================================================
+let toastTimer = null;
+function toast(msg, isError) {
+  const t = $('vh-toast');
+  t.textContent = msg;
+  t.classList.toggle('error', !!isError);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), isError ? 3500 : 1800);
+}
+
+async function writeClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    // 瀏覽器不給用剪貼簿時改用舊方法，並確認真的有複製到
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+}
+
+async function copyLink(id, btn) {
+  const v = allVideos.find((x) => x.id === id);
+  const url = v && v.publicUrl;
+  if (!url) return;
+  const ok = await writeClipboard(url);
+  if (!ok) { toast('複製失敗，請按「開啟」後從網址列複製', true); return; }
+  toast('已複製連結');
+  if (btn) {
+    const old = btn.innerHTML;
+    btn.classList.add('done');
+    btn.innerHTML = `${ICON_CHECK}已複製`;
+    setTimeout(() => { btn.classList.remove('done'); btn.innerHTML = old; }, 1600);
+  }
+}
+
+// =========================================================
 // 事件
 // =========================================================
 document.addEventListener('click', (e) => {
   const copyBtn = e.target.closest('[data-copy]');
-  if (copyBtn) { copyLink(copyBtn.dataset.id); return; }
+  if (copyBtn) { copyLink(copyBtn.dataset.id, copyBtn); return; }
   if (e.target.closest('a')) return; // 備註連結等照常開新分頁，不觸發預覽
   const viewBtn = e.target.closest('#vh-view button');
   if (viewBtn) {
