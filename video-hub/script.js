@@ -6,12 +6,12 @@
 const VIDEO_API_URL = 'https://script.google.com/macros/s/AKfycbzxNRvc0EesLOeoyZp4vVuC21SjFk_fRmYzaSgB2ijxA9sabMueG3LZ62i-t_nugZ3IqA/exec';
 
 // 產品欄位的值直接取自試算表，這裡只負責顯示名稱
-const PRODUCT_LABEL = { SOC: 'Autonomous SOC' };
+const PRODUCT_LABEL = {};
 const productName = (k) => PRODUCT_LABEL[k] || k;
 // 產品識別色：RAVEN 藍、HEIS 綠、LUCAS 橘、SRMAS 紫（公司規範），其餘自訂；沒登記的用深灰藍
 const PRODUCT_COLOR = { RAVEN: '#3c49ba', HEIS: '#15803d', LUCAS: '#c2410c', SRMAS: '#7e3af2', SOC: '#232e8a', uberAgent: '#0284c7', 'Q-Atlas': '#0e7490' };
 const productColor = (k) => PRODUCT_COLOR[k] || '#475569';
-const LANG_LABEL = { TC: '繁體中文', EN: '英文', JP: '日文', ID: '印尼文' };
+const LANG_LABEL = { TC: '繁中', EN: '英文', JP: '日文', ID: '印尼' };
 const NEW_DAYS = 30;
 
 // =========================================================
@@ -21,7 +21,6 @@ let allVideos = [];
 let dataSource = '';
 let updatedAt = '';
 const filters = { q: '', group: '', lang: '', products: new Set(), dubs: new Set(['配音', '無']) };
-let viewMode = 'group';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -102,8 +101,8 @@ function renderMeta() {
 function buildFilters() {
   const groups = [...new Set(allVideos.map(groupOf).filter(Boolean))];
   const langs = [...new Set(allVideos.map((v) => v.lang).filter(Boolean))];
-  fillSelect('f-group', 'group', '全部專案', groups.map((g) => [g, g]));
-  fillSelect('f-lang', 'lang', '全部語系', langs.map((l) => [l, LANG_LABEL[l] || l]));
+  fillSelect('f-group', 'group', '專案', groups.map((g) => [g, g]));
+  fillSelect('f-lang', 'lang', '語系', langs.map((l) => [l, LANG_LABEL[l] || l]));
   const productCount = {};
   allVideos.forEach((v) => v.products.forEach((p) => { productCount[p] = (productCount[p] || 0) + 1; }));
   const productKeys = Object.keys(productCount).sort((x, y) => productCount[y] - productCount[x]);
@@ -160,11 +159,10 @@ function noteLabel(v) {
 const ICON_CHECK = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const ICON_COPY = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 const ICON_OPEN = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
-const ICON_FILM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2"></rect><line x1="7" y1="4" x2="7" y2="20"></line><line x1="17" y1="4" x2="17" y2="20"></line><line x1="2.5" y1="9" x2="7" y2="9"></line><line x1="2.5" y1="15" x2="7" y2="15"></line><line x1="17" y1="9" x2="21.5" y2="9"></line><line x1="17" y1="15" x2="21.5" y2="15"></line></svg>';
 
 function linkBtn(url, id) {
   if (!url) return '';
-  return `<button type="button" class="vh-btn" data-copy data-id="${esc(id)}" title="複製影片連結">${ICON_COPY}複製連結</button><a class="vh-btn" href="${esc(url)}" target="_blank" rel="noopener" title="在新分頁開啟">${ICON_OPEN}開啟</a>`;
+  return `<button type="button" class="vh-btn" data-copy data-id="${esc(id)}" title="複製影片連結">${ICON_COPY}複製</button><a class="vh-btn" href="${esc(url)}" target="_blank" rel="noopener" title="在新分頁開啟">${ICON_OPEN}開啟</a>`;
 }
 
 function productsHTML(v) {
@@ -172,19 +170,6 @@ function productsHTML(v) {
 }
 
 const langName = (v) => LANG_LABEL[v.lang] || v.lang || '語系未填';
-
-function headHTML(v) {
-  const chips = [];
-  const sep = '<span class="vh-sep">｜</span>';
-  const parts = [productsHTML(v)];
-  if (v.version) chips.push(`<span class="vh-chip ver">${esc(v.version)}</span>`);
-  if (v.purpose) parts.push(`<span class="vh-purpose">${esc(v.purpose)}</span>`);
-  if (v.dub === '配音') chips.push('<span class="vh-chip dub">有配音</span>');
-  return `<div class="vh-head">
-        <h3 class="vh-title">${parts.join(sep)}</h3>
-        ${chips.join('')}
-      </div>`;
-}
 
 function descHTMLOf(v) {
   // 用途與備註接在一起當說明內文；備註若帶連結就把備註文字做成連結
@@ -195,21 +180,26 @@ function descHTMLOf(v) {
   return [esc(descText), noteHTML].filter(Boolean).join('　');
 }
 
-function cardHTML(v) {
-  const actionsHTML = linkBtn(v.publicUrl, v.id);
-  const descHTML = descHTMLOf(v);
-  // 有公開連結就能點，一律在新分頁開啟 SharePoint 播放頁（不在站內預覽，避免看到舊版影片）
+// 一支影片一行：語系｜產品＋標籤，說明截成一行，右側日期與按鈕
+function rowHTML(v) {
   const can = !!v.publicUrl;
-  const tip = '點擊在新分頁開啟影片';
-  const thumb = v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : (can ? '' : ICON_FILM);
-  return `<article class="vh-card${can ? ' can-preview' : ''}" style="--pc:${productColor(v.products[0])}${v.products.length > 1 ? `;--pc2:${productColor(v.products[1])}` : ''}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" title="${tip}" aria-label="${esc(v.products.map(productName).join('、'))}：${tip}"` : 'title="尚未提供公開連結"'}>
-    <div class="vh-thumb">${thumb}${isNew(v.date) ? '<span class="vh-new">新</span>' : ''}<span class="vh-lang">${esc(langName(v))}</span></div>
-    <div class="vh-info">
-      ${headHTML(v)}
-      ${descHTML ? `<p class="vh-desc">${descHTML}</p>` : ''}
+  const descHTML = descHTMLOf(v);
+  const descText = [v.desc, v.note].filter(Boolean).join('　');
+  const chips = [];
+  if (isNew(v.date)) chips.push('<span class="vh-new">新</span>');
+  if (v.version) chips.push(`<span class="vh-chip ver">${esc(v.version)}</span>`);
+  if (v.dub === '配音') chips.push('<span class="vh-chip dub">有配音</span>');
+  const tip = can ? '點擊在新分頁開啟影片' : '尚未提供公開連結';
+  return `<div class="vh-item${can ? ' can-open' : ''}" style="--pc:${productColor(v.products[0])}" ${can ? `data-preview="${esc(v.id)}" tabindex="0" role="button" aria-label="${esc(v.products.map(productName).join('、'))}：${tip}"` : ''} title="${esc(descText ? `${descText}\n\n${tip}` : tip)}">
+    <span class="vh-lang">${esc(langName(v))}</span>
+    <div class="vh-main">
+      <span class="vh-title">${productsHTML(v)}</span>
+      ${chips.join('')}
+      ${descHTML ? `<span class="vh-desc">${descHTML}</span>` : ''}
     </div>
-    <div class="vh-actions">${v.date ? `<span class="vh-when">${esc(fmtDate(v.date))}</span>` : ''}${actionsHTML}</div>
-  </article>`;
+    ${v.date ? `<span class="vh-when">${esc(fmtDate(v.date))}</span>` : ''}
+    <div class="vh-actions">${linkBtn(v.publicUrl, v.id)}</div>
+  </div>`;
 }
 
 function render() {
@@ -218,13 +208,12 @@ function render() {
   const filtered = list.length !== allVideos.length;
   $('vh-count').innerHTML = filtered ? `符合 <b>${list.length}</b> / ${allVideos.length} 支` : `共 <b>${list.length}</b> 支`;
   document.querySelectorAll('.vh-select').forEach((s) => s.classList.toggle('on', !!filters[s.dataset.key]));
+  // 手機版「篩選」按鈕上顯示目前套用了幾個條件
+  const active = (filters.group ? 1 : 0) + (filters.lang ? 1 : 0) + (filters.dubs.size < 2 ? 1 : 0) + filters.products.size;
+  $('vh-fcount').textContent = active ? String(active) : '';
   const box = $('vh-list');
   if (!list.length) {
     box.innerHTML = '<div class="vh-state"><h3>沒有符合的影片</h3><p>換個關鍵字，或把篩選條件調整一下</p></div>';
-    return;
-  }
-  if (viewMode === 'date') {
-    box.innerHTML = list.map(cardHTML).join('');
     return;
   }
   // 依專案：專案順序依各專案最新一支影片的日期，專案內同樣新到舊
@@ -235,7 +224,10 @@ function render() {
     if (!g) { g = { name, items: [] }; groups.push(g); }
     g.items.push(v);
   });
-  box.innerHTML = groups.map((g) => `<h2 class="vh-group">${esc(g.name || '未分類')}<small>${g.items.length} 支</small></h2>${g.items.map(cardHTML).join('')}`).join('');
+  box.innerHTML = groups.map((g) => `<section class="vh-gcard">
+    <h2 class="vh-group">${esc(g.name || '未分類')}<small>${g.items.length} 支</small></h2>
+    ${g.items.map((v) => rowHTML(v)).join('')}
+  </section>`).join('');
 }
 
 // =========================================================
@@ -300,13 +292,6 @@ document.addEventListener('click', (e) => {
   const copyBtn = e.target.closest('[data-copy]');
   if (copyBtn) { copyLink(copyBtn.dataset.id, copyBtn); return; }
   if (e.target.closest('a')) return; // 備註連結等照常開新分頁，不觸發預覽
-  const viewBtn = e.target.closest('#vh-view button');
-  if (viewBtn) {
-    viewMode = viewBtn.dataset.view;
-    document.querySelectorAll('#vh-view button').forEach((b) => b.setAttribute('aria-pressed', String(b === viewBtn)));
-    render();
-    return;
-  }
   const prodBtn = e.target.closest('[data-product]');
   if (prodBtn) {
     const val = prodBtn.dataset.product;
@@ -317,12 +302,12 @@ document.addEventListener('click', (e) => {
     render();
     return;
   }
-  const card = e.target.closest('.vh-card[data-preview]');
+  const card = e.target.closest('.vh-item[data-preview]');
   if (card) watch(card.dataset.preview);
 });
 
 document.addEventListener('keydown', (e) => {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.vh-card[data-preview]')) {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.vh-item[data-preview]')) {
     e.preventDefault();
     watch(e.target.dataset.preview);
   }
@@ -346,6 +331,10 @@ document.querySelectorAll('input[name="dub"]').forEach((box) => {
   });
 });
 
+$('vh-ftoggle').addEventListener('click', (e) => {
+  const open = $('vh-toolbar').classList.toggle('open');
+  e.currentTarget.setAttribute('aria-expanded', String(open));
+});
 $('vh-q').addEventListener('input', (e) => { filters.q = e.target.value.trim(); render(); });
 $('vh-refresh').addEventListener('click', start);
 

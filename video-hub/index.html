@@ -19,71 +19,67 @@
         .vh-link-btn:hover { text-decoration: underline; }
 
         /* 篩選列 */
+        .vh-sticky { display: contents; }
         .vh-toolbar { z-index: 20; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(8px); padding: 10px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; }
         .vh-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .vh-ftoggle { display: none; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; font-size: 14px; font-family: inherit; color: var(--text-main); cursor: pointer; }
+        .vh-ftoggle[aria-expanded="true"] { border-color: var(--primary); color: var(--primary); }
+        #vh-fcount:not(:empty) { min-width: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: var(--primary); color: #fff; font-size: 11.5px; font-weight: 700; line-height: 18px; text-align: center; }
         .vh-search { position: relative; flex: 0 1 210px; min-width: 150px; }
         .vh-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
         .vh-search input { width: 100%; box-sizing: border-box; padding: 8px 12px 8px 34px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: #fff; font-family: inherit; color: var(--text-main); }
         .vh-search input:focus, .vh-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(60, 73, 186, 0.1); }
         .vh-select { appearance: none; -webkit-appearance: none; border: 1px solid var(--border-color); border-radius: 8px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center; padding: 8px 28px 8px 12px; font-size: 14px; font-family: inherit; color: var(--text-main); cursor: pointer; max-width: 200px; }
         .vh-select.on { border-color: var(--primary); color: var(--primary); font-weight: 700; background-color: rgba(60, 73, 186, 0.05); }
-        .vh-flabel { font-size: 13px; color: var(--text-muted); font-weight: 700; white-space: nowrap; margin-right: 2px; }
         .vh-pill-group { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .vh-pill { cursor: pointer; }
         .vh-pill input { position: absolute; opacity: 0; pointer-events: none; }
-        .vh-pill span, .vh-pillbtn { display: inline-block; padding: 6px 13px; border: 1px solid var(--border-color); border-radius: 999px; background: #fff; font-size: 13px; color: var(--text-main); font-family: inherit; cursor: pointer; transition: all 0.15s ease; }
-        .vh-pill:hover span, .vh-pillbtn:hover { border-color: var(--primary); color: var(--primary); }
+        .vh-pillbtn { display: inline-block; padding: 6px 13px; border: 1px solid var(--border-color); border-radius: 999px; background: #fff; font-size: 13px; color: var(--text-main); font-family: inherit; cursor: pointer; transition: all 0.15s ease; }
+        .vh-pillbtn:hover { border-color: var(--primary); color: var(--primary); }
         .vh-pillbtn[style] { color: var(--pc); border-color: color-mix(in srgb, var(--pc) 45%, #fff); font-weight: 600; }
         .vh-pillbtn[style]:hover { border-color: var(--pc); background: color-mix(in srgb, var(--pc) 7%, #fff); color: var(--pc); }
-        .vh-pill input:checked + span, .vh-pillbtn[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
+        .vh-pillbtn[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
         .vh-pillbtn[style][aria-pressed="true"] { background: var(--pc); border-color: var(--pc); color: #fff; }
+        .vh-pill span { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px 7px 10px; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; font-size: 13px; color: var(--text-main); transition: border-color 0.15s ease; }
+        .vh-pill span::before { content: ''; width: 14px; height: 14px; box-sizing: border-box; border: 1.5px solid #b3bccb; border-radius: 4px; background: #fff center / 10px no-repeat; }
+        .vh-pill:hover span { border-color: var(--primary); }
+        .vh-pill input:checked + span::before { border-color: var(--primary); background-color: var(--primary); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
         .vh-pill input:focus-visible + span { box-shadow: 0 0 0 3px rgba(60, 73, 186, 0.25); }
-        .vh-seg { display: inline-flex; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #fff; }
-        .vh-seg button { border: none; background: #fff; padding: 7px 12px; font-size: 13px; cursor: pointer; color: var(--text-muted); font-family: inherit; white-space: nowrap; }
-        .vh-seg button + button { border-left: 1px solid var(--border-color); }
-        .vh-seg button[aria-pressed="true"] { background: rgba(60, 73, 186, 0.08); color: var(--primary); font-weight: 700; }
         #vh-count { font-size: 14px; color: var(--text-muted); white-space: nowrap; margin-left: auto; }
         #vh-count b { color: var(--primary); font-size: 16px; }
 
-        /* 影片列表：像 YouTube 一樣橫排，縮圖在左、資訊在右 */
-        .vh-list { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 18px; }
-        .vh-card { position: relative; display: flex; align-items: center; gap: 16px; padding: 12px 16px 12px 12px; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease; }
-        .vh-card.can-preview { cursor: pointer; }
-        .vh-card.can-preview:hover, .vh-card.can-preview:focus-visible { outline: none; border-color: var(--pc); background: color-mix(in srgb, var(--pc) 5%, #fff); box-shadow: 0 12px 28px color-mix(in srgb, var(--pc) 24%, transparent); transform: translateY(-3px); }
-        .vh-thumb { flex: 0 0 128px; aspect-ratio: 16 / 9; border-radius: 8px; background: #eceff5; display: flex; align-items: center; justify-content: center; color: #b3bccb; position: relative; overflow: hidden; align-self: center; transition: background 0.18s ease; }
-        .vh-card.can-preview .vh-thumb { background: linear-gradient(135deg, var(--pc), var(--pc2, color-mix(in srgb, var(--pc) 78%, #fff))); color: #fff; }
-        .vh-card.can-preview:hover .vh-thumb, .vh-card.can-preview:focus-visible .vh-thumb { filter: brightness(0.88); }
-        .vh-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-        .vh-group { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; margin: 14px 0 -4px; font-size: 15px; font-weight: 700; }
-        .vh-group:first-child { margin-top: 0; }
-        .vh-group small { font-size: 12.5px; font-weight: 400; color: var(--text-muted); }
-        .vh-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-        .vh-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
-        .vh-title { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.4; color: var(--text-main); display: flex; align-items: center; flex-wrap: wrap; }
-        .vh-plus { margin: 0 6px; font-weight: 400; font-size: 13px; color: #b3bccb; }
-        .vh-sep { margin: 0 6px; font-weight: 400; color: #b3bccb; }
-        .vh-new { position: absolute; top: 5px; left: 5px; z-index: 3; background: var(--danger); color: #fff; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
-        .vh-lang { position: absolute; top: 5px; right: 5px; z-index: 3; background: rgba(255, 255, 255, 0.92); color: #334155; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+        /* 影片列表：外層一張卡片（依專案時一組一張），裡面一支影片一行 */
+        .vh-list { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+        .vh-gcard { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+        .vh-group { display: flex; align-items: baseline; gap: 8px; margin: 0; padding: 16px 16px 6px; font-size: 18px; font-weight: 800; }
+        .vh-group small { white-space: nowrap; font-size: 12.5px; font-weight: 400; color: var(--text-muted); }
+        .vh-item { display: flex; align-items: center; gap: 12px; min-height: 48px; box-sizing: border-box; padding: 8px 12px 8px 16px; border-top: 1px solid #eef1f6; transition: background 0.15s ease; }
+        .vh-group + .vh-item, .vh-gcard > .vh-item:first-child { border-top: none; }
+        .vh-item.can-open { cursor: pointer; }
+        .vh-item.can-open:hover, .vh-item.can-open:focus-visible { outline: none; background: #f8fafc; }
+        .vh-lang { flex-shrink: 0; text-align: center; background: #eef1f6; color: #334155; font-size: 11.5px; font-weight: 600; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+        .vh-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+        .vh-title { flex-shrink: 0; max-width: 60%; font-size: 14.5px; font-weight: 800; line-height: 1.4; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vh-plus { margin: 0 5px; font-weight: 400; font-size: 12px; color: #b3bccb; }
+        .vh-sep { margin: 0 5px; font-weight: 400; color: #b3bccb; }
+        .vh-chip { flex-shrink: 0; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: #eef1f6; color: #475569; white-space: nowrap; }
         .vh-chip.ver { background: #334155; color: #fff; }
-        .vh-when { margin-right: 4px; font-size: 11.5px; color: var(--text-muted); white-space: nowrap; align-self: center; }
-        .vh-chip { font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: #eef1f6; color: #475569; }
         .vh-chip.dub { background: rgba(255, 180, 21, 0.22); color: #7a5300; }
-        .vh-desc { margin: 7px 0 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .vh-desc { flex: 1; min-width: 0; font-size: 12.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .vh-desc a { color: var(--primary); text-decoration: none; }
         .vh-desc a:hover { text-decoration: underline; }
-        .vh-actions { display: flex; flex-direction: row; gap: 6px; flex-shrink: 0; }
+        .vh-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .vh-new { flex-shrink: 0; background: var(--danger); color: #fff; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+        .vh-when { margin-right: 4px; font-size: 11.5px; color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
         .vh-btn { justify-content: center; border: 1px solid var(--border-color); background: #fff; color: var(--text-main); font-family: inherit; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 7px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
         .vh-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(60, 73, 186, 0.06); color: var(--primary); }
         .vh-btn:disabled { opacity: 0.45; cursor: default; }
 
         .vh-state { grid-column: 1 / -1; text-align: center; padding: 70px 20px; color: var(--text-muted); }
         .vh-state h3 { color: var(--text-main); margin: 0 0 8px; }
-        .vh-skel { height: 150px; border-radius: 12px; background: linear-gradient(100deg, #eef1f6 30%, #f8fafc 50%, #eef1f6 70%); background-size: 200% 100%; animation: vh-shine 1.3s linear infinite; }
+        .vh-skel { height: 56px; border-radius: 12px; background: linear-gradient(100deg, #eef1f6 30%, #f8fafc 50%, #eef1f6 70%); background-size: 200% 100%; animation: vh-shine 1.3s linear infinite; }
         @keyframes vh-shine { to { background-position: -200% 0; } }
 
-        /* 預覽視窗 */
-
-        /* 密碼畫面 */
         .vh-btn { text-decoration: none; }
 
         #vh-toast { position: fixed; left: 50%; bottom: 32px; transform: translate(-50%, 20px); background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 300; }
@@ -96,18 +92,32 @@
         }
         @media (max-width: 640px) {
             .vh-list { gap: 10px; }
-            .vh-card { flex-wrap: wrap; }
-            .vh-actions { width: 100%; align-items: center; }
-            .vh-when { margin-right: auto; }
-            .vh-actions .vh-btn { flex: 1; }
-            .vh-thumb { flex-basis: 100px; }
-            .vh-select { max-width: none; flex: 1 1 45%; }
-            #vh-count { margin-left: 0; }
+            /* 語系一欄，標題、說明、日期與按鈕都對齊在第二欄 */
+            .vh-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px 8px; padding: 10px 12px; }
+            .vh-main { flex-wrap: wrap; gap: 4px 8px; }
+            .vh-title { max-width: 100%; white-space: normal; }
+            .vh-desc { flex-basis: 100%; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+            .vh-lang { align-self: start; margin-top: 1px; }
+            .vh-when { align-self: start; margin: 2px 0 0; }
+            .vh-actions { grid-column: 2 / 4; justify-content: flex-end; }
+            .vh-actions:empty { display: none; }
+            /* 返回列和篩選列固定在上方；篩選收進「篩選」按鈕，第一排只留 搜尋｜支數｜篩選 */
+            .vh-sticky { display: block; position: sticky; top: 0; z-index: 20; margin: -16px -20px 0; padding: 12px 20px 0; background: #f8fafc; max-height: 100vh; overflow-y: auto; }
+            .vh-top { padding-bottom: 10px; }
+            .vh-toolbar { border-top: none; }
+            .vh-search { flex: 1 1 0; min-width: 0; order: 0; }
+            #vh-count { order: 1; flex: none; margin-left: 0; }
+            .vh-ftoggle { display: inline-flex; order: 2; }
+            .vh-select, .vh-fdub { order: 3; }
+            .vh-toolbar:not(.open) .vh-select, .vh-toolbar:not(.open) .vh-fdub, .vh-toolbar:not(.open) .vh-frow { display: none; }
+            .vh-select { max-width: none; min-width: 0; flex: 1 1 45%; }
+            #f-group { flex-basis: 100%; }
         }
     </style>
 </head>
 <body>
     <div class="vh-wrap">
+        <div class="vh-sticky">
         <div class="vh-top">
             <a href="../index.html" class="back-to-home">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -120,28 +130,25 @@
             </div>
         </div>
 
-        <div class="vh-toolbar">
+        <div class="vh-toolbar" id="vh-toolbar">
             <div class="vh-row">
                 <div class="vh-search">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <input id="vh-q" type="search" placeholder="搜尋關鍵字" autocomplete="off">
                 </div>
+                <button type="button" class="vh-ftoggle" id="vh-ftoggle" aria-expanded="false" aria-controls="vh-toolbar">篩選<span id="vh-fcount"></span></button>
                 <select class="vh-select" id="f-group" data-key="group" aria-label="專案"></select>
                 <select class="vh-select" id="f-lang" data-key="lang" aria-label="語系"></select>
-                <div class="vh-pill-group" role="group" aria-label="配音">
+                <div class="vh-pill-group vh-fdub" role="group" aria-label="配音">
                     <label class="vh-pill"><input type="checkbox" name="dub" value="配音" checked><span>有配音</span></label>
                     <label class="vh-pill"><input type="checkbox" name="dub" value="無" checked><span>無配音</span></label>
                 </div>
                 <span id="vh-count"></span>
-                <div class="vh-seg" id="vh-view">
-                    <button type="button" data-view="group" aria-pressed="true">依專案</button>
-                    <button type="button" data-view="date" aria-pressed="false">依日期</button>
-                </div>
             </div>
-            <div class="vh-row">
-                <span class="vh-flabel">產品</span>
+            <div class="vh-row vh-frow">
                 <div class="vh-pill-group" id="f-product"></div>
             </div>
+        </div>
         </div>
 
         <main id="vh-list" class="vh-list"></main>
